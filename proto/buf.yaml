@@ -1,0 +1,4 @@
+version: v1
+name: buf.build/cerbos/cerbos-rs
+deps:
+  - "buf.build/cerbos/cerbos-api"
