@@ -1,9 +1,4 @@
-use std::collections::HashMap;
-use std::slice::Iter;
-
-use prost::Message;
-use prost_types::{value::Kind, Value};
-
+use super::attr::{AttrVal, Attribute};
 use crate::genpb::cerbos::effect::v1::Effect;
 use crate::genpb::cerbos::engine::v1::{Principal as PrincipalPB, Resource as ResourcePB};
 use crate::genpb::cerbos::request::v1::aux_data::Jwt;
@@ -11,6 +6,8 @@ use crate::genpb::cerbos::request::v1::check_resources_request::ResourceEntry;
 use crate::genpb::cerbos::request::v1::AuxData as AuxDataPB;
 use crate::genpb::cerbos::response::v1::check_resources_response::ResultEntry;
 use crate::genpb::cerbos::response::v1::CheckResourcesResponse as CheckResourcesResponsePB;
+use prost::Message;
+use std::slice::Iter;
 
 pub(crate) trait ProtobufWrapper<T: Message> {
     fn to_pb(self) -> T;
@@ -49,22 +46,19 @@ impl Principal {
         self
     }
 
-    pub fn with_attributes(mut self, attrs: HashMap<String, Kind>) -> Self {
-        self.principal.attr.extend(attrs.iter().map(|(k, v)| {
-            (
-                k.to_owned(),
-                Value {
-                    kind: Some(v.to_owned()),
-                },
-            )
-        }));
+    pub fn with_attributes<A, I>(mut self, attrs: I) -> Self
+    where
+        A: Attribute,
+        I: IntoIterator<Item = A>,
+    {
+        self.principal
+            .attr
+            .extend(attrs.into_iter().map(Attribute::to_tuple));
         self
     }
 
-    pub fn add_attr(mut self, key: impl Into<String>, value: Kind) -> Self {
-        self.principal
-            .attr
-            .insert(key.into(), Value { kind: Some(value) });
+    pub fn add_attr(mut self, key: impl Into<String>, value: impl AttrVal) -> Self {
+        self.principal.attr.insert(key.into(), value.to_value());
         self
     }
 }
@@ -99,22 +93,19 @@ impl Resource {
         self
     }
 
-    pub fn with_attributes(mut self, attrs: HashMap<String, Kind>) -> Self {
-        self.resource.attr.extend(attrs.iter().map(|(k, v)| {
-            (
-                k.to_owned(),
-                Value {
-                    kind: Some(v.to_owned()),
-                },
-            )
-        }));
+    pub fn with_attributes<A, I>(mut self, attrs: I) -> Self
+    where
+        A: Attribute,
+        I: IntoIterator<Item = A>,
+    {
+        self.resource
+            .attr
+            .extend(attrs.into_iter().map(Attribute::to_tuple));
         self
     }
 
-    pub fn add_attr(mut self, key: impl Into<String>, value: Kind) -> Self {
-        self.resource
-            .attr
-            .insert(key.into(), Value { kind: Some(value) });
+    pub fn add_attr(mut self, key: impl Into<String>, value: impl AttrVal) -> Self {
+        self.resource.attr.insert(key.into(), value.to_value());
         self
     }
 }
@@ -155,6 +146,24 @@ impl ProtobufWrapper<AuxDataPB> for AuxData {
     }
 }
 
+pub struct ResourceAction<A, B>(pub Resource, pub B)
+where
+    A: Into<String>,
+    B: IntoIterator<Item = A>;
+
+impl<A, B> ProtobufWrapper<ResourceEntry> for ResourceAction<A, B>
+where
+    A: Into<String>,
+    B: IntoIterator<Item = A>,
+{
+    fn to_pb(self) -> ResourceEntry {
+        let mut r = ResourceEntry::default();
+        r.resource = Some(self.0.to_pb());
+        r.actions = self.1.into_iter().map(Into::into).collect();
+        r
+    }
+}
+
 #[derive(Debug)]
 pub struct ResourceList {
     pub(crate) resources: Vec<ResourceEntry>,
@@ -164,6 +173,17 @@ impl ResourceList {
     pub fn new() -> Self {
         ResourceList {
             resources: Vec::new(),
+        }
+    }
+
+    pub fn new_from<A, B, I>(items: I) -> Self
+    where
+        A: Into<String>,
+        B: IntoIterator<Item = A>,
+        I: IntoIterator<Item = ResourceAction<A, B>>,
+    {
+        Self {
+            resources: items.into_iter().map(|item| item.to_pb()).collect(),
         }
     }
 
