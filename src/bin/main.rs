@@ -1,15 +1,38 @@
-use cerbos_rs::genpb::cerbos::engine::v1::Principal;
-use cerbos_rs::genpb::cerbos::engine::v1::Resource;
-use cerbos_rs::genpb::cerbos::request::v1::check_resource_batch_request::BatchEntry;
-use cerbos_rs::genpb::cerbos::request::v1::CheckResourceBatchRequest;
-use cerbos_rs::genpb::cerbos::svc::v1::cerbos_service_client::CerbosServiceClient;
+use cerbos_rs::sdk::model::Principal;
+use cerbos_rs::sdk::model::Resource;
+use cerbos_rs::sdk::model::ResourceList;
+use cerbos_rs::sdk::CerbosAsyncClient;
+use cerbos_rs::sdk::CerbosClientOptions;
+use cerbos_rs::sdk::Result;
 use prost_types::{value::Kind, Value};
 use std::collections::HashMap;
-use tonic::transport::{Channel, ClientTlsConfig};
 
 #[tokio::main]
+async fn main() -> Result<()> {
+    let opt = CerbosClientOptions::new("https://localhost:3593");
+    let mut client = CerbosAsyncClient::new(opt).await?;
+
+    let principal = Principal::new("alice", vec!["employee"]).with_policy_version("20210210");
+    let resource = Resource::new("XX125", "leave_request").with_policy_version("20210210");
+
+    let resp = client
+        .check_resources(
+            principal,
+            ResourceList::new().add(resource, vec!["view:public"]),
+            None,
+        )
+        .await?;
+    println!("Response={:?}", resp);
+    println!(
+        "Allowed={:?}",
+        resp.find("XX125").map(|r| r.is_allowed("view:public"))
+    );
+    Ok(())
+}
+
+/*
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /*
     let pem = tokio::fs::read("tls.crt").await?;
     let ca = Certificate::from_pem(pem);
 
@@ -23,7 +46,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let mut client = CerbosServiceClient::new(channel);
-    */
 
     let channel = Channel::from_static("https://localhost:3593")
         .tls_config(ClientTlsConfig::new())?
@@ -76,3 +98,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Response={:?}", response);
     Ok(())
 }
+*/
