@@ -1,34 +1,66 @@
 use std::time::Duration;
 
-use tonic::transport::{Certificate, Channel, ClientTlsConfig, Endpoint};
+use tokio::{
+    net::UnixStream,
+    runtime::{Builder, Runtime},
+};
+use tonic::{
+    codegen::InterceptedService,
+    metadata::Ascii,
+    metadata::MetadataValue,
+    service::Interceptor,
+    transport::{Certificate, Channel, ClientTlsConfig, Uri},
+    Request, Status,
+};
+use tower::service_fn;
 use uuid::Uuid;
 
 use crate::genpb::cerbos::{
     request::v1::CheckResourcesRequest, svc::v1::cerbos_service_client::CerbosServiceClient,
 };
 
-use self::model::ProtobufWrapper;
+use self::model::{ProtobufWrapper, Resource, ResourceList};
 
 pub mod attr;
+pub mod container;
 pub mod model;
 
 type StdError = Box<dyn std::error::Error + Send + Sync + 'static>;
 pub type Result<T, E = StdError> = std::result::Result<T, E>;
 
-pub struct CerbosClientOptions {
-    host: &'static str,
+#[derive(Debug)]
+pub enum CerbosEndpoint<S>
+where
+    S: Into<String> + Send,
+{
+    HostPort(S, u16),
+    UnixDomainSocket(S),
+}
+
+pub struct CerbosClientOptions<S>
+where
+    S: Into<String> + Send,
+{
+    endpoint: CerbosEndpoint<S>,
     tls_config: Option<ClientTlsConfig>,
     timeout: Duration,
     request_id_gen: fn() -> String,
+    playground_instance: Option<String>,
+    user_agent: String,
 }
 
-impl CerbosClientOptions {
-    pub fn new(host: &'static str) -> Self {
+impl<S> CerbosClientOptions<S>
+where
+    S: Into<String> + Send,
+{
+    pub fn new(endpoint: CerbosEndpoint<S>) -> Self {
         Self {
-            host,
+            endpoint,
             tls_config: Some(ClientTlsConfig::new()),
             timeout: Duration::from_secs(2),
             request_id_gen: gen_uuid,
+            playground_instance: None,
+            user_agent: "cerbos-rs".to_string(),
         }
     }
 
@@ -65,27 +97,80 @@ impl CerbosClientOptions {
         self
     }
 
-    pub(crate) fn build_endpoint(self) -> Result<Endpoint> {
-        let channel = Channel::from_static(&self.host).timeout(self.timeout);
-        match self.tls_config {
-            Some(tc) => Ok(channel.tls_config(tc)?),
-            None => Ok(channel),
+    pub fn with_playground_instance(mut self, id: impl Into<String>) -> Self {
+        self.playground_instance = Some(id.into());
+        self
+    }
+
+    pub fn with_user_agent(mut self, ua: impl Into<String>) -> Self {
+        self.user_agent = ua.into();
+        self
+    }
+
+    pub(crate) fn build_channel(self) -> Result<Channel> {
+        match self.endpoint {
+            CerbosEndpoint::HostPort(host, port) => {
+                let protocol = self.tls_config.as_ref().map_or_else(|| "http", |_| "https");
+                let mut endpoint =
+                    Channel::from_shared(format!("{}://{}:{}", protocol, host.into(), port))?
+                        .connect_timeout(self.timeout)
+                        .timeout(self.timeout)
+                        .user_agent(self.user_agent.clone())?;
+
+                endpoint = match self.tls_config {
+                    Some(tc) => endpoint.tls_config(tc.to_owned())?,
+                    None => endpoint,
+                };
+
+                Ok(endpoint.connect_lazy())
+            }
+            CerbosEndpoint::UnixDomainSocket(path) => {
+                let mut endpoint = Channel::from_static("https://127.0.0.1:3593")
+                    .connect_timeout(self.timeout)
+                    .timeout(self.timeout)
+                    .user_agent(self.user_agent.clone())?;
+
+                endpoint = match self.tls_config {
+                    Some(tc) => endpoint.tls_config(tc.to_owned())?,
+                    None => endpoint,
+                };
+
+                let uds = Box::new(path.into());
+                let connect = move |_: Uri| UnixStream::connect(uds.to_string());
+                Ok(endpoint.connect_with_connector_lazy(service_fn(connect)))
+            }
         }
     }
 }
 
 pub struct CerbosAsyncClient {
-    stub: CerbosServiceClient<Channel>,
+    stub: CerbosServiceClient<InterceptedService<Channel, CerbosInterceptor>>,
     request_id_gen: fn() -> String,
 }
 
 impl CerbosAsyncClient {
-    pub async fn new(conf: CerbosClientOptions) -> Result<Self> {
+    pub async fn new<S>(conf: CerbosClientOptions<S>) -> Result<Self>
+    where
+        S: Into<String> + Send,
+    {
+        let playground_instance = match conf.playground_instance {
+            Some(ref instance) => Some(MetadataValue::from_str(instance)?),
+            None => None,
+        };
+
+        let request_timeout = conf.timeout;
         let request_id_gen = conf.request_id_gen;
-        let endpoint = conf.build_endpoint()?;
-        let channel = endpoint.connect_lazy();
+        let channel = conf.build_channel()?;
+        let stub = CerbosServiceClient::with_interceptor(
+            channel,
+            CerbosInterceptor {
+                playground_instance,
+                request_timeout,
+            },
+        );
+
         Ok(Self {
-            stub: CerbosServiceClient::new(channel),
+            stub,
             request_id_gen,
         })
     }
@@ -108,8 +193,92 @@ impl CerbosAsyncClient {
             response: resp.get_ref().to_owned(),
         })
     }
+
+    pub async fn is_allowed<S>(
+        &mut self,
+        action: S,
+        principal: model::Principal,
+        resource: Resource,
+        aux_data: Option<model::AuxData>,
+    ) -> Result<bool>
+    where
+        S: Into<String> + Clone,
+    {
+        let resp = self
+            .check_resources(
+                principal,
+                ResourceList::new().add(resource, [action.clone()]),
+                aux_data,
+            )
+            .await?;
+        Ok(resp
+            .iter()
+            .next()
+            .map(|r| r.is_allowed(action.into()))
+            .unwrap_or(false))
+    }
+}
+
+pub struct CerbosSyncClient {
+    runtime: Runtime,
+    client: CerbosAsyncClient,
+}
+
+impl CerbosSyncClient {
+    pub fn new<S>(conf: CerbosClientOptions<S>) -> Result<Self>
+    where
+        S: Into<String> + Send,
+    {
+        let runtime = Builder::new_multi_thread().enable_all().build()?;
+        let client = runtime.block_on(CerbosAsyncClient::new(conf))?;
+        Ok(Self { runtime, client })
+    }
+
+    pub fn check_resources(
+        &mut self,
+        principal: model::Principal,
+        resources: model::ResourceList,
+        aux_data: Option<model::AuxData>,
+    ) -> Result<model::CheckResourcesResponse> {
+        self.runtime
+            .block_on(self.client.check_resources(principal, resources, aux_data))
+    }
+
+    pub fn is_allowed<S>(
+        &mut self,
+        action: S,
+        principal: model::Principal,
+        resource: Resource,
+        aux_data: Option<model::AuxData>,
+    ) -> Result<bool>
+    where
+        S: Into<String> + Clone,
+    {
+        self.runtime.block_on(
+            self.client
+                .is_allowed(action, principal, resource, aux_data),
+        )
+    }
 }
 
 fn gen_uuid() -> String {
     Uuid::new_v4().to_hyphenated().to_string()
+}
+
+struct CerbosInterceptor {
+    request_timeout: Duration,
+    playground_instance: Option<MetadataValue<Ascii>>,
+}
+
+impl Interceptor for CerbosInterceptor {
+    fn call(&mut self, mut request: Request<()>) -> std::result::Result<Request<()>, Status> {
+        if let Some(ref playground_md) = self.playground_instance {
+            request
+                .metadata_mut()
+                .insert("playground-instance", playground_md.clone());
+        }
+
+        request.set_timeout(self.request_timeout);
+        Ok(request)
+    }
 }
