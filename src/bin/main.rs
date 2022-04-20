@@ -1,11 +1,11 @@
-use cerbos_rs::sdk::attr::{Attr, StrVal};
-use cerbos_rs::sdk::model::Principal;
-use cerbos_rs::sdk::model::Resource;
-use cerbos_rs::sdk::model::ResourceAction;
-use cerbos_rs::sdk::model::ResourceList;
-use cerbos_rs::sdk::CerbosClientOptions;
-use cerbos_rs::sdk::Result;
-use cerbos_rs::sdk::{CerbosAsyncClient, CerbosEndpoint};
+use cerbos::sdk::attr::{Attr, StrVal};
+use cerbos::sdk::model::Principal;
+use cerbos::sdk::model::Resource;
+use cerbos::sdk::model::ResourceAction;
+use cerbos::sdk::model::ResourceList;
+use cerbos::sdk::CerbosClientOptions;
+use cerbos::sdk::Result;
+use cerbos::sdk::{CerbosAsyncClient, CerbosEndpoint};
 
 #[tokio::main]
 async fn main() -> Result<()> {

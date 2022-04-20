@@ -1,4 +1,4 @@
-use cerbos_rs::sdk::{
+use cerbos::sdk::{
     attr::{Attr, StrVal},
     model::*,
     CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
@@ -9,8 +9,15 @@ async fn async_tls_client() -> Result<CerbosAsyncClient> {
     CerbosAsyncClient::new(client_conf).await
 }
 
+async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
+    let client_conf =
+        CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
+    CerbosAsyncClient::new(client_conf).await
+}
+
 #[tokio::test]
-async fn check_resources() -> Result<()> {
+#[ignore]
+async fn check_resources_tls() -> Result<()> {
     /*
     let docker = clients::Cli::default();
     let cerbos_container = docker.run(CerbosContainer::default().with_image_tag("dev"));
@@ -18,8 +25,17 @@ async fn check_resources() -> Result<()> {
     let port = cerbos_container.get_host_port(3593);
     */
 
-    let mut client = async_tls_client().await?;
+    let client = async_tls_client().await?;
+    do_check_resources(client).await
+}
 
+#[tokio::test]
+async fn check_resources_plaintext() -> Result<()> {
+    let client = async_plaintext_client().await?;
+    do_check_resources(client).await
+}
+
+async fn do_check_resources(mut client: CerbosAsyncClient) -> Result<()> {
     let principal = Principal::new("alice", ["employee"])
         .with_policy_version("20210210")
         .with_attributes([
@@ -56,9 +72,19 @@ async fn check_resources() -> Result<()> {
 }
 
 #[tokio::test]
-async fn is_allowed() -> Result<()> {
-    let mut client = async_tls_client().await?;
+#[ignore]
+async fn is_allowed_tls() -> Result<()> {
+    let client = async_tls_client().await?;
+    do_is_allowed(client).await
+}
 
+#[tokio::test]
+async fn is_allowed_plaintext() -> Result<()> {
+    let client = async_plaintext_client().await?;
+    do_is_allowed(client).await
+}
+
+async fn do_is_allowed(mut client: CerbosAsyncClient) -> Result<()> {
     let principal = Principal::new("alice", ["employee"])
         .with_policy_version("20210210")
         .with_attributes([
