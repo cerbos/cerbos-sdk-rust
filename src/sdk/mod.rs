@@ -1,3 +1,5 @@
+// Copyright 2021-2022 Zenauth Ltd.
+// SPDX-License-Identifier: Apache-2.0
 use std::time::Duration;
 
 use tokio::{
@@ -20,14 +22,15 @@ use crate::genpb::cerbos::{
 };
 
 use self::model::{ProtobufWrapper, Resource, ResourceList};
+use anyhow::Context;
 
 pub mod attr;
 pub mod container;
 pub mod model;
 
-type StdError = Box<dyn std::error::Error + Send + Sync + 'static>;
-pub type Result<T, E = StdError> = std::result::Result<T, E>;
+pub type Result<T> = anyhow::Result<T>;
 
+/// Cerbos gRPC endpoint kind.
 #[derive(Debug)]
 pub enum CerbosEndpoint<S>
 where
@@ -37,6 +40,7 @@ where
     UnixDomainSocket(S),
 }
 
+/// Options for constructing the Cerbos client.
 pub struct CerbosClientOptions<S>
 where
     S: Into<String> + Send,
@@ -64,16 +68,19 @@ where
         }
     }
 
+    /// Disable TLS
     pub fn with_plaintext(mut self) -> Self {
         self.tls_config = None;
         self
     }
 
+    /// Set timeout for API calls
     pub fn with_timeout(mut self, duration: Duration) -> Self {
         self.timeout = duration;
         self
     }
 
+    /// Domain name in the TLS certificate.
     pub fn with_tls_domain_name(mut self, domain: impl Into<String>) -> Self {
         self.tls_config = self
             .tls_config
@@ -82,6 +89,7 @@ where
         self
     }
 
+    /// CA cert to verify the server TLS certificate.
     pub fn with_tls_ca_cert_pem(mut self, pem: impl AsRef<[u8]>) -> Self {
         let cert = Certificate::from_pem(pem);
 
@@ -92,16 +100,19 @@ where
         self
     }
 
+    /// Request ID generator to use. Defaults to UUID.
     pub fn with_request_id_gen(mut self, id_gen: fn() -> String) -> Self {
         self.request_id_gen = id_gen;
         self
     }
 
+    /// Configure the client to use the Cerbos playground.
     pub fn with_playground_instance(mut self, id: impl Into<String>) -> Self {
         self.playground_instance = Some(id.into());
         self
     }
 
+    /// Set a custom user agent for the client.
     pub fn with_user_agent(mut self, ua: impl Into<String>) -> Self {
         self.user_agent = ua.into();
         self
@@ -111,14 +122,18 @@ where
         match self.endpoint {
             CerbosEndpoint::HostPort(host, port) => {
                 let protocol = self.tls_config.as_ref().map_or_else(|| "http", |_| "https");
-                let mut endpoint =
-                    Channel::from_shared(format!("{}://{}:{}", protocol, host.into(), port))?
-                        .connect_timeout(self.timeout)
-                        .timeout(self.timeout)
-                        .user_agent(self.user_agent.clone())?;
+                let endpoint_addr = format!("{}://{}:{}", protocol, host.into(), port);
+                let mut endpoint = Channel::from_shared(endpoint_addr.clone())
+                    .with_context(|| format!("Failed to create channel for {}", endpoint_addr))?
+                    .connect_timeout(self.timeout)
+                    .timeout(self.timeout)
+                    .user_agent(self.user_agent.clone())
+                    .with_context(|| "Failed to create channel")?;
 
                 endpoint = match self.tls_config {
-                    Some(tc) => endpoint.tls_config(tc.to_owned())?,
+                    Some(tc) => endpoint
+                        .tls_config(tc.to_owned())
+                        .with_context(|| "Failed to create TLS configuration")?,
                     None => endpoint,
                 };
 
@@ -128,10 +143,13 @@ where
                 let mut endpoint = Channel::from_static("https://127.0.0.1:3593")
                     .connect_timeout(self.timeout)
                     .timeout(self.timeout)
-                    .user_agent(self.user_agent.clone())?;
+                    .user_agent(self.user_agent.clone())
+                    .with_context(|| "Failed to create channel")?;
 
                 endpoint = match self.tls_config {
-                    Some(tc) => endpoint.tls_config(tc.to_owned())?,
+                    Some(tc) => endpoint
+                        .tls_config(tc.to_owned())
+                        .with_context(|| "Failed to create TLS configuration")?,
                     None => endpoint,
                 };
 
@@ -143,12 +161,14 @@ where
     }
 }
 
+/// Asynchronous Cerbos client
 pub struct CerbosAsyncClient {
     stub: CerbosServiceClient<InterceptedService<Channel, CerbosInterceptor>>,
     request_id_gen: fn() -> String,
 }
 
 impl CerbosAsyncClient {
+    /// Create a new Cerbos client using client options
     pub async fn new<S>(conf: CerbosClientOptions<S>) -> Result<Self>
     where
         S: Into<String> + Send,
@@ -175,6 +195,7 @@ impl CerbosAsyncClient {
         })
     }
 
+    /// Check access to multiple resources
     pub async fn check_resources(
         &mut self,
         principal: model::Principal,
@@ -187,13 +208,18 @@ impl CerbosAsyncClient {
         req.resources = resources.resources;
         req.aux_data = aux_data.map(|a| a.to_pb());
 
-        let resp = self.stub.check_resources(req).await?;
+        let resp = self
+            .stub
+            .check_resources(req)
+            .await
+            .with_context(|| "CheckResources call failed")?;
 
         Ok(model::CheckResourcesResponse {
             response: resp.get_ref().to_owned(),
         })
     }
 
+    /// Check access to a single resource
     pub async fn is_allowed<S>(
         &mut self,
         action: S,
