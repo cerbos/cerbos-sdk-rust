@@ -20,19 +20,21 @@ async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
 #[tokio::test]
 #[ignore]
 async fn check_resources_tls() -> Result<()> {
-    /*
-    let docker = clients::Cli::default();
-    let cerbos_container = docker.run(CerbosContainer::default().with_image_tag("dev"));
-    let host = cerbos_container.get_bridge_ip_address().to_string();
-    let port = cerbos_container.get_host_port(3593);
-    */
-
     let client = async_tls_client().await?;
     do_check_resources(client).await
 }
 
 #[tokio::test]
 async fn check_resources_plaintext() -> Result<()> {
+    /*
+    let docker = clients::Cli::default();
+    let cerbos_container = docker.run(CerbosContainer::default().with_image_tag("dev"));
+    let host = cerbos_container.get_bridge_ip_address().to_string();
+    let port = cerbos_container.get_host_port(3593);
+    let client_conf =
+        CerbosClientOptions::new(CerbosEndpoint::HostPort(host, port)).with_plaintext();
+    let client = CerbosAsyncClient::new(client_conf).await?;
+    */
     let client = async_plaintext_client().await?;
     do_check_resources(client).await
 }

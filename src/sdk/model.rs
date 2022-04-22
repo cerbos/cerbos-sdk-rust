@@ -15,7 +15,7 @@ pub(crate) trait ProtobufWrapper<T: Message> {
     fn to_pb(self) -> T;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Principal {
     pub(crate) principal: PrincipalPB,
 }
@@ -71,7 +71,7 @@ impl ProtobufWrapper<PrincipalPB> for Principal {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Resource {
     pub(crate) resource: ResourcePB,
 }
@@ -110,6 +110,10 @@ impl Resource {
         self.resource.attr.insert(key.into(), value.to_value());
         self
     }
+
+    pub fn id(&self) -> &str {
+        &self.resource.id
+    }
 }
 
 impl ProtobufWrapper<ResourcePB> for Resource {
@@ -118,7 +122,7 @@ impl ProtobufWrapper<ResourcePB> for Resource {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AuxData {
     pub(crate) aux_data: AuxDataPB,
 }
@@ -148,6 +152,7 @@ impl ProtobufWrapper<AuxDataPB> for AuxData {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ResourceAction<A, B>(pub Resource, pub B)
 where
     A: Into<String>,
@@ -166,7 +171,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ResourceList {
     pub(crate) resources: Vec<ResourceEntry>,
 }
@@ -225,7 +230,7 @@ impl<'a> ResourceResult<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CheckResourcesResponse {
     pub response: CheckResourcesResponsePB,
 }

@@ -7,6 +7,7 @@ pub trait AttrVal: Sized {
     fn to_value(self) -> Value;
 }
 
+#[derive(Debug, Clone)]
 pub struct NullVal;
 
 impl AttrVal for NullVal {
@@ -17,6 +18,7 @@ impl AttrVal for NullVal {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct StrVal<V>(pub V)
 where
     V: Into<String>;
@@ -32,6 +34,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct NumVal<V>(pub V)
 where
     V: Into<f64>;
@@ -47,6 +50,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct BoolVal<V>(pub V)
 where
     V: Into<bool>;
@@ -62,6 +66,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct StructVal<K, V, I>(pub I)
 where
     K: Into<String>,
@@ -87,6 +92,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ListVal<V, I>(pub I)
 where
     V: AttrVal,
@@ -110,7 +116,7 @@ pub trait Attribute: Sized {
     fn to_tuple(self) -> (String, Value);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Attr<K, V>(pub K, pub V)
 where
     K: Into<String>,
