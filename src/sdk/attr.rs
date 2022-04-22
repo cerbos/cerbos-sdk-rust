@@ -18,6 +18,14 @@ impl AttrVal for NullVal {
     }
 }
 
+impl AttrVal for () {
+    fn to_value(self) -> Value {
+        Value {
+            kind: Some(Kind::NullValue(0)),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct StrVal<V>(pub V)
 where
@@ -30,6 +38,22 @@ where
     fn to_value(self) -> Value {
         Value {
             kind: Some(Kind::StringValue(self.0.into())),
+        }
+    }
+}
+
+impl AttrVal for String {
+    fn to_value(self) -> Value {
+        Value {
+            kind: Some(Kind::StringValue(self)),
+        }
+    }
+}
+
+impl AttrVal for &str {
+    fn to_value(self) -> Value {
+        Value {
+            kind: Some(Kind::StringValue(self.to_string())),
         }
     }
 }
@@ -50,6 +74,33 @@ where
     }
 }
 
+macro_rules! impl_numeric_attr_val {
+    ($t:ty) => {
+        impl AttrVal for $t {
+            fn to_value(self) -> Value {
+                Value {
+                    kind: Some(Kind::NumberValue(self as f64)),
+                }
+            }
+        }
+    };
+}
+
+impl_numeric_attr_val!(u8);
+impl_numeric_attr_val!(u16);
+impl_numeric_attr_val!(u32);
+impl_numeric_attr_val!(u64);
+impl_numeric_attr_val!(usize);
+
+impl_numeric_attr_val!(i8);
+impl_numeric_attr_val!(i16);
+impl_numeric_attr_val!(i32);
+impl_numeric_attr_val!(i64);
+impl_numeric_attr_val!(isize);
+
+impl_numeric_attr_val!(f32);
+impl_numeric_attr_val!(f64);
+
 #[derive(Debug, Clone)]
 pub struct BoolVal<V>(pub V)
 where
@@ -62,6 +113,14 @@ where
     fn to_value(self) -> Value {
         Value {
             kind: Some(Kind::BoolValue(self.0.into())),
+        }
+    }
+}
+
+impl AttrVal for bool {
+    fn to_value(self) -> Value {
+        Value {
+            kind: Some(Kind::BoolValue(self)),
         }
     }
 }
@@ -112,22 +171,42 @@ where
     }
 }
 
-pub trait Attribute: Sized {
-    fn to_tuple(self) -> (String, Value);
+pub struct Attribute {
+    key: String,
+    value: Value,
 }
 
-#[derive(Debug, Clone)]
-pub struct Attr<K, V>(pub K, pub V)
-where
-    K: Into<String>,
-    V: AttrVal;
+impl Attribute {
+    pub fn new<K, V>(k: K, v: V) -> Self
+    where
+        K: Into<String>,
+        V: AttrVal,
+    {
+        Self {
+            key: k.into(),
+            value: v.to_value(),
+        }
+    }
 
-impl<K, V> Attribute for Attr<K, V>
+    pub(crate) fn to_tuple(self) -> (String, Value) {
+        (self.key, self.value)
+    }
+}
+
+pub fn attr<K, V>(k: K, v: V) -> Attribute
 where
     K: Into<String>,
     V: AttrVal,
 {
-    fn to_tuple(self) -> (String, Value) {
-        (self.0.into(), self.1.to_value())
+    Attribute::new(k, v)
+}
+
+impl<K, V> From<(K, V)> for Attribute
+where
+    K: Into<String>,
+    V: Into<String>,
+{
+    fn from(t: (K, V)) -> Self {
+        attr(t.0.into(), t.1.into())
     }
 }

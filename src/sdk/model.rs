@@ -48,10 +48,9 @@ impl Principal {
         self
     }
 
-    pub fn with_attributes<A, I>(mut self, attrs: I) -> Self
+    pub fn with_attributes<I>(mut self, attrs: I) -> Self
     where
-        A: Attribute,
-        I: IntoIterator<Item = A>,
+        I: IntoIterator<Item = Attribute>,
     {
         self.principal
             .attr
@@ -95,10 +94,9 @@ impl Resource {
         self
     }
 
-    pub fn with_attributes<A, I>(mut self, attrs: I) -> Self
+    pub fn with_attributes<I>(mut self, attrs: I) -> Self
     where
-        A: Attribute,
-        I: IntoIterator<Item = A>,
+        I: IntoIterator<Item = Attribute>,
     {
         self.resource
             .attr
