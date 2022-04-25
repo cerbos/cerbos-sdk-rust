@@ -68,7 +68,7 @@ async fn do_check_resources(mut client: CerbosAsyncClient) -> Result<()> {
         .find("XX125")
         .map(|x| x.is_allowed("view:public"))
         .unwrap();
-    assert!(allowed == true);
+    assert!(allowed);
 
     Ok(())
 }
@@ -108,7 +108,7 @@ async fn do_is_allowed(mut client: CerbosAsyncClient) -> Result<()> {
     let allowed = client
         .is_allowed("view:public", principal, resource, None)
         .await?;
-    assert!(allowed == true);
+    assert!(allowed);
 
     Ok(())
 }

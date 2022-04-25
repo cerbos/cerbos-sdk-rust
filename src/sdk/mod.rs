@@ -132,7 +132,7 @@ where
 
                 endpoint = match self.tls_config {
                     Some(tc) => endpoint
-                        .tls_config(tc.to_owned())
+                        .tls_config(tc)
                         .with_context(|| "Failed to create TLS configuration")?,
                     None => endpoint,
                 };
@@ -148,7 +148,7 @@ where
 
                 endpoint = match self.tls_config {
                     Some(tc) => endpoint
-                        .tls_config(tc.to_owned())
+                        .tls_config(tc)
                         .with_context(|| "Failed to create TLS configuration")?,
                     None => endpoint,
                 };
@@ -202,11 +202,13 @@ impl CerbosAsyncClient {
         resources: model::ResourceList,
         aux_data: Option<model::AuxData>,
     ) -> Result<model::CheckResourcesResponse> {
-        let mut req = CheckResourcesRequest::default();
-        req.request_id = (self.request_id_gen)();
-        req.principal = Some(principal.to_pb());
-        req.resources = resources.resources;
-        req.aux_data = aux_data.map(|a| a.to_pb());
+        let req = CheckResourcesRequest {
+            request_id: (self.request_id_gen)(),
+            principal: Some(principal.to_pb()),
+            resources: resources.resources,
+            aux_data: aux_data.map(|a| a.to_pb()),
+            ..Default::default()
+        };
 
         let resp = self
             .stub

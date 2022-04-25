@@ -188,7 +188,7 @@ impl Attribute {
         }
     }
 
-    pub(crate) fn to_tuple(self) -> (String, Value) {
+    pub(crate) fn into_tuple(self) -> (String, Value) {
         (self.key, self.value)
     }
 }

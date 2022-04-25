@@ -26,11 +26,17 @@ impl Principal {
         I: IntoIterator<Item = T>,
         T: Into<String>,
     {
-        let mut p = PrincipalPB::default();
-        p.id = id.into();
-        p.roles = roles.into_iter().map(Into::into).collect::<Vec<String>>();
+        let principal = PrincipalPB {
+            id: id.into(),
+            roles: roles.into_iter().map(Into::into).collect::<Vec<String>>(),
+            ..Default::default()
+        };
 
-        Principal { principal: p }
+        Principal { principal }
+    }
+
+    pub fn id(&self) -> &str {
+        &self.principal.id
     }
 
     pub fn add_role(mut self, role: impl Into<String>) -> Self {
@@ -54,7 +60,7 @@ impl Principal {
     {
         self.principal
             .attr
-            .extend(attrs.into_iter().map(Attribute::to_tuple));
+            .extend(attrs.into_iter().map(Attribute::into_tuple));
         self
     }
 
@@ -77,11 +83,13 @@ pub struct Resource {
 
 impl Resource {
     pub fn new(id: impl Into<String>, kind: impl Into<String>) -> Self {
-        let mut r = ResourcePB::default();
-        r.id = id.into();
-        r.kind = kind.into();
+        let resource = ResourcePB {
+            id: id.into(),
+            kind: kind.into(),
+            ..Default::default()
+        };
 
-        Resource { resource: r }
+        Resource { resource }
     }
 
     pub fn with_policy_version(mut self, policy_version: impl Into<String>) -> Self {
@@ -100,7 +108,7 @@ impl Resource {
     {
         self.resource
             .attr
-            .extend(attrs.into_iter().map(Attribute::to_tuple));
+            .extend(attrs.into_iter().map(Attribute::into_tuple));
         self
     }
 
@@ -125,6 +133,12 @@ pub struct AuxData {
     pub(crate) aux_data: AuxDataPB,
 }
 
+impl Default for AuxData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AuxData {
     pub fn new() -> AuxData {
         AuxData {
@@ -133,12 +147,16 @@ impl AuxData {
     }
 
     pub fn with_jwt<T: Into<String>>(mut self, token: T, key_set_id: Option<T>) -> Self {
-        let mut jwt = Jwt::default();
-        jwt.token = token.into();
+        let mut jwt = Jwt {
+            token: token.into(),
+            ..Default::default()
+        };
+
         key_set_id
             .map(Into::into)
             .iter()
             .for_each(|ks| jwt.key_set_id = ks.to_string());
+
         self.aux_data.jwt = Some(jwt);
         self
     }
@@ -162,16 +180,22 @@ where
     B: IntoIterator<Item = A>,
 {
     fn to_pb(self) -> ResourceEntry {
-        let mut r = ResourceEntry::default();
-        r.resource = Some(self.0.to_pb());
-        r.actions = self.1.into_iter().map(Into::into).collect();
-        r
+        ResourceEntry {
+            resource: Some(self.0.to_pb()),
+            actions: self.1.into_iter().map(Into::into).collect(),
+        }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct ResourceList {
     pub(crate) resources: Vec<ResourceEntry>,
+}
+
+impl Default for ResourceList {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ResourceList {
@@ -197,9 +221,11 @@ impl ResourceList {
         I: IntoIterator<Item = T>,
         T: Into<String>,
     {
-        let mut r = ResourceEntry::default();
-        r.resource = Some(resource.to_pb());
-        r.actions = actions.into_iter().map(Into::into).collect();
+        let r = ResourceEntry {
+            resource: Some(resource.to_pb()),
+            actions: actions.into_iter().map(Into::into).collect(),
+        };
+
         self.resources.push(r);
         self
     }
