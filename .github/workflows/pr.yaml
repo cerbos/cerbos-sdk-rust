@@ -38,10 +38,15 @@ jobs:
         ports:
           - 3593:3593
         volumes:
-          - "${{ github.workspace }}/tests/store:/policies"
+          - "${{ github.workspace }}/policies:/policies"
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+        with:
+          path: cerbos-rs
+
+      - name: Copy policies
+        run: "cp -r ./cerbos-rs/tests/store/* ./policies/"
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -51,9 +56,8 @@ jobs:
           override: true
 
       - name: Run cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test
+        working-directory: ./cerbos-rs
 
   lints:
     name: Lints

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Rust SDK for working with Cerbos: an open core, language-agnostic, scalable authorization solution"
 license = "Apache-2.0"
-authors = ["Cerbos Developers <help+rust@cerbos.dev>"]
+authors = ["Cerbos Developers <sdk+rust@cerbos.dev>"]
 categories = ["api-bindings"]
 
 [dependencies]
