@@ -38,7 +38,7 @@ jobs:
         ports:
           - 3593:3593
         volumes:
-          - "${{ env.GITHUB_WORKSPACE }}/tests/store:/policies"
+          - "$GITHUB_WORKSPACE/tests/store:/policies"
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
