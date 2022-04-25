@@ -34,9 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       cerbos:
-        image: ghcr.io/cerbos/cerbos:latest
+        image: ghcr.io/cerbos/cerbos:dev
         ports:
           - 3593:3593
+        volumes:
+          - ${{ env.GITHUB_WORKSPACE }}/tests/store:/policies
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -68,11 +70,11 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      #      - name: Run cargo fmt
+      #        uses: actions-rs/cargo@v1
+      #        with:
+      #          command: fmt
+      #          args: --all -- --check
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
