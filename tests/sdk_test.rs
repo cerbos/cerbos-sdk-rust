@@ -1,11 +1,8 @@
 // Copyright 2021-2022 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 use cerbos::sdk::{
-    attr::attr, container::CerbosContainer, model::*, CerbosAsyncClient, CerbosClientOptions,
-    CerbosEndpoint, Result,
+    attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
 };
-use std::path::PathBuf;
-use testcontainers::clients;
 
 async fn async_tls_client() -> Result<CerbosAsyncClient> {
     let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593));
@@ -13,10 +10,10 @@ async fn async_tls_client() -> Result<CerbosAsyncClient> {
 }
 
 async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
-    /*let client_conf =
+    let client_conf =
         CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
     CerbosAsyncClient::new(client_conf).await
-    */
+    /*
     let mut store_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     store_dir.push("resources");
     store_dir.push("store");
@@ -33,6 +30,7 @@ async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
     let client_conf =
         CerbosClientOptions::new(CerbosEndpoint::HostPort(host, port)).with_plaintext();
     CerbosAsyncClient::new(client_conf).await
+    */
 }
 
 #[tokio::test]
