@@ -23,49 +23,15 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+          components: rustfmt, clippy
+
+      - name: Cache artefacts
+        uses: Swatinem/rust-cache@v1
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
           command: check
-
-  test:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Install Cerbos
-        uses: cerbos/cerbos-setup-action@v1
-        with:
-          version: latest 
-
-      - name: Run tests
-        run: |
-          cerbos run --set=storage.disk.directory=resources/store -- cargo test
-
-  lints:
-    name: Lints
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
 
       #      - name: Run cargo fmt
       #        uses: actions-rs/cargo@v1
@@ -78,3 +44,15 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+
+      - name: Install Cerbos
+        uses: cerbos/cerbos-setup-action@v1
+        with:
+          version: latest 
+
+      - name: Run tests
+        run: |
+          cerbos run --set=storage.disk.directory=resources/store -- cargo test
+        env:
+          CERBOS_NO_TELEMETRY: "1"
+
