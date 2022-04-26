@@ -32,21 +32,9 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
-    services:
-      cerbos:
-        image: ghcr.io/cerbos/cerbos:dev
-        ports:
-          - 3593:3593
-        volumes:
-          - "${{ github.workspace }}/policies:/policies"
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-        with:
-          path: cerbos-rs
-
-      - name: Copy policies
-        run: "cp -r ./cerbos-rs/tests/store/* ./policies/"
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -55,9 +43,10 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Run cargo test
-        run: cargo test
-        working-directory: ./cerbos-rs
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
 
   lints:
     name: Lints
