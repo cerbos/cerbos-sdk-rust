@@ -121,3 +121,39 @@ async fn do_is_allowed(mut client: CerbosAsyncClient) -> Result<()> {
 
     Ok(())
 }
+
+#[tokio::test]
+#[ignore]
+async fn plan_resources_tls() -> Result<()> {
+    let client = async_tls_client().await?;
+    do_plan_resources(client).await
+}
+
+#[tokio::test]
+async fn plan_resources_plaintext() -> Result<()> {
+    let client = async_plaintext_client().await?;
+    do_plan_resources(client).await
+}
+
+async fn do_plan_resources(mut client: CerbosAsyncClient) -> Result<()> {
+    let principal = Principal::new("maggie", ["manager"])
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("geography", "GB"),
+            attr("managed_geographies", "GB"),
+            attr("team", "design"),
+        ]);
+
+    let resource = ResourceKind::new("leave_request").with_policy_version("20210210");
+
+    let response = client
+        .plan_resources("approve", principal, resource, None)
+        .await?;
+    assert!(matches!(
+        response.filter(),
+        PlanResourcesFilter::Conditional(..)
+    ));
+
+    Ok(())
+}

@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ResourcesQueryPlanResponse {
+pub struct PlanResourcesResponse {
     #[prost(string, tag="1")]
     pub request_id: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
@@ -9,12 +9,12 @@ pub struct ResourcesQueryPlanResponse {
     #[prost(string, tag="4")]
     pub policy_version: ::prost::alloc::string::String,
     #[prost(message, optional, tag="5")]
-    pub filter: ::core::option::Option<resources_query_plan_response::Filter>,
+    pub filter: ::core::option::Option<plan_resources_response::Filter>,
     #[prost(message, optional, tag="6")]
-    pub meta: ::core::option::Option<resources_query_plan_response::Meta>,
+    pub meta: ::core::option::Option<plan_resources_response::Meta>,
 }
-/// Nested message and enum types in `ResourcesQueryPlanResponse`.
-pub mod resources_query_plan_response {
+/// Nested message and enum types in `PlanResourcesResponse`.
+pub mod plan_resources_response {
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Expression {
         #[prost(string, tag="1")]
@@ -223,12 +223,17 @@ pub struct PlaygroundTestResponse {
 }
 /// Nested message and enum types in `PlaygroundTestResponse`.
 pub mod playground_test_response {
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct TestResults {
+        #[prost(message, optional, tag="1")]
+        pub results: ::core::option::Option<super::super::super::policy::v1::TestResults>,
+    }
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Outcome {
         #[prost(message, tag="2")]
         Failure(super::PlaygroundFailure),
         #[prost(message, tag="3")]
-        Results(super::super::super::policy::v1::TestResults),
+        Success(TestResults),
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -270,7 +275,7 @@ pub mod playground_evaluate_response {
 pub struct PlaygroundProxyResponse {
     #[prost(string, tag="1")]
     pub playground_id: ::prost::alloc::string::String,
-    #[prost(oneof="playground_proxy_response::Outcome", tags="2, 3, 4, 5")]
+    #[prost(oneof="playground_proxy_response::Outcome", tags="2, 3, 4, 5, 6")]
     pub outcome: ::core::option::Option<playground_proxy_response::Outcome>,
 }
 /// Nested message and enum types in `PlaygroundProxyResponse`.
@@ -284,7 +289,9 @@ pub mod playground_proxy_response {
         #[prost(message, tag="4")]
         CheckResourceBatch(super::CheckResourceBatchResponse),
         #[prost(message, tag="5")]
-        ResourcesQueryPlan(super::ResourcesQueryPlanResponse),
+        PlanResources(super::PlanResourcesResponse),
+        #[prost(message, tag="6")]
+        CheckResources(super::CheckResourcesResponse),
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]

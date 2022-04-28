@@ -163,14 +163,14 @@ pub mod cerbos_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        pub async fn resources_query_plan(
+        pub async fn plan_resources(
             &mut self,
             request: impl tonic::IntoRequest<
-                super::super::super::request::v1::ResourcesQueryPlanRequest,
+                super::super::super::request::v1::PlanResourcesRequest,
             >,
         ) -> Result<
                 tonic::Response<
-                    super::super::super::response::v1::ResourcesQueryPlanResponse,
+                    super::super::super::response::v1::PlanResourcesResponse,
                 >,
                 tonic::Status,
             > {
@@ -185,7 +185,7 @@ pub mod cerbos_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/cerbos.svc.v1.CerbosService/ResourcesQueryPlan",
+                "/cerbos.svc.v1.CerbosService/PlanResources",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }

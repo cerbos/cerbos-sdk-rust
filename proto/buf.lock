@@ -4,7 +4,7 @@ deps:
   - remote: buf.build
     owner: cerbos
     repository: cerbos-api
-    commit: 3568180d24394e6187cdefb3c22c1fe3
+    commit: ad64740c69b64e81afdbc4c03a850f80
   - remote: buf.build
     owner: envoyproxy
     repository: protoc-gen-validate

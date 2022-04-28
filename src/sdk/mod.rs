@@ -18,7 +18,8 @@ use tower::service_fn;
 use uuid::Uuid;
 
 use crate::genpb::cerbos::{
-    request::v1::CheckResourcesRequest, svc::v1::cerbos_service_client::CerbosServiceClient,
+    request::v1::{CheckResourcesRequest, PlanResourcesRequest},
+    svc::v1::cerbos_service_client::CerbosServiceClient,
 };
 
 use self::model::{ProtobufWrapper, Resource, ResourceList};
@@ -245,6 +246,38 @@ impl CerbosAsyncClient {
             .map(|r| r.is_allowed(action.into()))
             .unwrap_or(false))
     }
+
+    /// Produce a query plan for selecting resources that the principal can perform the given
+    /// action on.
+    pub async fn plan_resources<S>(
+        &mut self,
+        action: S,
+        principal: model::Principal,
+        resource: model::ResourceKind,
+        aux_data: Option<model::AuxData>,
+    ) -> Result<model::PlanResourcesResponse>
+    where
+        S: Into<String> + Clone,
+    {
+        let req = PlanResourcesRequest {
+            request_id: (self.request_id_gen)(),
+            action: action.into(),
+            principal: Some(principal.to_pb()),
+            resource: Some(resource.to_pb()),
+            aux_data: aux_data.map(|a| a.to_pb()),
+            ..Default::default()
+        };
+
+        let resp = self
+            .stub
+            .plan_resources(req)
+            .await
+            .with_context(|| "PlanResources call failed")?;
+
+        Ok(model::PlanResourcesResponse {
+            response: resp.get_ref().to_owned(),
+        })
+    }
 }
 
 pub struct CerbosSyncClient {
@@ -285,6 +318,22 @@ impl CerbosSyncClient {
         self.runtime.block_on(
             self.client
                 .is_allowed(action, principal, resource, aux_data),
+        )
+    }
+
+    pub fn plan_resources<S>(
+        &mut self,
+        action: S,
+        principal: model::Principal,
+        resource: model::ResourceKind,
+        aux_data: Option<model::AuxData>,
+    ) -> Result<model::PlanResourcesResponse>
+    where
+        S: Into<String> + Clone,
+    {
+        self.runtime.block_on(
+            self.client
+                .plan_resources(action, principal, resource, aux_data),
         )
     }
 }

@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ResourcesQueryPlanRequest {
+pub struct PlanResourcesRequest {
     #[prost(string, tag="1")]
     pub request_id: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
@@ -7,7 +7,7 @@ pub struct ResourcesQueryPlanRequest {
     #[prost(message, optional, tag="3")]
     pub principal: ::core::option::Option<super::super::engine::v1::Principal>,
     #[prost(message, optional, tag="4")]
-    pub resource: ::core::option::Option<super::super::engine::v1::resources_query_plan_request::Resource>,
+    pub resource: ::core::option::Option<super::super::engine::v1::plan_resources_request::Resource>,
     #[prost(message, optional, tag="5")]
     pub aux_data: ::core::option::Option<AuxData>,
     #[prost(bool, tag="6")]
@@ -148,7 +148,7 @@ pub struct PlaygroundProxyRequest {
     pub playground_id: ::prost::alloc::string::String,
     #[prost(message, repeated, tag="2")]
     pub files: ::prost::alloc::vec::Vec<File>,
-    #[prost(oneof="playground_proxy_request::ProxyRequest", tags="3, 4, 5")]
+    #[prost(oneof="playground_proxy_request::ProxyRequest", tags="3, 4, 5, 6")]
     pub proxy_request: ::core::option::Option<playground_proxy_request::ProxyRequest>,
 }
 /// Nested message and enum types in `PlaygroundProxyRequest`.
@@ -160,7 +160,9 @@ pub mod playground_proxy_request {
         #[prost(message, tag="4")]
         CheckResourceBatch(super::CheckResourceBatchRequest),
         #[prost(message, tag="5")]
-        ResourcesQueryPlan(super::ResourcesQueryPlanRequest),
+        PlanResources(super::PlanResourcesRequest),
+        #[prost(message, tag="6")]
+        CheckResources(super::CheckResourcesRequest),
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]

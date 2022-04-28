@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ResourcesQueryPlanRequest {
+pub struct PlanResourcesRequest {
     #[prost(string, tag="1")]
     pub request_id: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
@@ -7,14 +7,14 @@ pub struct ResourcesQueryPlanRequest {
     #[prost(message, optional, tag="3")]
     pub principal: ::core::option::Option<Principal>,
     #[prost(message, optional, tag="4")]
-    pub resource: ::core::option::Option<resources_query_plan_request::Resource>,
+    pub resource: ::core::option::Option<plan_resources_request::Resource>,
     #[prost(message, optional, tag="5")]
     pub aux_data: ::core::option::Option<AuxData>,
     #[prost(bool, tag="6")]
     pub include_meta: bool,
 }
-/// Nested message and enum types in `ResourcesQueryPlanRequest`.
-pub mod resources_query_plan_request {
+/// Nested message and enum types in `PlanResourcesRequest`.
+pub mod plan_resources_request {
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Resource {
         #[prost(string, tag="1")]
@@ -66,7 +66,7 @@ pub mod check_output {
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ResourcesQueryPlanOutput {
+pub struct PlanResourcesOutput {
     #[prost(string, tag="1")]
     pub request_id: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
@@ -78,10 +78,10 @@ pub struct ResourcesQueryPlanOutput {
     #[prost(string, tag="5")]
     pub scope: ::prost::alloc::string::String,
     #[prost(message, optional, tag="6")]
-    pub filter: ::core::option::Option<resources_query_plan_output::Node>,
+    pub filter: ::core::option::Option<plan_resources_output::Node>,
 }
-/// Nested message and enum types in `ResourcesQueryPlanOutput`.
-pub mod resources_query_plan_output {
+/// Nested message and enum types in `PlanResourcesOutput`.
+pub mod plan_resources_output {
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Node {
         #[prost(oneof="node::Node", tags="1, 2")]
