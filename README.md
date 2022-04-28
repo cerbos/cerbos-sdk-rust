@@ -54,3 +54,10 @@ async fn main() -> Result<()> {
 
 ```
 
+## Development
+
+Running tests
+
+```sh
+cerbos run --set=storage.disk.directory=resources/store -- cargo test
+```
