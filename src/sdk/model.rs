@@ -137,20 +137,6 @@ impl ProtobufWrapper<ResourcePB> for Resource {
     }
 }
 
-impl Into<ResourceKind> for Resource {
-    fn into(self) -> ResourceKind {
-        let resource = ResourceKindPB {
-            kind: self.resource.kind,
-            policy_version: self.resource.policy_version,
-            scope: self.resource.scope,
-            attr: self.resource.attr,
-            ..Default::default()
-        };
-
-        ResourceKind { resource }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct ResourceKind {
     pub(crate) resource: ResourceKindPB,
@@ -195,6 +181,19 @@ impl ResourceKind {
 impl ProtobufWrapper<ResourceKindPB> for ResourceKind {
     fn to_pb(self) -> ResourceKindPB {
         self.resource
+    }
+}
+
+impl From<Resource> for ResourceKind {
+    fn from(r: Resource) -> Self {
+        let resource = ResourceKindPB {
+            kind: r.resource.kind,
+            policy_version: r.resource.policy_version,
+            scope: r.resource.scope,
+            attr: r.resource.attr,
+        };
+
+        Self { resource }
     }
 }
 

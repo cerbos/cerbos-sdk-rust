@@ -26,6 +26,7 @@ use self::model::{ProtobufWrapper, Resource, ResourceList};
 use anyhow::Context;
 
 pub mod attr;
+#[cfg(feature = "testcontainers")]
 pub mod container;
 pub mod model;
 

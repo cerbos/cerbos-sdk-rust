@@ -6,6 +6,11 @@ description = "Rust SDK for working with Cerbos: an open core, language-agnostic
 license = "Apache-2.0"
 authors = ["Cerbos Developers <sdk+rust@cerbos.dev>"]
 categories = ["api-bindings"]
+repository = "https://github.com/cerbos/cerbos-sdk-rust"
+homepage = "https://cerbos.dev"
+
+[features]
+testcontainers = []
 
 [dependencies]
 anyhow = "1.0.56"
