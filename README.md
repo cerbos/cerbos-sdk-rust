@@ -10,6 +10,10 @@ Rust client library for [Cerbos](https://cerbos.dev): the open core, language-ag
 
 ## Usage
 
+```
+cargo add cerbos
+```
+
 The client can be used either asynchronously or synchronously by instantiating `CerbosAsyncClient`
 or `CerbosSyncClient` respectively.
 
