@@ -7,7 +7,7 @@ pub struct PlanResourcesRequest {
     #[prost(message, optional, tag="3")]
     pub principal: ::core::option::Option<super::super::engine::v1::Principal>,
     #[prost(message, optional, tag="4")]
-    pub resource: ::core::option::Option<super::super::engine::v1::plan_resources_request::Resource>,
+    pub resource: ::core::option::Option<super::super::engine::v1::plan_resources_input::Resource>,
     #[prost(message, optional, tag="5")]
     pub aux_data: ::core::option::Option<AuxData>,
     #[prost(bool, tag="6")]
