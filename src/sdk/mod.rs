@@ -176,7 +176,7 @@ impl CerbosAsyncClient {
         S: Into<String> + Send,
     {
         let playground_instance = match conf.playground_instance {
-            Some(ref instance) => Some(MetadataValue::from_str(instance)?),
+            Some(ref instance) => Some(instance.parse()?),
             None => None,
         };
 
