@@ -21,7 +21,7 @@ pub mod cerbos_service_client {
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
-        T::ResponseBody: Default + Body<Data = Bytes> + Send + 'static,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
         <T::ResponseBody as Body>::Error: Into<StdError> + Send,
     {
         pub fn new(inner: T) -> Self {
@@ -34,6 +34,7 @@ pub mod cerbos_service_client {
         ) -> CerbosServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
+            T::ResponseBody: Default,
             T: tonic::codegen::Service<
                 http::Request<tonic::body::BoxBody>,
                 Response = http::Response<
@@ -67,11 +68,9 @@ pub mod cerbos_service_client {
                 super::super::super::request::v1::CheckResourceSetRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::CheckResourceSetResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::CheckResourceSetResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -93,11 +92,11 @@ pub mod cerbos_service_client {
                 super::super::super::request::v1::CheckResourceBatchRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::CheckResourceBatchResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<
+                super::super::super::response::v1::CheckResourceBatchResponse,
+            >,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -119,11 +118,9 @@ pub mod cerbos_service_client {
                 super::super::super::request::v1::CheckResourcesRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::CheckResourcesResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::CheckResourcesResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -145,9 +142,9 @@ pub mod cerbos_service_client {
                 super::super::super::request::v1::ServerInfoRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::ServerInfoResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::ServerInfoResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -169,11 +166,9 @@ pub mod cerbos_service_client {
                 super::super::super::request::v1::PlanResourcesRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::PlanResourcesResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::PlanResourcesResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -214,7 +209,7 @@ pub mod cerbos_admin_service_client {
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
-        T::ResponseBody: Default + Body<Data = Bytes> + Send + 'static,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
         <T::ResponseBody as Body>::Error: Into<StdError> + Send,
     {
         pub fn new(inner: T) -> Self {
@@ -227,6 +222,7 @@ pub mod cerbos_admin_service_client {
         ) -> CerbosAdminServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
+            T::ResponseBody: Default,
             T: tonic::codegen::Service<
                 http::Request<tonic::body::BoxBody>,
                 Response = http::Response<
@@ -260,11 +256,11 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::AddOrUpdatePolicyRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::AddOrUpdatePolicyResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<
+                super::super::super::response::v1::AddOrUpdatePolicyResponse,
+            >,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -286,9 +282,9 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::ListPoliciesRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::ListPoliciesResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::ListPoliciesResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -310,9 +306,9 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::GetPolicyRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::GetPolicyResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::GetPolicyResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -334,13 +330,13 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::ListAuditLogEntriesRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    tonic::codec::Streaming<
-                        super::super::super::response::v1::ListAuditLogEntriesResponse,
-                    >,
+            tonic::Response<
+                tonic::codec::Streaming<
+                    super::super::super::response::v1::ListAuditLogEntriesResponse,
                 >,
-                tonic::Status,
-            > {
+            >,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -362,11 +358,11 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::AddOrUpdateSchemaRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::AddOrUpdateSchemaResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<
+                super::super::super::response::v1::AddOrUpdateSchemaResponse,
+            >,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -388,9 +384,9 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::ListSchemasRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::ListSchemasResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::ListSchemasResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -412,9 +408,9 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::GetSchemaRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::GetSchemaResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::GetSchemaResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -436,9 +432,9 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::DeleteSchemaRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::DeleteSchemaResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::DeleteSchemaResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -460,9 +456,9 @@ pub mod cerbos_admin_service_client {
                 super::super::super::request::v1::ReloadStoreRequest,
             >,
         ) -> Result<
-                tonic::Response<super::super::super::response::v1::ReloadStoreResponse>,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::ReloadStoreResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -503,7 +499,7 @@ pub mod cerbos_playground_service_client {
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
-        T::ResponseBody: Default + Body<Data = Bytes> + Send + 'static,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
         <T::ResponseBody as Body>::Error: Into<StdError> + Send,
     {
         pub fn new(inner: T) -> Self {
@@ -516,6 +512,7 @@ pub mod cerbos_playground_service_client {
         ) -> CerbosPlaygroundServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
+            T::ResponseBody: Default,
             T: tonic::codegen::Service<
                 http::Request<tonic::body::BoxBody>,
                 Response = http::Response<
@@ -551,11 +548,11 @@ pub mod cerbos_playground_service_client {
                 super::super::super::request::v1::PlaygroundValidateRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::PlaygroundValidateResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<
+                super::super::super::response::v1::PlaygroundValidateResponse,
+            >,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -577,11 +574,9 @@ pub mod cerbos_playground_service_client {
                 super::super::super::request::v1::PlaygroundTestRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::PlaygroundTestResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::PlaygroundTestResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -603,11 +598,11 @@ pub mod cerbos_playground_service_client {
                 super::super::super::request::v1::PlaygroundEvaluateRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::PlaygroundEvaluateResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<
+                super::super::super::response::v1::PlaygroundEvaluateResponse,
+            >,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -629,11 +624,9 @@ pub mod cerbos_playground_service_client {
                 super::super::super::request::v1::PlaygroundProxyRequest,
             >,
         ) -> Result<
-                tonic::Response<
-                    super::super::super::response::v1::PlaygroundProxyResponse,
-                >,
-                tonic::Status,
-            > {
+            tonic::Response<super::super::super::response::v1::PlaygroundProxyResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await

@@ -48,6 +48,7 @@
 //!
 //! ```
 
+#[allow(clippy::large_enum_variant)]
 #[path = "genpb"]
 pub mod genpb {
     #[path = ""]

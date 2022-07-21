@@ -1,5 +1,5 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct PlanResourcesRequest {
+pub struct PlanResourcesInput {
     #[prost(string, tag="1")]
     pub request_id: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
@@ -7,14 +7,14 @@ pub struct PlanResourcesRequest {
     #[prost(message, optional, tag="3")]
     pub principal: ::core::option::Option<Principal>,
     #[prost(message, optional, tag="4")]
-    pub resource: ::core::option::Option<plan_resources_request::Resource>,
+    pub resource: ::core::option::Option<plan_resources_input::Resource>,
     #[prost(message, optional, tag="5")]
     pub aux_data: ::core::option::Option<AuxData>,
     #[prost(bool, tag="6")]
     pub include_meta: bool,
 }
-/// Nested message and enum types in `PlanResourcesRequest`.
-pub mod plan_resources_request {
+/// Nested message and enum types in `PlanResourcesInput`.
+pub mod plan_resources_input {
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Resource {
         #[prost(string, tag="1")]
@@ -26,6 +26,111 @@ pub mod plan_resources_request {
         #[prost(string, tag="4")]
         pub scope: ::prost::alloc::string::String,
     }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PlanResourcesAst {
+    #[prost(message, optional, tag="1")]
+    pub filter_ast: ::core::option::Option<plan_resources_ast::Node>,
+}
+/// Nested message and enum types in `PlanResourcesAst`.
+pub mod plan_resources_ast {
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Node {
+        #[prost(oneof="node::Node", tags="1, 2")]
+        pub node: ::core::option::Option<node::Node>,
+    }
+    /// Nested message and enum types in `Node`.
+    pub mod node {
+        #[derive(Clone, PartialEq, ::prost::Oneof)]
+        pub enum Node {
+            #[prost(message, tag="1")]
+            LogicalOperation(super::LogicalOperation),
+            #[prost(message, tag="2")]
+            Expression(super::super::super::super::super::google::api::expr::v1alpha1::CheckedExpr),
+        }
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct LogicalOperation {
+        #[prost(enumeration="logical_operation::Operator", tag="1")]
+        pub operator: i32,
+        #[prost(message, repeated, tag="2")]
+        pub nodes: ::prost::alloc::vec::Vec<Node>,
+    }
+    /// Nested message and enum types in `LogicalOperation`.
+    pub mod logical_operation {
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+        #[repr(i32)]
+        pub enum Operator {
+            Unspecified = 0,
+            And = 1,
+            Or = 2,
+            Not = 3,
+        }
+    }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PlanResourcesFilter {
+    #[prost(enumeration="plan_resources_filter::Kind", tag="1")]
+    pub kind: i32,
+    #[prost(message, optional, tag="2")]
+    pub condition: ::core::option::Option<plan_resources_filter::expression::Operand>,
+}
+/// Nested message and enum types in `PlanResourcesFilter`.
+pub mod plan_resources_filter {
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Expression {
+        #[prost(string, tag="1")]
+        pub operator: ::prost::alloc::string::String,
+        #[prost(message, repeated, tag="2")]
+        pub operands: ::prost::alloc::vec::Vec<expression::Operand>,
+    }
+    /// Nested message and enum types in `Expression`.
+    pub mod expression {
+        #[derive(Clone, PartialEq, ::prost::Message)]
+        pub struct Operand {
+            #[prost(oneof="operand::Node", tags="1, 2, 3")]
+            pub node: ::core::option::Option<operand::Node>,
+        }
+        /// Nested message and enum types in `Operand`.
+        pub mod operand {
+            #[derive(Clone, PartialEq, ::prost::Oneof)]
+            pub enum Node {
+                #[prost(message, tag="1")]
+                Value(::prost_types::Value),
+                #[prost(message, tag="2")]
+                Expression(super::super::Expression),
+                #[prost(string, tag="3")]
+                Variable(::prost::alloc::string::String),
+            }
+        }
+    }
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+    #[repr(i32)]
+    pub enum Kind {
+        Unspecified = 0,
+        AlwaysAllowed = 1,
+        AlwaysDenied = 2,
+        Conditional = 3,
+    }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PlanResourcesOutput {
+    #[prost(string, tag="1")]
+    pub request_id: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub action: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub kind: ::prost::alloc::string::String,
+    #[prost(string, tag="4")]
+    pub policy_version: ::prost::alloc::string::String,
+    #[prost(string, tag="5")]
+    pub scope: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="6")]
+    pub filter: ::core::option::Option<PlanResourcesFilter>,
+    #[prost(string, tag="7")]
+    pub filter_debug: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag="8")]
+    pub validation_errors: ::prost::alloc::vec::Vec<super::super::schema::v1::ValidationError>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CheckInput {
@@ -63,57 +168,6 @@ pub mod check_output {
         pub policy: ::prost::alloc::string::String,
         #[prost(string, tag="3")]
         pub scope: ::prost::alloc::string::String,
-    }
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct PlanResourcesOutput {
-    #[prost(string, tag="1")]
-    pub request_id: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
-    pub action: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
-    pub kind: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
-    pub policy_version: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
-    pub scope: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="6")]
-    pub filter: ::core::option::Option<plan_resources_output::Node>,
-}
-/// Nested message and enum types in `PlanResourcesOutput`.
-pub mod plan_resources_output {
-    #[derive(Clone, PartialEq, ::prost::Message)]
-    pub struct Node {
-        #[prost(oneof="node::Node", tags="1, 2")]
-        pub node: ::core::option::Option<node::Node>,
-    }
-    /// Nested message and enum types in `Node`.
-    pub mod node {
-        #[derive(Clone, PartialEq, ::prost::Oneof)]
-        pub enum Node {
-            #[prost(message, tag="1")]
-            LogicalOperation(super::LogicalOperation),
-            #[prost(message, tag="2")]
-            Expression(super::super::super::super::super::google::api::expr::v1alpha1::CheckedExpr),
-        }
-    }
-    #[derive(Clone, PartialEq, ::prost::Message)]
-    pub struct LogicalOperation {
-        #[prost(enumeration="logical_operation::Operator", tag="1")]
-        pub operator: i32,
-        #[prost(message, repeated, tag="2")]
-        pub nodes: ::prost::alloc::vec::Vec<Node>,
-    }
-    /// Nested message and enum types in `LogicalOperation`.
-    pub mod logical_operation {
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-        #[repr(i32)]
-        pub enum Operator {
-            Unspecified = 0,
-            And = 1,
-            Or = 2,
-            Not = 3,
-        }
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]

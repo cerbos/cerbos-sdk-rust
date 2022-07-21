@@ -9,57 +9,14 @@ pub struct PlanResourcesResponse {
     #[prost(string, tag="4")]
     pub policy_version: ::prost::alloc::string::String,
     #[prost(message, optional, tag="5")]
-    pub filter: ::core::option::Option<plan_resources_response::Filter>,
+    pub filter: ::core::option::Option<super::super::engine::v1::PlanResourcesFilter>,
     #[prost(message, optional, tag="6")]
     pub meta: ::core::option::Option<plan_resources_response::Meta>,
+    #[prost(message, repeated, tag="7")]
+    pub validation_errors: ::prost::alloc::vec::Vec<super::super::schema::v1::ValidationError>,
 }
 /// Nested message and enum types in `PlanResourcesResponse`.
 pub mod plan_resources_response {
-    #[derive(Clone, PartialEq, ::prost::Message)]
-    pub struct Expression {
-        #[prost(string, tag="1")]
-        pub operator: ::prost::alloc::string::String,
-        #[prost(message, repeated, tag="2")]
-        pub operands: ::prost::alloc::vec::Vec<expression::Operand>,
-    }
-    /// Nested message and enum types in `Expression`.
-    pub mod expression {
-        #[derive(Clone, PartialEq, ::prost::Message)]
-        pub struct Operand {
-            #[prost(oneof="operand::Node", tags="1, 2, 3")]
-            pub node: ::core::option::Option<operand::Node>,
-        }
-        /// Nested message and enum types in `Operand`.
-        pub mod operand {
-            #[derive(Clone, PartialEq, ::prost::Oneof)]
-            pub enum Node {
-                #[prost(message, tag="1")]
-                Value(::prost_types::Value),
-                #[prost(message, tag="2")]
-                Expression(super::super::Expression),
-                #[prost(string, tag="3")]
-                Variable(::prost::alloc::string::String),
-            }
-        }
-    }
-    #[derive(Clone, PartialEq, ::prost::Message)]
-    pub struct Filter {
-        #[prost(enumeration="filter::Kind", tag="1")]
-        pub kind: i32,
-        #[prost(message, optional, tag="2")]
-        pub condition: ::core::option::Option<expression::Operand>,
-    }
-    /// Nested message and enum types in `Filter`.
-    pub mod filter {
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-        #[repr(i32)]
-        pub enum Kind {
-            Unspecified = 0,
-            AlwaysAllowed = 1,
-            AlwaysDenied = 2,
-            Conditional = 3,
-        }
-    }
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Meta {
         #[prost(string, tag="1")]

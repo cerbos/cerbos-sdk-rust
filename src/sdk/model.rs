@@ -3,16 +3,14 @@
 use super::attr::{AttrVal, Attribute};
 use crate::genpb::cerbos::effect::v1::Effect;
 use crate::genpb::cerbos::engine::v1::{
-    plan_resources_request::Resource as ResourceKindPB, Principal as PrincipalPB,
+    plan_resources_filter::expression::Operand, plan_resources_filter::Kind,
+    plan_resources_input::Resource as ResourceKindPB, Principal as PrincipalPB,
     Resource as ResourcePB,
 };
 use crate::genpb::cerbos::request::v1::aux_data::Jwt;
 use crate::genpb::cerbos::request::v1::check_resources_request::ResourceEntry;
 use crate::genpb::cerbos::request::v1::AuxData as AuxDataPB;
 use crate::genpb::cerbos::response::v1::check_resources_response::ResultEntry;
-use crate::genpb::cerbos::response::v1::plan_resources_response::{
-    expression::Operand, filter::Kind,
-};
 use crate::genpb::cerbos::response::v1::{
     CheckResourcesResponse as CheckResourcesResponsePB,
     PlanResourcesResponse as PlanResourcesResponsePB,
