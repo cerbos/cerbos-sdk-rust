@@ -363,7 +363,7 @@ impl CheckResourcesResponse {
             .iter()
             .find(|r| r.resource.as_ref().map_or(false, |rr| rr.id == id_str));
 
-        entry.map(|r| ResourceResult::new(r))
+        entry.map(ResourceResult::new)
     }
 
     pub fn find_with_predicates(
@@ -394,7 +394,7 @@ impl CheckResourcesResponse {
             })
         });
 
-        entry.map(|r| ResourceResult::new(r))
+        entry.map(ResourceResult::new)
     }
 
     pub fn iter(&self) -> CheckResourcesResponseIter {
@@ -412,7 +412,7 @@ impl<'a> Iterator for CheckResourcesResponseIter<'a> {
     type Item = ResourceResult<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|r| ResourceResult::new(r))
+        self.iter.next().map(ResourceResult::new)
     }
 }
 
