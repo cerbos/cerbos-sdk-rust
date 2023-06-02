@@ -33,8 +33,11 @@ pub struct Metadata {
     pub annotations: ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
     #[prost(message, optional, tag="3")]
     pub hash: ::core::option::Option<u64>,
+    #[deprecated]
     #[prost(string, tag="4")]
     pub store_identifer: ::prost::alloc::string::String,
+    #[prost(string, tag="5")]
+    pub store_identifier: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ResourcePolicy {
@@ -65,6 +68,8 @@ pub struct ResourceRule {
     pub effect: i32,
     #[prost(string, tag="6")]
     pub name: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="7")]
+    pub output: ::core::option::Option<Output>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PrincipalPolicy {
@@ -96,6 +101,8 @@ pub mod principal_rule {
         pub effect: i32,
         #[prost(string, tag="4")]
         pub name: ::prost::alloc::string::String,
+        #[prost(message, optional, tag="5")]
+        pub output: ::core::option::Option<super::Output>,
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -154,6 +161,11 @@ pub mod r#match {
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Output {
+    #[prost(string, tag="1")]
+    pub expr: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Schemas {
     #[prost(message, optional, tag="1")]
     pub principal_schema: ::core::option::Option<schemas::Schema>,
@@ -197,6 +209,11 @@ pub mod test_fixture {
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TestOptions {
+    #[prost(message, optional, tag="1")]
+    pub now: ::core::option::Option<::prost_types::Timestamp>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TestSuite {
     #[prost(string, tag="1")]
     pub name: ::prost::alloc::string::String,
@@ -214,6 +231,8 @@ pub struct TestSuite {
     pub resources: ::std::collections::HashMap<::prost::alloc::string::String, super::super::engine::v1::Resource>,
     #[prost(map="string, message", tag="8")]
     pub aux_data: ::std::collections::HashMap<::prost::alloc::string::String, super::super::engine::v1::AuxData>,
+    #[prost(message, optional, tag="9")]
+    pub options: ::core::option::Option<TestOptions>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TestTable {
@@ -229,6 +248,8 @@ pub struct TestTable {
     pub input: ::core::option::Option<test_table::Input>,
     #[prost(message, repeated, tag="6")]
     pub expected: ::prost::alloc::vec::Vec<test_table::Expectation>,
+    #[prost(message, optional, tag="7")]
+    pub options: ::core::option::Option<TestOptions>,
 }
 /// Nested message and enum types in `TestTable`.
 pub mod test_table {
@@ -267,6 +288,8 @@ pub struct Test {
     pub input: ::core::option::Option<super::super::engine::v1::CheckInput>,
     #[prost(map="string, enumeration(super::super::effect::v1::Effect)", tag="6")]
     pub expected: ::std::collections::HashMap<::prost::alloc::string::String, i32>,
+    #[prost(message, optional, tag="7")]
+    pub options: ::core::option::Option<TestOptions>,
 }
 /// Nested message and enum types in `Test`.
 pub mod test {
@@ -311,12 +334,24 @@ pub mod test_results {
         pub file: ::prost::alloc::string::String,
         #[prost(string, tag="2")]
         pub name: ::prost::alloc::string::String,
+        #[deprecated]
         #[prost(message, repeated, tag="3")]
         pub principals: ::prost::alloc::vec::Vec<Principal>,
         #[prost(message, optional, tag="4")]
         pub summary: ::core::option::Option<Summary>,
         #[prost(string, tag="5")]
         pub error: ::prost::alloc::string::String,
+        #[prost(message, repeated, tag="6")]
+        pub test_cases: ::prost::alloc::vec::Vec<TestCase>,
+        #[prost(string, tag="7")]
+        pub description: ::prost::alloc::string::String,
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct TestCase {
+        #[prost(string, tag="1")]
+        pub name: ::prost::alloc::string::String,
+        #[prost(message, repeated, tag="2")]
+        pub principals: ::prost::alloc::vec::Vec<Principal>,
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Principal {

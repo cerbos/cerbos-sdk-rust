@@ -8,7 +8,7 @@
 ///    info: {
 ///      title: "Echo API";
 ///      version: "1.0";
-///      description: ";
+///      description: "";
 ///      contact: {
 ///        name: "gRPC-Gateway project";
 ///        url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
@@ -16,7 +16,7 @@
 ///      };
 ///      license: {
 ///        name: "BSD 3-Clause License";
-///        url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";>
+///        url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE.txt";>
 ///      };
 ///    };
 ///    schemes: HTTPS;
@@ -27,28 +27,28 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Swagger {
     /// Specifies the OpenAPI Specification version being used. It can be
-    /// used by the OpenAPI UI and other clients to interpret the API listing. The 
+    /// used by the OpenAPI UI and other clients to interpret the API listing. The
     /// value MUST be "2.0".
     #[prost(string, tag="1")]
     pub swagger: ::prost::alloc::string::String,
-    /// Provides metadata about the API. The metadata can be used by the 
+    /// Provides metadata about the API. The metadata can be used by the
     /// clients if needed.
     #[prost(message, optional, tag="2")]
     pub info: ::core::option::Option<Info>,
-    /// The host (name or ip) serving the API. This MUST be the host only and does 
+    /// The host (name or ip) serving the API. This MUST be the host only and does
     /// not include the scheme nor sub-paths. It MAY include a port. If the host is
     /// not included, the host serving the documentation is to be used (including
     /// the port). The host does not support path templating.
     #[prost(string, tag="3")]
     pub host: ::prost::alloc::string::String,
     /// The base path on which the API is served, which is relative to the host. If
-    /// it is not included, the API is served directly under the host. The value 
+    /// it is not included, the API is served directly under the host. The value
     /// MUST start with a leading slash (/). The basePath does not support path
     /// templating.
-    /// Note that using `base_path` does not change the endpoint paths that are 
+    /// Note that using `base_path` does not change the endpoint paths that are
     /// generated in the resulting OpenAPI file. If you wish to use `base_path`
-    /// with relatively generated OpenAPI paths, the `base_path` prefix must be 
-    /// manually removed from your `google.api.http` paths and your code changed to 
+    /// with relatively generated OpenAPI paths, the `base_path` prefix must be
+    /// manually removed from your `google.api.http` paths and your code changed to
     /// serve the API from the `base_path`.
     #[prost(string, tag="4")]
     pub base_path: ::prost::alloc::string::String,
@@ -57,7 +57,7 @@ pub struct Swagger {
     /// be used is the one used to access the OpenAPI definition itself.
     #[prost(enumeration="Scheme", repeated, tag="5")]
     pub schemes: ::prost::alloc::vec::Vec<i32>,
-    /// A list of MIME types the APIs can consume. This is global to all APIs but 
+    /// A list of MIME types the APIs can consume. This is global to all APIs but
     /// can be overridden on specific API calls. Value MUST be as described under
     /// Mime Types.
     #[prost(string, repeated, tag="6")]
@@ -75,14 +75,21 @@ pub struct Swagger {
     #[prost(message, optional, tag="11")]
     pub security_definitions: ::core::option::Option<SecurityDefinitions>,
     /// A declaration of which security schemes are applied for the API as a whole.
-    /// The list of values describes alternative security schemes that can be used 
-    /// (that is, there is a logical OR between the security requirements). 
+    /// The list of values describes alternative security schemes that can be used
+    /// (that is, there is a logical OR between the security requirements).
     /// Individual operations can override this definition.
     #[prost(message, repeated, tag="12")]
     pub security: ::prost::alloc::vec::Vec<SecurityRequirement>,
+    /// A list of tags for API documentation control. Tags can be used for logical
+    /// grouping of operations by resources or any other qualifier.
+    #[prost(message, repeated, tag="13")]
+    pub tags: ::prost::alloc::vec::Vec<Tag>,
     /// Additional external documentation.
     #[prost(message, optional, tag="14")]
     pub external_docs: ::core::option::Option<ExternalDocumentation>,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
     #[prost(map="string, message", tag="15")]
     pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
 }
@@ -164,8 +171,63 @@ pub struct Operation {
     /// security declaration, an empty array can be used.
     #[prost(message, repeated, tag="12")]
     pub security: ::prost::alloc::vec::Vec<SecurityRequirement>,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
     #[prost(map="string, message", tag="13")]
     pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
+    /// Custom parameters such as HTTP request headers.
+    /// See: <https://swagger.io/docs/specification/2-0/describing-parameters/>
+    /// and <https://swagger.io/specification/v2/#parameter-object.>
+    #[prost(message, optional, tag="14")]
+    pub parameters: ::core::option::Option<Parameters>,
+}
+/// `Parameters` is a representation of OpenAPI v2 specification's parameters object.
+/// Note: This technically breaks compatibility with the OpenAPI 2 definition structure as we only
+/// allow header parameters to be set here since we do not want users specifying custom non-header
+/// parameters beyond those inferred from the Protobuf schema.
+/// See: <https://swagger.io/specification/v2/#parameter-object>
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Parameters {
+    /// `Headers` is one or more HTTP header parameter.
+    /// See: <https://swagger.io/docs/specification/2-0/describing-parameters/#header-parameters>
+    #[prost(message, repeated, tag="1")]
+    pub headers: ::prost::alloc::vec::Vec<HeaderParameter>,
+}
+/// `HeaderParameter` a HTTP header parameter.
+/// See: <https://swagger.io/specification/v2/#parameter-object>
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct HeaderParameter {
+    /// `Name` is the header name.
+    #[prost(string, tag="1")]
+    pub name: ::prost::alloc::string::String,
+    /// `Description` is a short description of the header.
+    #[prost(string, tag="2")]
+    pub description: ::prost::alloc::string::String,
+    /// `Type` is the type of the object. The value MUST be one of "string", "number", "integer", or "boolean". The "array" type is not supported.
+    /// See: <https://swagger.io/specification/v2/#parameterType.>
+    #[prost(enumeration="header_parameter::Type", tag="3")]
+    pub r#type: i32,
+    /// `Format` The extending format for the previously mentioned type.
+    #[prost(string, tag="4")]
+    pub format: ::prost::alloc::string::String,
+    /// `Required` indicates if the header is optional
+    #[prost(bool, tag="5")]
+    pub required: bool,
+}
+/// Nested message and enum types in `HeaderParameter`.
+pub mod header_parameter {
+    /// `Type` is a a supported HTTP header type.
+    /// See <https://swagger.io/specification/v2/#parameterType.>
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+    #[repr(i32)]
+    pub enum Type {
+        Unknown = 0,
+        String = 1,
+        Number = 2,
+        Integer = 3,
+        Boolean = 4,
+    }
 }
 /// `Header` is a representation of OpenAPI v2 specification's Header object.
 ///
@@ -214,6 +276,9 @@ pub struct Response {
     /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#example-object>
     #[prost(map="string, string", tag="4")]
     pub examples: ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
     #[prost(map="string, message", tag="5")]
     pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
 }
@@ -227,7 +292,7 @@ pub struct Response {
 ///    info: {
 ///      title: "Echo API";
 ///      version: "1.0";
-///      description: ";
+///      description: "";
 ///      contact: {
 ///        name: "gRPC-Gateway project";
 ///        url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
@@ -235,7 +300,7 @@ pub struct Response {
 ///      };
 ///      license: {
 ///        name: "BSD 3-Clause License";
-///        url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";>
+///        url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE.txt";>
 ///      };
 ///    };
 ///    ...
@@ -263,6 +328,9 @@ pub struct Info {
     /// with the specification version).
     #[prost(string, tag="6")]
     pub version: ::prost::alloc::string::String,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
     #[prost(map="string, message", tag="7")]
     pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
 }
@@ -310,7 +378,7 @@ pub struct Contact {
 ///      ...
 ///      license: {
 ///        name: "BSD 3-Clause License";
-///        url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";>
+///        url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE.txt";>
 ///      };
 ///      ...
 ///    };
@@ -438,14 +506,14 @@ pub struct JsonSchema {
     pub example: ::prost::alloc::string::String,
     #[prost(double, tag="10")]
     pub multiple_of: f64,
-    /// Maximum represents an inclusive upper limit for a numeric instance. The 
-    /// value of MUST be a number, 
+    /// Maximum represents an inclusive upper limit for a numeric instance. The
+    /// value of MUST be a number,
     #[prost(double, tag="11")]
     pub maximum: f64,
     #[prost(bool, tag="12")]
     pub exclusive_maximum: bool,
-    /// minimum represents an inclusive lower limit for a numeric instance. The 
-    /// value of MUST be a number, 
+    /// minimum represents an inclusive lower limit for a numeric instance. The
+    /// value of MUST be a number,
     #[prost(double, tag="13")]
     pub minimum: f64,
     #[prost(bool, tag="14")]
@@ -479,9 +547,28 @@ pub struct JsonSchema {
     /// Items in `enum` must be unique <https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.5.1>
     #[prost(string, repeated, tag="46")]
     pub r#enum: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// Additional field level properties used when generating the OpenAPI v2 file.
+    #[prost(message, optional, tag="1001")]
+    pub field_configuration: ::core::option::Option<json_schema::FieldConfiguration>,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
+    #[prost(map="string, message", tag="48")]
+    pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
 }
 /// Nested message and enum types in `JSONSchema`.
 pub mod json_schema {
+    /// 'FieldConfiguration' provides additional field level properties used when generating the OpenAPI v2 file.
+    /// These properties are not defined by OpenAPIv2, but they are used to control the generation.
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct FieldConfiguration {
+        /// Alternative parameter name when used as path parameter. If set, this will
+        /// be used as the complete parameter name when this field is used as a path
+        /// parameter. Use this to avoid having auto generated path parameter names
+        /// for overlapping paths.
+        #[prost(string, tag="47")]
+        pub path_param_name: ::prost::alloc::string::String,
+    }
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum JsonSchemaSimpleTypes {
@@ -501,13 +588,23 @@ pub mod json_schema {
 ///
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Tag {
-    /// A short description for the tag. GFM syntax can be used for rich text 
+    /// The name of the tag. Use it to allow override of the name of a
+    /// global Tag object, then use that name to reference the tag throughout the
+    /// OpenAPI file.
+    #[prost(string, tag="1")]
+    pub name: ::prost::alloc::string::String,
+    /// A short description for the tag. GFM syntax can be used for rich text
     /// representation.
     #[prost(string, tag="2")]
     pub description: ::prost::alloc::string::String,
     /// Additional external documentation for this tag.
     #[prost(message, optional, tag="3")]
     pub external_docs: ::core::option::Option<ExternalDocumentation>,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
+    #[prost(map="string, message", tag="4")]
+    pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
 }
 /// `SecurityDefinitions` is a representation of OpenAPI v2 specification's
 /// Security Definitions object.
@@ -570,6 +667,9 @@ pub struct SecurityScheme {
     /// Valid for oauth2.
     #[prost(message, optional, tag="8")]
     pub scopes: ::core::option::Option<Scopes>,
+    /// Custom properties that start with "x-" such as "x-foo" used to describe
+    /// extra functionality that is not covered by the standard OpenAPI Specification.
+    /// See: <https://swagger.io/docs/specification/2-0/swagger-extensions/>
     #[prost(map="string, message", tag="9")]
     pub extensions: ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
 }

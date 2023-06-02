@@ -157,6 +157,8 @@ pub struct CheckOutput {
     pub effective_derived_roles: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, repeated, tag="5")]
     pub validation_errors: ::prost::alloc::vec::Vec<super::super::schema::v1::ValidationError>,
+    #[prost(message, repeated, tag="6")]
+    pub outputs: ::prost::alloc::vec::Vec<OutputEntry>,
 }
 /// Nested message and enum types in `CheckOutput`.
 pub mod check_output {
@@ -169,6 +171,13 @@ pub mod check_output {
         #[prost(string, tag="3")]
         pub scope: ::prost::alloc::string::String,
     }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct OutputEntry {
+    #[prost(string, tag="1")]
+    pub src: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="2")]
+    pub val: ::core::option::Option<::prost_types::Value>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Resource {
@@ -214,7 +223,7 @@ pub mod trace {
     pub struct Component {
         #[prost(enumeration="component::Kind", tag="1")]
         pub kind: i32,
-        #[prost(oneof="component::Details", tags="2, 3, 4, 5, 6, 7, 8, 9, 10")]
+        #[prost(oneof="component::Details", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
         pub details: ::core::option::Option<component::Details>,
     }
     /// Nested message and enum types in `Component`.
@@ -243,6 +252,7 @@ pub mod trace {
             Scope = 11,
             Variable = 12,
             Variables = 13,
+            Output = 14,
         }
         #[derive(Clone, PartialEq, ::prost::Oneof)]
         pub enum Details {
@@ -264,6 +274,8 @@ pub mod trace {
             Scope(::prost::alloc::string::String),
             #[prost(message, tag="10")]
             Variable(Variable),
+            #[prost(string, tag="11")]
+            Output(::prost::alloc::string::String),
         }
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
