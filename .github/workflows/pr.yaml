@@ -48,7 +48,7 @@ jobs:
       - name: Install Cerbos
         uses: cerbos/cerbos-setup-action@v1
         with:
-          version: latest 
+          version: dev 
 
       - name: Run tests
         run: |
