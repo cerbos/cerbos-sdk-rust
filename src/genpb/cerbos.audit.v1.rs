@@ -30,6 +30,8 @@ pub struct DecisionLogEntry {
     /// Deprecated. Use method.check_resources.error instead.
     #[prost(string, tag="6")]
     pub error: ::prost::alloc::string::String,
+    #[prost(map="string, message", tag="15")]
+    pub metadata: ::std::collections::HashMap<::prost::alloc::string::String, MetaValues>,
     #[prost(oneof="decision_log_entry::Method", tags="7, 8")]
     pub method: ::core::option::Option<decision_log_entry::Method>,
 }

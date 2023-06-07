@@ -106,6 +106,8 @@ pub mod check_resources_response {
         pub validation_errors: ::prost::alloc::vec::Vec<super::super::super::schema::v1::ValidationError>,
         #[prost(message, optional, tag="4")]
         pub meta: ::core::option::Option<result_entry::Meta>,
+        #[prost(message, repeated, tag="5")]
+        pub outputs: ::prost::alloc::vec::Vec<super::super::super::engine::v1::OutputEntry>,
     }
     /// Nested message and enum types in `ResultEntry`.
     pub mod result_entry {
@@ -291,6 +293,16 @@ pub struct GetPolicyResponse {
     pub policies: ::prost::alloc::vec::Vec<super::super::policy::v1::Policy>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DisablePolicyResponse {
+    #[prost(uint32, tag="1")]
+    pub disabled_policies: u32,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct EnablePolicyResponse {
+    #[prost(uint32, tag="1")]
+    pub enabled_policies: u32,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AddOrUpdateSchemaResponse {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -305,6 +317,8 @@ pub struct GetSchemaResponse {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DeleteSchemaResponse {
+    #[prost(uint32, tag="1")]
+    pub deleted_schemas: u32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ReloadStoreResponse {

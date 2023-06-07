@@ -324,6 +324,54 @@ pub mod cerbos_admin_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
+        pub async fn disable_policy(
+            &mut self,
+            request: impl tonic::IntoRequest<
+                super::super::super::request::v1::DisablePolicyRequest,
+            >,
+        ) -> Result<
+            tonic::Response<super::super::super::response::v1::DisablePolicyResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.svc.v1.CerbosAdminService/DisablePolicy",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        pub async fn enable_policy(
+            &mut self,
+            request: impl tonic::IntoRequest<
+                super::super::super::request::v1::EnablePolicyRequest,
+            >,
+        ) -> Result<
+            tonic::Response<super::super::super::response::v1::EnablePolicyResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.svc.v1.CerbosAdminService/EnablePolicy",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
         pub async fn list_audit_log_entries(
             &mut self,
             request: impl tonic::IntoRequest<

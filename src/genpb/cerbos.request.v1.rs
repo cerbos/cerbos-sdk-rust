@@ -210,9 +210,21 @@ pub struct ServerInfoRequest {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListPoliciesRequest {
+    #[prost(bool, tag="1")]
+    pub include_disabled: bool,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetPolicyRequest {
+    #[prost(string, repeated, tag="1")]
+    pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DisablePolicyRequest {
+    #[prost(string, repeated, tag="1")]
+    pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct EnablePolicyRequest {
     #[prost(string, repeated, tag="1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }

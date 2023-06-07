@@ -16,6 +16,9 @@ use crate::genpb::cerbos::response::v1::{
     PlanResourcesResponse as PlanResourcesResponsePB,
 };
 use prost::Message;
+use prost_types::Value;
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::slice::Iter;
 
 pub(crate) trait ProtobufWrapper<T: Message> {
@@ -308,9 +311,17 @@ pub enum ResourceMatcher {
 #[derive(Debug)]
 pub struct ResourceResult<'a> {
     pub(crate) result: &'a ResultEntry,
+    output_map: RefCell<Option<HashMap<String, &'a Value>>>,
 }
 
 impl<'a> ResourceResult<'a> {
+    pub fn new(result: &'a ResultEntry) -> Self {
+        Self {
+            result,
+            output_map: RefCell::new(None),
+        }
+    }
+
     pub fn is_allowed(&self, action: impl AsRef<str>) -> bool {
         self.result
             .actions
@@ -318,6 +329,23 @@ impl<'a> ResourceResult<'a> {
             .map_or(false, |effect| {
                 Effect::Allow == Effect::from_i32(*effect).unwrap()
             })
+    }
+
+    pub fn output(&self, key: &str) -> Option<&'a Value> {
+        if self.output_map.borrow().is_none() {
+            self.build_output_map();
+        }
+        self.output_map.borrow().as_ref()?.get(key).copied()
+    }
+
+    fn build_output_map(&self) {
+        let mut map = HashMap::new();
+        for output in &self.result.outputs {
+            if let Some(val) = output.val.as_ref() {
+                map.insert(output.src.clone(), val);
+            }
+        }
+        *self.output_map.borrow_mut() = Some(map);
     }
 }
 
@@ -335,7 +363,7 @@ impl CheckResourcesResponse {
             .iter()
             .find(|r| r.resource.as_ref().map_or(false, |rr| rr.id == id_str));
 
-        entry.map(|r| ResourceResult { result: r })
+        entry.map(ResourceResult::new)
     }
 
     pub fn find_with_predicates(
@@ -366,7 +394,7 @@ impl CheckResourcesResponse {
             })
         });
 
-        entry.map(|r| ResourceResult { result: r })
+        entry.map(ResourceResult::new)
     }
 
     pub fn iter(&self) -> CheckResourcesResponseIter {
@@ -384,7 +412,7 @@ impl<'a> Iterator for CheckResourcesResponseIter<'a> {
     type Item = ResourceResult<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|r| ResourceResult { result: r })
+        self.iter.next().map(ResourceResult::new)
     }
 }
 

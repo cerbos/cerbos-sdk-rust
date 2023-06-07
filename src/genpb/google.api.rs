@@ -229,15 +229,18 @@ pub struct Http {
 /// 1. Leaf request fields (recursive expansion nested messages in the request
 ///    message) are classified into three categories:
 ///    - Fields referred by the path template. They are passed via the URL path.
-///    - Fields referred by the \[HttpRule.body][google.api.HttpRule.body\]. They are passed via the HTTP
+///    - Fields referred by the \[HttpRule.body][google.api.HttpRule.body\]. They
+///    are passed via the HTTP
 ///      request body.
 ///    - All other fields are passed via the URL query parameters, and the
 ///      parameter name is the field path in the request message. A repeated
 ///      field can be represented as multiple query parameters under the same
 ///      name.
-///  2. If \[HttpRule.body][google.api.HttpRule.body\] is "*", there is no URL query parameter, all fields
+///  2. If \[HttpRule.body][google.api.HttpRule.body\] is "*", there is no URL
+///  query parameter, all fields
 ///     are passed via URL path and HTTP request body.
-///  3. If \[HttpRule.body][google.api.HttpRule.body\] is omitted, there is no HTTP request body, all
+///  3. If \[HttpRule.body][google.api.HttpRule.body\] is omitted, there is no HTTP
+///  request body, all
 ///     fields are passed via URL path and URL query parameters.
 ///
 /// ### Path template syntax
@@ -333,7 +336,8 @@ pub struct Http {
 pub struct HttpRule {
     /// Selects a method to which this rule applies.
     ///
-    /// Refer to \[selector][google.api.DocumentationRule.selector\] for syntax details.
+    /// Refer to \[selector][google.api.DocumentationRule.selector\] for syntax
+    /// details.
     #[prost(string, tag="1")]
     pub selector: ::prost::alloc::string::String,
     /// The name of the request field whose value is mapped to the HTTP request
@@ -403,4 +407,63 @@ pub struct CustomHttpPattern {
     /// The path matched by this custom verb.
     #[prost(string, tag="2")]
     pub path: ::prost::alloc::string::String,
+}
+/// `Visibility` restricts service consumer's access to service elements,
+/// such as whether an application can call a visibility-restricted method.
+/// The restriction is expressed by applying visibility labels on service
+/// elements. The visibility labels are elsewhere linked to service consumers.
+///
+/// A service can define multiple visibility labels, but a service consumer
+/// should be granted at most one visibility label. Multiple visibility
+/// labels for a single service consumer are not supported.
+///
+/// If an element and all its parents have no visibility label, its visibility
+/// is unconditionally granted.
+///
+/// Example:
+///
+///     visibility:
+///       rules:
+///       - selector: google.calendar.Calendar.EnhancedSearch
+///         restriction: PREVIEW
+///       - selector: google.calendar.Calendar.Delegate
+///         restriction: INTERNAL
+///
+/// Here, all methods are publicly visible except for the restricted methods
+/// EnhancedSearch and Delegate.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Visibility {
+    /// A list of visibility rules that apply to individual API elements.
+    ///
+    /// **NOTE:** All service configuration rules follow "last one wins" order.
+    #[prost(message, repeated, tag="1")]
+    pub rules: ::prost::alloc::vec::Vec<VisibilityRule>,
+}
+/// A visibility rule provides visibility configuration for an individual API
+/// element.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VisibilityRule {
+    /// Selects methods, messages, fields, enums, etc. to which this rule applies.
+    ///
+    /// Refer to \[selector][google.api.DocumentationRule.selector\] for syntax
+    /// details.
+    #[prost(string, tag="1")]
+    pub selector: ::prost::alloc::string::String,
+    /// A comma-separated list of visibility labels that apply to the `selector`.
+    /// Any of the listed labels can be used to grant the visibility.
+    ///
+    /// If a rule has multiple labels, removing one of the labels but not all of
+    /// them can break clients.
+    ///
+    /// Example:
+    ///
+    ///     visibility:
+    ///       rules:
+    ///       - selector: google.calendar.Calendar.EnhancedSearch
+    ///         restriction: INTERNAL, PREVIEW
+    ///
+    /// Removing INTERNAL from this restriction will break clients that rely on
+    /// this method and only had access to it through INTERNAL.
+    #[prost(string, tag="2")]
+    pub restriction: ::prost::alloc::string::String,
 }

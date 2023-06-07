@@ -1,4 +1,4 @@
-// Copyright 2021-2022 Zenauth Ltd.
+// Copyright 2021-2023 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
@@ -57,11 +57,18 @@ message ServerLaunch {
         google.protobuf.Duration poll_interval = 2;
       }
 
+      message Bundle {
+        string pdp_id = 1;
+        string bundle_source = 2;
+        string client_id = 3;
+      }
+
       string driver = 1;
       oneof store {
         Disk disk = 2;
         Git git = 3;
         Blob blob = 4;
+        Bundle bundle = 5;
       }
     }
 
