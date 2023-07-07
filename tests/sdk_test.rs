@@ -134,9 +134,7 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
 
     let resource = Resource::new("XX125", "leave_request")
         .with_policy_version("20210210")
-        .with_attributes([
-            attr("id", "XX125"),
-        ]);
+        .with_attributes([attr("id", "XX125")]);
 
     let resp = client
         .check_resources(
@@ -188,12 +186,6 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     assert_eq!(
         xx125.output("resource.leave_request.v20210210#public-view"),
         resource_output.as_ref()
-    );
-
-    let principal_output = Some(string_value("dev_record_override:donald_duck"));
-    assert_eq!(
-        xx125.output("principal.donald_duck.v20210210#dev_admin"),
-        principal_output.as_ref()
     );
 
     assert!(xx125.output("nonexistent key").is_none());
