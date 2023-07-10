@@ -2,6 +2,7 @@
 pub mod cerbos_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
     pub struct CerbosServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -10,7 +11,7 @@ pub mod cerbos_service_client {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
-            D: std::convert::TryInto<tonic::transport::Endpoint>,
+            D: TryInto<tonic::transport::Endpoint>,
             D::Error: Into<StdError>,
         {
             let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
@@ -26,6 +27,10 @@ pub mod cerbos_service_client {
     {
         pub fn new(inner: T) -> Self {
             let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_origin(inner: T, origin: Uri) -> Self {
+            let inner = tonic::client::Grpc::with_origin(inner, origin);
             Self { inner }
         }
         pub fn with_interceptor<F>(
@@ -47,19 +52,35 @@ pub mod cerbos_service_client {
         {
             CerbosServiceClient::new(InterceptedService::new(inner, interceptor))
         }
-        /// Compress requests with `gzip`.
+        /// Compress requests with the given encoding.
         ///
         /// This requires the server to support it otherwise it might respond with an
         /// error.
         #[must_use]
-        pub fn send_gzip(mut self) -> Self {
-            self.inner = self.inner.send_gzip();
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.send_compressed(encoding);
             self
         }
-        /// Enable decompressing responses with `gzip`.
+        /// Enable decompressing responses.
         #[must_use]
-        pub fn accept_gzip(mut self) -> Self {
-            self.inner = self.inner.accept_gzip();
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.accept_compressed(encoding);
+            self
+        }
+        /// Limits the maximum size of a decoded message.
+        ///
+        /// Default: `4MB`
+        #[must_use]
+        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_decoding_message_size(limit);
+            self
+        }
+        /// Limits the maximum size of an encoded message.
+        ///
+        /// Default: `usize::MAX`
+        #[must_use]
+        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
         pub async fn check_resource_set(
@@ -67,7 +88,7 @@ pub mod cerbos_service_client {
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::CheckResourceSetRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::CheckResourceSetResponse>,
             tonic::Status,
         > {
@@ -84,14 +105,19 @@ pub mod cerbos_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/CheckResourceSet",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosService", "CheckResourceSet"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn check_resource_batch(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::CheckResourceBatchRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<
                 super::super::super::response::v1::CheckResourceBatchResponse,
             >,
@@ -110,14 +136,19 @@ pub mod cerbos_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/CheckResourceBatch",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosService", "CheckResourceBatch"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn check_resources(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::CheckResourcesRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::CheckResourcesResponse>,
             tonic::Status,
         > {
@@ -134,14 +165,19 @@ pub mod cerbos_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/CheckResources",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosService", "CheckResources"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn server_info(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::ServerInfoRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::ServerInfoResponse>,
             tonic::Status,
         > {
@@ -158,14 +194,17 @@ pub mod cerbos_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/ServerInfo",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("cerbos.svc.v1.CerbosService", "ServerInfo"));
+            self.inner.unary(req, path, codec).await
         }
         pub async fn plan_resources(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::PlanResourcesRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::PlanResourcesResponse>,
             tonic::Status,
         > {
@@ -182,7 +221,10 @@ pub mod cerbos_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/PlanResources",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("cerbos.svc.v1.CerbosService", "PlanResources"));
+            self.inner.unary(req, path, codec).await
         }
     }
 }
@@ -190,6 +232,7 @@ pub mod cerbos_service_client {
 pub mod cerbos_admin_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
     pub struct CerbosAdminServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -198,7 +241,7 @@ pub mod cerbos_admin_service_client {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
-            D: std::convert::TryInto<tonic::transport::Endpoint>,
+            D: TryInto<tonic::transport::Endpoint>,
             D::Error: Into<StdError>,
         {
             let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
@@ -214,6 +257,10 @@ pub mod cerbos_admin_service_client {
     {
         pub fn new(inner: T) -> Self {
             let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_origin(inner: T, origin: Uri) -> Self {
+            let inner = tonic::client::Grpc::with_origin(inner, origin);
             Self { inner }
         }
         pub fn with_interceptor<F>(
@@ -235,19 +282,35 @@ pub mod cerbos_admin_service_client {
         {
             CerbosAdminServiceClient::new(InterceptedService::new(inner, interceptor))
         }
-        /// Compress requests with `gzip`.
+        /// Compress requests with the given encoding.
         ///
         /// This requires the server to support it otherwise it might respond with an
         /// error.
         #[must_use]
-        pub fn send_gzip(mut self) -> Self {
-            self.inner = self.inner.send_gzip();
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.send_compressed(encoding);
             self
         }
-        /// Enable decompressing responses with `gzip`.
+        /// Enable decompressing responses.
         #[must_use]
-        pub fn accept_gzip(mut self) -> Self {
-            self.inner = self.inner.accept_gzip();
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.accept_compressed(encoding);
+            self
+        }
+        /// Limits the maximum size of a decoded message.
+        ///
+        /// Default: `4MB`
+        #[must_use]
+        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_decoding_message_size(limit);
+            self
+        }
+        /// Limits the maximum size of an encoded message.
+        ///
+        /// Default: `usize::MAX`
+        #[must_use]
+        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
         pub async fn add_or_update_policy(
@@ -255,7 +318,7 @@ pub mod cerbos_admin_service_client {
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::AddOrUpdatePolicyRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<
                 super::super::super::response::v1::AddOrUpdatePolicyResponse,
             >,
@@ -274,14 +337,22 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/AddOrUpdatePolicy",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosAdminService",
+                        "AddOrUpdatePolicy",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn list_policies(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::ListPoliciesRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::ListPoliciesResponse>,
             tonic::Status,
         > {
@@ -298,14 +369,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ListPolicies",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "ListPolicies"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn get_policy(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::GetPolicyRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::GetPolicyResponse>,
             tonic::Status,
         > {
@@ -322,14 +398,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/GetPolicy",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "GetPolicy"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn disable_policy(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::DisablePolicyRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::DisablePolicyResponse>,
             tonic::Status,
         > {
@@ -346,14 +427,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/DisablePolicy",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "DisablePolicy"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn enable_policy(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::EnablePolicyRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::EnablePolicyResponse>,
             tonic::Status,
         > {
@@ -370,14 +456,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/EnablePolicy",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "EnablePolicy"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn list_audit_log_entries(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::ListAuditLogEntriesRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<
                 tonic::codec::Streaming<
                     super::super::super::response::v1::ListAuditLogEntriesResponse,
@@ -398,14 +489,22 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ListAuditLogEntries",
             );
-            self.inner.server_streaming(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosAdminService",
+                        "ListAuditLogEntries",
+                    ),
+                );
+            self.inner.server_streaming(req, path, codec).await
         }
         pub async fn add_or_update_schema(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::AddOrUpdateSchemaRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<
                 super::super::super::response::v1::AddOrUpdateSchemaResponse,
             >,
@@ -424,14 +523,22 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/AddOrUpdateSchema",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosAdminService",
+                        "AddOrUpdateSchema",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn list_schemas(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::ListSchemasRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::ListSchemasResponse>,
             tonic::Status,
         > {
@@ -448,14 +555,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ListSchemas",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "ListSchemas"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn get_schema(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::GetSchemaRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::GetSchemaResponse>,
             tonic::Status,
         > {
@@ -472,14 +584,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/GetSchema",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "GetSchema"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn delete_schema(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::DeleteSchemaRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::DeleteSchemaResponse>,
             tonic::Status,
         > {
@@ -496,14 +613,19 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/DeleteSchema",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "DeleteSchema"),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn reload_store(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::ReloadStoreRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::ReloadStoreResponse>,
             tonic::Status,
         > {
@@ -520,7 +642,12 @@ pub mod cerbos_admin_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ReloadStore",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "ReloadStore"),
+                );
+            self.inner.unary(req, path, codec).await
         }
     }
 }
@@ -528,6 +655,7 @@ pub mod cerbos_admin_service_client {
 pub mod cerbos_playground_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
     pub struct CerbosPlaygroundServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -536,7 +664,7 @@ pub mod cerbos_playground_service_client {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
-            D: std::convert::TryInto<tonic::transport::Endpoint>,
+            D: TryInto<tonic::transport::Endpoint>,
             D::Error: Into<StdError>,
         {
             let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
@@ -552,6 +680,10 @@ pub mod cerbos_playground_service_client {
     {
         pub fn new(inner: T) -> Self {
             let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_origin(inner: T, origin: Uri) -> Self {
+            let inner = tonic::client::Grpc::with_origin(inner, origin);
             Self { inner }
         }
         pub fn with_interceptor<F>(
@@ -575,19 +707,35 @@ pub mod cerbos_playground_service_client {
                 InterceptedService::new(inner, interceptor),
             )
         }
-        /// Compress requests with `gzip`.
+        /// Compress requests with the given encoding.
         ///
         /// This requires the server to support it otherwise it might respond with an
         /// error.
         #[must_use]
-        pub fn send_gzip(mut self) -> Self {
-            self.inner = self.inner.send_gzip();
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.send_compressed(encoding);
             self
         }
-        /// Enable decompressing responses with `gzip`.
+        /// Enable decompressing responses.
         #[must_use]
-        pub fn accept_gzip(mut self) -> Self {
-            self.inner = self.inner.accept_gzip();
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.accept_compressed(encoding);
+            self
+        }
+        /// Limits the maximum size of a decoded message.
+        ///
+        /// Default: `4MB`
+        #[must_use]
+        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_decoding_message_size(limit);
+            self
+        }
+        /// Limits the maximum size of an encoded message.
+        ///
+        /// Default: `usize::MAX`
+        #[must_use]
+        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
         pub async fn playground_validate(
@@ -595,7 +743,7 @@ pub mod cerbos_playground_service_client {
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::PlaygroundValidateRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<
                 super::super::super::response::v1::PlaygroundValidateResponse,
             >,
@@ -614,14 +762,22 @@ pub mod cerbos_playground_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundValidate",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosPlaygroundService",
+                        "PlaygroundValidate",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn playground_test(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::PlaygroundTestRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::PlaygroundTestResponse>,
             tonic::Status,
         > {
@@ -638,14 +794,22 @@ pub mod cerbos_playground_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundTest",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosPlaygroundService",
+                        "PlaygroundTest",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn playground_evaluate(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::PlaygroundEvaluateRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<
                 super::super::super::response::v1::PlaygroundEvaluateResponse,
             >,
@@ -664,14 +828,22 @@ pub mod cerbos_playground_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundEvaluate",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosPlaygroundService",
+                        "PlaygroundEvaluate",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
         }
         pub async fn playground_proxy(
             &mut self,
             request: impl tonic::IntoRequest<
                 super::super::super::request::v1::PlaygroundProxyRequest,
             >,
-        ) -> Result<
+        ) -> std::result::Result<
             tonic::Response<super::super::super::response::v1::PlaygroundProxyResponse>,
             tonic::Status,
         > {
@@ -688,7 +860,15 @@ pub mod cerbos_playground_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundProxy",
             );
-            self.inner.unary(request.into_request(), path, codec).await
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosPlaygroundService",
+                        "PlaygroundProxy",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
         }
     }
 }
