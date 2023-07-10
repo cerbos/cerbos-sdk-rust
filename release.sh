@@ -8,7 +8,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 REMOTE=${REMOTE:-"upstream"}
-RELEASE_VER="$1"
+RELEASE_VER="${1#v}"
 
 cargo install cargo-release
-cargo release --sign --no-publish --dev-version --push-remote "$REMOTE" --verbose --execute "$RELEASE_VER"
+cargo release --sign --no-publish --push-remote "$REMOTE" --verbose --execute "$RELEASE_VER"
