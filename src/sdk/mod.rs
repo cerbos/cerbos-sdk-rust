@@ -340,7 +340,7 @@ impl CerbosSyncClient {
 }
 
 fn gen_uuid() -> String {
-    Uuid::new_v4().to_hyphenated().to_string()
+    Uuid::new_v4().hyphenated().to_string()
 }
 
 struct CerbosInterceptor {
