@@ -17,6 +17,9 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -33,12 +36,6 @@ jobs:
         with:
           command: check
 
-      #      - name: Run cargo fmt
-      #        uses: actions-rs/cargo@v1
-      #        with:
-      #          command: fmt
-      #          args: --all -- --check
-
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
@@ -48,11 +45,10 @@ jobs:
       - name: Install Cerbos
         uses: cerbos/cerbos-setup-action@v1
         with:
-          version: latest 
+          version: latest
 
       - name: Run tests
         run: |
           cerbos run --set=storage.disk.directory=resources/store -- cargo test
         env:
           CERBOS_NO_TELEMETRY: "1"
-
