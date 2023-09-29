@@ -327,7 +327,7 @@ impl<'a> ResourceResult<'a> {
             .actions
             .get(action.as_ref())
             .map_or(false, |effect| {
-                Effect::Allow == Effect::from_i32(*effect).unwrap()
+                Effect::Allow == Effect::try_from(*effect).unwrap()
             })
     }
 
@@ -424,7 +424,7 @@ pub struct PlanResourcesResponse {
 impl PlanResourcesResponse {
     pub fn filter(&self) -> PlanResourcesFilter {
         let f = self.response.filter.as_ref().unwrap();
-        let kind = Kind::from_i32(f.kind).unwrap();
+        let kind = Kind::try_from(f.kind).unwrap();
 
         match kind {
             Kind::AlwaysAllowed => PlanResourcesFilter::AlwaysAllowed,

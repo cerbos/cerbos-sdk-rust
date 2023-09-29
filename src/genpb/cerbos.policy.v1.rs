@@ -14,7 +14,9 @@ pub struct Policy {
         ::prost::alloc::string::String,
         ::prost::alloc::string::String,
     >,
-    #[prost(oneof = "policy::PolicyType", tags = "5, 6, 7")]
+    #[prost(string, tag = "9")]
+    pub json_schema: ::prost::alloc::string::String,
+    #[prost(oneof = "policy::PolicyType", tags = "5, 6, 7, 10")]
     pub policy_type: ::core::option::Option<policy::PolicyType>,
 }
 /// Nested message and enum types in `Policy`.
@@ -28,6 +30,8 @@ pub mod policy {
         PrincipalPolicy(super::PrincipalPolicy),
         #[prost(message, tag = "7")]
         DerivedRoles(super::DerivedRoles),
+        #[prost(message, tag = "10")]
+        ExportVariables(super::ExportVariables),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -63,6 +67,8 @@ pub struct ResourcePolicy {
     pub scope: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "6")]
     pub schemas: ::core::option::Option<Schemas>,
+    #[prost(message, optional, tag = "7")]
+    pub variables: ::core::option::Option<Variables>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -93,6 +99,8 @@ pub struct PrincipalPolicy {
     pub rules: ::prost::alloc::vec::Vec<PrincipalRule>,
     #[prost(string, tag = "4")]
     pub scope: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "5")]
+    pub variables: ::core::option::Option<Variables>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -126,6 +134,8 @@ pub struct DerivedRoles {
     pub name: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "2")]
     pub definitions: ::prost::alloc::vec::Vec<RoleDef>,
+    #[prost(message, optional, tag = "3")]
+    pub variables: ::core::option::Option<Variables>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -136,6 +146,28 @@ pub struct RoleDef {
     pub parent_roles: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub condition: ::core::option::Option<Condition>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ExportVariables {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(map = "string, string", tag = "2")]
+    pub definitions: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Variables {
+    #[prost(string, repeated, tag = "1")]
+    pub import: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(map = "string, string", tag = "2")]
+    pub local: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -225,6 +257,8 @@ pub mod test_fixture {
             ::prost::alloc::string::String,
             super::super::super::engine::v1::Principal,
         >,
+        #[prost(string, tag = "2")]
+        pub json_schema: ::prost::alloc::string::String,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -234,6 +268,8 @@ pub mod test_fixture {
             ::prost::alloc::string::String,
             super::super::super::engine::v1::Resource,
         >,
+        #[prost(string, tag = "2")]
+        pub json_schema: ::prost::alloc::string::String,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -243,6 +279,8 @@ pub mod test_fixture {
             ::prost::alloc::string::String,
             super::super::super::engine::v1::AuxData,
         >,
+        #[prost(string, tag = "2")]
+        pub json_schema: ::prost::alloc::string::String,
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -281,6 +319,8 @@ pub struct TestSuite {
     >,
     #[prost(message, optional, tag = "9")]
     pub options: ::core::option::Option<TestOptions>,
+    #[prost(string, tag = "10")]
+    pub json_schema: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -316,6 +356,16 @@ pub mod test_table {
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct OutputExpectations {
+        #[prost(string, tag = "1")]
+        pub action: ::prost::alloc::string::String,
+        #[prost(message, repeated, tag = "2")]
+        pub expected: ::prost::alloc::vec::Vec<
+            super::super::super::engine::v1::OutputEntry,
+        >,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Expectation {
         #[prost(string, tag = "1")]
         pub principal: ::prost::alloc::string::String,
@@ -326,6 +376,8 @@ pub mod test_table {
             tag = "3"
         )]
         pub actions: ::std::collections::HashMap<::prost::alloc::string::String, i32>,
+        #[prost(message, repeated, tag = "4")]
+        pub outputs: ::prost::alloc::vec::Vec<OutputExpectations>,
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -345,6 +397,11 @@ pub struct Test {
     pub expected: ::std::collections::HashMap<::prost::alloc::string::String, i32>,
     #[prost(message, optional, tag = "7")]
     pub options: ::core::option::Option<TestOptions>,
+    #[prost(map = "string, message", tag = "8")]
+    pub expected_outputs: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        test::OutputEntries,
+    >,
 }
 /// Nested message and enum types in `Test`.
 pub mod test {
@@ -357,6 +414,15 @@ pub mod test {
         pub principal_key: ::prost::alloc::string::String,
         #[prost(string, tag = "3")]
         pub resource_key: ::prost::alloc::string::String,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct OutputEntries {
+        #[prost(map = "string, message", tag = "1")]
+        pub entries: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            ::prost_types::Value,
+        >,
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -463,11 +529,46 @@ pub mod test_results {
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct OutputFailure {
+        #[prost(string, tag = "1")]
+        pub src: ::prost::alloc::string::String,
+        #[prost(oneof = "output_failure::Outcome", tags = "2, 3")]
+        pub outcome: ::core::option::Option<output_failure::Outcome>,
+    }
+    /// Nested message and enum types in `OutputFailure`.
+    pub mod output_failure {
+        #[allow(clippy::derive_partial_eq_without_eq)]
+        #[derive(Clone, PartialEq, ::prost::Message)]
+        pub struct MismatchedValue {
+            #[prost(message, optional, tag = "1")]
+            pub expected: ::core::option::Option<::prost_types::Value>,
+            #[prost(message, optional, tag = "2")]
+            pub actual: ::core::option::Option<::prost_types::Value>,
+        }
+        #[allow(clippy::derive_partial_eq_without_eq)]
+        #[derive(Clone, PartialEq, ::prost::Message)]
+        pub struct MissingValue {
+            #[prost(message, optional, tag = "1")]
+            pub expected: ::core::option::Option<::prost_types::Value>,
+        }
+        #[allow(clippy::derive_partial_eq_without_eq)]
+        #[derive(Clone, PartialEq, ::prost::Oneof)]
+        pub enum Outcome {
+            #[prost(message, tag = "2")]
+            Mismatched(MismatchedValue),
+            #[prost(message, tag = "3")]
+            Missing(MissingValue),
+        }
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Failure {
         #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "1")]
         pub expected: i32,
         #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "2")]
         pub actual: i32,
+        #[prost(message, repeated, tag = "3")]
+        pub outputs: ::prost::alloc::vec::Vec<OutputFailure>,
     }
     #[derive(
         Clone,

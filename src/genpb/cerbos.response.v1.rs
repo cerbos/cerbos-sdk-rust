@@ -274,10 +274,12 @@ pub mod playground_evaluate_response {
         pub effect: i32,
         #[prost(string, tag = "3")]
         pub policy: ::prost::alloc::string::String,
+        #[deprecated]
         #[prost(string, repeated, tag = "4")]
         pub effective_derived_roles: ::prost::alloc::vec::Vec<
             ::prost::alloc::string::String,
         >,
+        #[deprecated]
         #[prost(message, repeated, tag = "5")]
         pub validation_errors: ::prost::alloc::vec::Vec<
             super::super::super::schema::v1::ValidationError,
@@ -288,6 +290,18 @@ pub mod playground_evaluate_response {
     pub struct EvalResultList {
         #[prost(message, repeated, tag = "1")]
         pub results: ::prost::alloc::vec::Vec<EvalResult>,
+        #[prost(string, repeated, tag = "2")]
+        pub effective_derived_roles: ::prost::alloc::vec::Vec<
+            ::prost::alloc::string::String,
+        >,
+        #[prost(message, repeated, tag = "3")]
+        pub validation_errors: ::prost::alloc::vec::Vec<
+            super::super::super::schema::v1::ValidationError,
+        >,
+        #[prost(message, repeated, tag = "4")]
+        pub outputs: ::prost::alloc::vec::Vec<
+            super::super::super::engine::v1::OutputEntry,
+        >,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
