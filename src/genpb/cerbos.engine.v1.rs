@@ -504,3 +504,52 @@ pub mod trace {
         }
     }
 }
+/// Data from the request, provided to expressions as the top-level `request` variable.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Request {
+    #[prost(message, optional, tag = "1")]
+    pub principal: ::core::option::Option<request::Principal>,
+    #[prost(message, optional, tag = "2")]
+    pub resource: ::core::option::Option<request::Resource>,
+    #[prost(message, optional, tag = "3")]
+    pub aux_data: ::core::option::Option<AuxData>,
+}
+/// Nested message and enum types in `Request`.
+pub mod request {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Principal {
+        #[prost(string, tag = "1")]
+        pub id: ::prost::alloc::string::String,
+        #[prost(string, repeated, tag = "2")]
+        pub roles: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+        #[prost(map = "string, message", tag = "3")]
+        pub attr: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            ::prost_types::Value,
+        >,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Resource {
+        #[prost(string, tag = "1")]
+        pub kind: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub id: ::prost::alloc::string::String,
+        #[prost(map = "string, message", tag = "3")]
+        pub attr: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            ::prost_types::Value,
+        >,
+    }
+}
+/// Data from the runtime, provided to expressions as the top-level `runtime` variable.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Runtime {
+    #[prost(string, repeated, tag = "1")]
+    pub effective_derived_roles: ::prost::alloc::vec::Vec<
+        ::prost::alloc::string::String,
+    >,
+}
