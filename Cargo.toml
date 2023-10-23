@@ -20,7 +20,7 @@ testcontainers = "0.15.0"
 tokio = { version = "1.33.0", features = ["full"] }
 tonic = { version = "0.10.2", features = ["transport", "tls", "tls-roots"]}
 tower = "0.4.13"
-uuid = { version = "1.4.1", features = ["v4"] }
+uuid = { version = "1.5.0", features = ["v4"] }
 
 [build-dependencies]
 tonic-build = "0.10.2"
