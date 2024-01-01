@@ -13,7 +13,7 @@ homepage = "https://cerbos.dev"
 testcontainers = []
 
 [dependencies]
-anyhow = "1.0.77"
+anyhow = "1.0.78"
 prost = "0.12.3"
 prost-types = "0.12.3"
 testcontainers = "0.15.0"
