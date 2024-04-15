@@ -40,6 +40,8 @@ pub struct DecisionLogEntry {
         ::prost::alloc::string::String,
         MetaValues,
     >,
+    #[prost(message, optional, tag = "16")]
+    pub audit_trail: ::core::option::Option<AuditTrail>,
     #[prost(oneof = "decision_log_entry::Method", tags = "7, 8")]
     pub method: ::core::option::Option<decision_log_entry::Method>,
 }
@@ -99,4 +101,13 @@ pub struct Peer {
     pub user_agent: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
     pub forwarded_for: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AuditTrail {
+    #[prost(map = "string, message", tag = "1")]
+    pub effective_policies: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        super::super::policy::v1::SourceAttributes,
+    >,
 }

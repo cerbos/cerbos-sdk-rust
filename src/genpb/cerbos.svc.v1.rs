@@ -347,6 +347,38 @@ pub mod cerbos_admin_service_client {
                 );
             self.inner.unary(req, path, codec).await
         }
+        pub async fn inspect_policies(
+            &mut self,
+            request: impl tonic::IntoRequest<
+                super::super::super::request::v1::InspectPoliciesRequest,
+            >,
+        ) -> std::result::Result<
+            tonic::Response<super::super::super::response::v1::InspectPoliciesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.svc.v1.CerbosAdminService/InspectPolicies",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosAdminService",
+                        "InspectPolicies",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn list_policies(
             &mut self,
             request: impl tonic::IntoRequest<

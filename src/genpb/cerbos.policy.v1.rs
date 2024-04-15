@@ -36,6 +36,15 @@ pub mod policy {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SourceAttributes {
+    #[prost(map = "string, message", tag = "1")]
+    pub attributes: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost_types::Value,
+    >,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Metadata {
     #[prost(string, tag = "1")]
     pub source_file: ::prost::alloc::string::String,
@@ -51,6 +60,8 @@ pub struct Metadata {
     pub store_identifer: ::prost::alloc::string::String,
     #[prost(string, tag = "5")]
     pub store_identifier: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "6")]
+    pub source_attributes: ::core::option::Option<SourceAttributes>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -216,8 +227,22 @@ pub mod r#match {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Output {
+    #[deprecated]
     #[prost(string, tag = "1")]
     pub expr: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub when: ::core::option::Option<output::When>,
+}
+/// Nested message and enum types in `Output`.
+pub mod output {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct When {
+        #[prost(string, tag = "1")]
+        pub rule_activated: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub condition_not_met: ::prost::alloc::string::String,
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -288,6 +313,13 @@ pub mod test_fixture {
 pub struct TestOptions {
     #[prost(message, optional, tag = "1")]
     pub now: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(bool, tag = "2")]
+    pub lenient_scope_search: bool,
+    #[prost(map = "string, message", tag = "3")]
+    pub globals: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost_types::Value,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -513,7 +545,7 @@ pub mod test_results {
         pub engine_trace: ::prost::alloc::vec::Vec<
             super::super::super::engine::v1::Trace,
         >,
-        #[prost(oneof = "details::Outcome", tags = "2, 3")]
+        #[prost(oneof = "details::Outcome", tags = "2, 3, 5")]
         pub outcome: ::core::option::Option<details::Outcome>,
     }
     /// Nested message and enum types in `Details`.
@@ -525,6 +557,8 @@ pub mod test_results {
             Failure(super::Failure),
             #[prost(string, tag = "3")]
             Error(::prost::alloc::string::String),
+            #[prost(message, tag = "5")]
+            Success(super::Success),
         }
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
@@ -569,6 +603,16 @@ pub mod test_results {
         pub actual: i32,
         #[prost(message, repeated, tag = "3")]
         pub outputs: ::prost::alloc::vec::Vec<OutputFailure>,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Success {
+        #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "1")]
+        pub effect: i32,
+        #[prost(message, repeated, tag = "2")]
+        pub outputs: ::prost::alloc::vec::Vec<
+            super::super::super::engine::v1::OutputEntry,
+        >,
     }
     #[derive(
         Clone,
