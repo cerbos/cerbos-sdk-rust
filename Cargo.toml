@@ -13,9 +13,9 @@ homepage = "https://cerbos.dev"
 testcontainers = []
 
 [dependencies]
-anyhow = "1.0.81"
-prost = "0.12.3"
-prost-types = "0.12.3"
+anyhow = "1.0.82"
+prost = "0.12.4"
+prost-types = "0.12.4"
 testcontainers = "0.15.0"
 tokio = { version = "1.37.0", features = ["full"] }
 tonic = { version = "0.11.0", features = ["transport", "tls", "tls-roots"]}
