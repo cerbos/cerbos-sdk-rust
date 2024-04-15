@@ -17,6 +17,8 @@ pub struct PlanResourcesResponse {
     pub validation_errors: ::prost::alloc::vec::Vec<
         super::super::schema::v1::ValidationError,
     >,
+    #[prost(string, tag = "8")]
+    pub cerbos_call_id: ::prost::alloc::string::String,
 }
 /// Nested message and enum types in `PlanResourcesResponse`.
 pub mod plan_resources_response {
@@ -128,6 +130,8 @@ pub struct CheckResourcesResponse {
     pub request_id: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "2")]
     pub results: ::prost::alloc::vec::Vec<check_resources_response::ResultEntry>,
+    #[prost(string, tag = "3")]
+    pub cerbos_call_id: ::prost::alloc::string::String,
 }
 /// Nested message and enum types in `CheckResourcesResponse`.
 pub mod check_resources_response {
@@ -202,11 +206,23 @@ pub struct PlaygroundFailure {
 pub mod playground_failure {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct ErrorDetails {
+        #[prost(uint32, tag = "1")]
+        pub line: u32,
+        #[prost(uint32, tag = "2")]
+        pub column: u32,
+        #[prost(string, tag = "3")]
+        pub context: ::prost::alloc::string::String,
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Error {
         #[prost(string, tag = "1")]
         pub file: ::prost::alloc::string::String,
         #[prost(string, tag = "2")]
         pub error: ::prost::alloc::string::String,
+        #[prost(message, optional, tag = "3")]
+        pub details: ::core::option::Option<ErrorDetails>,
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -393,6 +409,24 @@ pub struct DisablePolicyResponse {
 pub struct EnablePolicyResponse {
     #[prost(uint32, tag = "1")]
     pub enabled_policies: u32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InspectPoliciesResponse {
+    #[prost(map = "string, message", tag = "1")]
+    pub results: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        inspect_policies_response::Result,
+    >,
+}
+/// Nested message and enum types in `InspectPoliciesResponse`.
+pub mod inspect_policies_response {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Result {
+        #[prost(string, repeated, tag = "1")]
+        pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

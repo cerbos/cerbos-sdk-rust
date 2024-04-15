@@ -300,6 +300,18 @@ pub struct EnablePolicyRequest {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InspectPoliciesRequest {
+    #[prost(bool, tag = "1")]
+    pub include_disabled: bool,
+    #[prost(string, tag = "2")]
+    pub name_regexp: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub scope_regexp: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub version_regexp: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AddOrUpdateSchemaRequest {
     #[prost(message, repeated, tag = "1")]
     pub schemas: ::prost::alloc::vec::Vec<super::super::schema::v1::Schema>,
