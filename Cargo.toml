@@ -1,6 +1,6 @@
 [package]
 name = "cerbos"
-version = "0.4.2"
+version = "0.4.5"
 edition = "2021"
 description = "Rust SDK for working with Cerbos: an open core, language-agnostic, scalable authorization solution"
 license = "Apache-2.0"
