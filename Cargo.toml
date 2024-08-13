@@ -14,13 +14,13 @@ testcontainers = []
 
 [dependencies]
 anyhow = "1.0.82"
-prost = "0.12.4"
-prost-types = "0.12.4"
-testcontainers = "0.20.0"
+prost = "0.13.0"
+prost-types = "0.13.0"
+testcontainers = "0.21.0"
 tokio = { version = "1.37.0", features = ["full"] }
-tonic = { version = "0.11.0", features = ["transport", "tls", "tls-roots"]}
-tower = "0.4.13"
+tonic = { version = "0.12.0", features = ["transport", "tls", "tls-roots"]}
+tower = "0.5.0"
 uuid = { version = "1.8.0", features = ["v4"] }
 
 [build-dependencies]
-tonic-build = "0.11.0"
+tonic-build = "0.12.0"
