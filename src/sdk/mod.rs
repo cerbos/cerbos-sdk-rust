@@ -24,6 +24,7 @@ use crate::genpb::cerbos::{
 
 use self::model::{ProtobufWrapper, Resource, ResourceList};
 use anyhow::Context;
+use hyper_util::rt::TokioIo;
 
 pub mod attr;
 #[cfg(feature = "testcontainers")]
@@ -155,8 +156,10 @@ where
                     None => endpoint,
                 };
 
-                let uds = Box::new(path.into());
-                let connect = move |_: Uri| UnixStream::connect(uds.to_string());
+                let uds: &'static str = Box::leak(path.into().into_boxed_str());
+                let connect = move |_: Uri| async {
+                    UnixStream::connect(uds.to_string()).await.map(TokioIo::new)
+                } ;
                 Ok(endpoint.connect_with_connector_lazy(service_fn(connect)))
             }
         }

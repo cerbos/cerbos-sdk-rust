@@ -207,7 +207,7 @@ pub struct ListAuditLogEntriesRequest {
 /// Nested message and enum types in `ListAuditLogEntriesRequest`.
 pub mod list_audit_log_entries_request {
     #[allow(clippy::derive_partial_eq_without_eq)]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
     pub struct TimeRange {
         #[prost(message, optional, tag = "1")]
         pub start: ::core::option::Option<::prost_types::Timestamp>,
@@ -267,7 +267,7 @@ pub mod list_audit_log_entries_request {
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ServerInfoRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -318,7 +318,7 @@ pub struct AddOrUpdateSchemaRequest {
     pub schemas: ::prost::alloc::vec::Vec<super::super::schema::v1::Schema>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ListSchemasRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -333,7 +333,7 @@ pub struct DeleteSchemaRequest {
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ReloadStoreRequest {
     #[prost(bool, tag = "1")]
     pub wait: bool,

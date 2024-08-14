@@ -14,6 +14,7 @@ testcontainers = []
 
 [dependencies]
 anyhow = "1.0.82"
+hyper-util = { version = "0.1.7", features = ["tokio"] }
 prost = "0.13.0"
 prost-types = "0.13.0"
 testcontainers = "0.21.0"
