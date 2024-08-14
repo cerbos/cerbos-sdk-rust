@@ -355,7 +355,7 @@ pub mod playground_proxy_response {
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct AddOrUpdatePolicyResponse {
     #[prost(message, optional, tag = "1")]
     pub success: ::core::option::Option<()>,
@@ -400,13 +400,13 @@ pub struct GetPolicyResponse {
     pub policies: ::prost::alloc::vec::Vec<super::super::policy::v1::Policy>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct DisablePolicyResponse {
     #[prost(uint32, tag = "1")]
     pub disabled_policies: u32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct EnablePolicyResponse {
     #[prost(uint32, tag = "1")]
     pub enabled_policies: u32,
@@ -430,7 +430,7 @@ pub mod inspect_policies_response {
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct AddOrUpdateSchemaResponse {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -445,11 +445,11 @@ pub struct GetSchemaResponse {
     pub schemas: ::prost::alloc::vec::Vec<super::super::schema::v1::Schema>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct DeleteSchemaResponse {
     #[prost(uint32, tag = "1")]
     pub deleted_schemas: u32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ReloadStoreResponse {}

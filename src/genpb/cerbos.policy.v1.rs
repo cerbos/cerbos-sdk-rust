@@ -271,7 +271,7 @@ pub mod schemas {
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct TestFixture {}
 /// Nested message and enum types in `TestFixture`.
 pub mod test_fixture {
@@ -469,7 +469,7 @@ pub struct TestResults {
 /// Nested message and enum types in `TestResults`.
 pub mod test_results {
     #[allow(clippy::derive_partial_eq_without_eq)]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
     pub struct Tally {
         #[prost(enumeration = "Result", tag = "1")]
         pub result: i32,
