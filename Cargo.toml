@@ -2,6 +2,7 @@
 name = "cerbos"
 version = "0.4.5"
 edition = "2021"
+rust-version = "1.63.0"
 description = "Rust SDK for working with Cerbos: an open core, language-agnostic, scalable authorization solution"
 license = "Apache-2.0"
 authors = ["Cerbos Developers <sdk+rust@cerbos.dev>"]
@@ -13,15 +14,15 @@ homepage = "https://cerbos.dev"
 testcontainers = []
 
 [dependencies]
-anyhow = "1.0.82"
+anyhow = "1.0.86"
 hyper-util = { version = "0.1.7", features = ["tokio"] }
-prost = "0.13.0"
-prost-types = "0.13.0"
-testcontainers = "0.21.0"
-tokio = { version = "1.37.0", features = ["full"] }
-tonic = { version = "0.12.0", features = ["transport", "tls", "tls-roots"]}
-tower = "0.5.0"
-uuid = { version = "1.8.0", features = ["v4"] }
+prost = "0.13.1"
+prost-types = "0.13.1"
+testcontainers = "0.21.1"
+tokio = { version = "1.39.2", features = ["full"] }
+tonic = { version = "0.12.1", features = ["transport", "tls", "tls-roots"]}
+tower = { version =  "0.5.0", features = ["util"] }
+uuid = { version = "1.10.0", features = ["v4"] }
 
 [build-dependencies]
-tonic-build = "0.12.0"
+tonic-build = "0.12.1"
