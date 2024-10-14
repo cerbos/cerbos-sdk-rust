@@ -5,7 +5,7 @@ on:
   pull_request:
     branches:
       - main
-      - 'v*'
+      - "v*"
 
 name: Pull Request
 
@@ -21,10 +21,8 @@ jobs:
         uses: arduino/setup-protoc@v2
 
       - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
-          toolchain: stable
           override: true
           components: rustfmt, clippy
 
@@ -32,15 +30,10 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
+        run: cargo check
 
       - name: Run cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
 
       - name: Install Cerbos
         uses: cerbos/cerbos-setup-action@v1
