@@ -17,7 +17,7 @@ pub struct Policy {
     >,
     #[prost(string, tag = "9")]
     pub json_schema: ::prost::alloc::string::String,
-    #[prost(oneof = "policy::PolicyType", tags = "5, 6, 7, 10")]
+    #[prost(oneof = "policy::PolicyType", tags = "5, 6, 7, 10, 11")]
     pub policy_type: ::core::option::Option<policy::PolicyType>,
 }
 /// Nested message and enum types in `Policy`.
@@ -33,6 +33,8 @@ pub mod policy {
         DerivedRoles(super::DerivedRoles),
         #[prost(message, tag = "10")]
         ExportVariables(super::ExportVariables),
+        #[prost(message, tag = "11")]
+        RolePolicy(super::RolePolicy),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -81,6 +83,8 @@ pub struct ResourcePolicy {
     pub schemas: ::core::option::Option<Schemas>,
     #[prost(message, optional, tag = "7")]
     pub variables: ::core::option::Option<Variables>,
+    #[prost(enumeration = "ScopePermissions", tag = "8")]
+    pub scope_permissions: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -102,6 +106,35 @@ pub struct ResourceRule {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RolePolicy {
+    #[prost(string, tag = "2")]
+    pub scope: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "3")]
+    pub rules: ::prost::alloc::vec::Vec<RoleRule>,
+    #[prost(enumeration = "ScopePermissions", tag = "4")]
+    pub scope_permissions: i32,
+    #[prost(oneof = "role_policy::PolicyType", tags = "1")]
+    pub policy_type: ::core::option::Option<role_policy::PolicyType>,
+}
+/// Nested message and enum types in `RolePolicy`.
+pub mod role_policy {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum PolicyType {
+        #[prost(string, tag = "1")]
+        Role(::prost::alloc::string::String),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RoleRule {
+    #[prost(string, tag = "1")]
+    pub resource: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "2")]
+    pub permissible_actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PrincipalPolicy {
     #[prost(string, tag = "1")]
     pub principal: ::prost::alloc::string::String,
@@ -113,6 +146,8 @@ pub struct PrincipalPolicy {
     pub scope: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]
     pub variables: ::core::option::Option<Variables>,
+    #[prost(enumeration = "ScopePermissions", tag = "6")]
+    pub scope_permissions: i32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -658,6 +693,77 @@ pub mod test_results {
                 "RESULT_ERRORED" => Some(Self::Errored),
                 _ => None,
             }
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum Kind {
+    Unspecified = 0,
+    DerivedRoles = 1,
+    ExportVariables = 2,
+    Principal = 3,
+    Resource = 4,
+    RolePolicy = 5,
+}
+impl Kind {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Kind::Unspecified => "KIND_UNSPECIFIED",
+            Kind::DerivedRoles => "KIND_DERIVED_ROLES",
+            Kind::ExportVariables => "KIND_EXPORT_VARIABLES",
+            Kind::Principal => "KIND_PRINCIPAL",
+            Kind::Resource => "KIND_RESOURCE",
+            Kind::RolePolicy => "KIND_ROLE_POLICY",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "KIND_UNSPECIFIED" => Some(Self::Unspecified),
+            "KIND_DERIVED_ROLES" => Some(Self::DerivedRoles),
+            "KIND_EXPORT_VARIABLES" => Some(Self::ExportVariables),
+            "KIND_PRINCIPAL" => Some(Self::Principal),
+            "KIND_RESOURCE" => Some(Self::Resource),
+            "KIND_ROLE_POLICY" => Some(Self::RolePolicy),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ScopePermissions {
+    Unspecified = 0,
+    OverrideParent = 1,
+    RequireParentalConsentForAllows = 2,
+}
+impl ScopePermissions {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            ScopePermissions::Unspecified => "SCOPE_PERMISSIONS_UNSPECIFIED",
+            ScopePermissions::OverrideParent => "SCOPE_PERMISSIONS_OVERRIDE_PARENT",
+            ScopePermissions::RequireParentalConsentForAllows => {
+                "SCOPE_PERMISSIONS_REQUIRE_PARENTAL_CONSENT_FOR_ALLOWS"
+            }
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "SCOPE_PERMISSIONS_UNSPECIFIED" => Some(Self::Unspecified),
+            "SCOPE_PERMISSIONS_OVERRIDE_PARENT" => Some(Self::OverrideParent),
+            "SCOPE_PERMISSIONS_REQUIRE_PARENTAL_CONSENT_FOR_ALLOWS" => {
+                Some(Self::RequireParentalConsentForAllows)
+            }
+            _ => None,
         }
     }
 }

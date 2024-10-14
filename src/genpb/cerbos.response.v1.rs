@@ -424,9 +424,187 @@ pub struct InspectPoliciesResponse {
 pub mod inspect_policies_response {
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Attribute {
+        #[prost(enumeration = "attribute::Kind", tag = "1")]
+        pub kind: i32,
+        #[prost(string, tag = "2")]
+        pub name: ::prost::alloc::string::String,
+    }
+    /// Nested message and enum types in `Attribute`.
+    pub mod attribute {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            PartialEq,
+            Eq,
+            Hash,
+            PartialOrd,
+            Ord,
+            ::prost::Enumeration
+        )]
+        #[repr(i32)]
+        pub enum Kind {
+            Unspecified = 0,
+            PrincipalAttribute = 1,
+            ResourceAttribute = 2,
+        }
+        impl Kind {
+            /// String value of the enum field names used in the ProtoBuf definition.
+            ///
+            /// The values are not transformed in any way and thus are considered stable
+            /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+            pub fn as_str_name(&self) -> &'static str {
+                match self {
+                    Kind::Unspecified => "KIND_UNSPECIFIED",
+                    Kind::PrincipalAttribute => "KIND_PRINCIPAL_ATTRIBUTE",
+                    Kind::ResourceAttribute => "KIND_RESOURCE_ATTRIBUTE",
+                }
+            }
+            /// Creates an enum from field names used in the ProtoBuf definition.
+            pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+                match value {
+                    "KIND_UNSPECIFIED" => Some(Self::Unspecified),
+                    "KIND_PRINCIPAL_ATTRIBUTE" => Some(Self::PrincipalAttribute),
+                    "KIND_RESOURCE_ATTRIBUTE" => Some(Self::ResourceAttribute),
+                    _ => None,
+                }
+            }
+        }
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct DerivedRole {
+        #[prost(string, tag = "1")]
+        pub name: ::prost::alloc::string::String,
+        #[prost(enumeration = "derived_role::Kind", tag = "2")]
+        pub kind: i32,
+        #[prost(string, tag = "3")]
+        pub source: ::prost::alloc::string::String,
+    }
+    /// Nested message and enum types in `DerivedRole`.
+    pub mod derived_role {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            PartialEq,
+            Eq,
+            Hash,
+            PartialOrd,
+            Ord,
+            ::prost::Enumeration
+        )]
+        #[repr(i32)]
+        pub enum Kind {
+            Unspecified = 0,
+            Undefined = 1,
+            Exported = 2,
+            Imported = 3,
+        }
+        impl Kind {
+            /// String value of the enum field names used in the ProtoBuf definition.
+            ///
+            /// The values are not transformed in any way and thus are considered stable
+            /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+            pub fn as_str_name(&self) -> &'static str {
+                match self {
+                    Kind::Unspecified => "KIND_UNSPECIFIED",
+                    Kind::Undefined => "KIND_UNDEFINED",
+                    Kind::Exported => "KIND_EXPORTED",
+                    Kind::Imported => "KIND_IMPORTED",
+                }
+            }
+            /// Creates an enum from field names used in the ProtoBuf definition.
+            pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+                match value {
+                    "KIND_UNSPECIFIED" => Some(Self::Unspecified),
+                    "KIND_UNDEFINED" => Some(Self::Undefined),
+                    "KIND_EXPORTED" => Some(Self::Exported),
+                    "KIND_IMPORTED" => Some(Self::Imported),
+                    _ => None,
+                }
+            }
+        }
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Variable {
+        #[prost(string, tag = "1")]
+        pub name: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub value: ::prost::alloc::string::String,
+        #[prost(enumeration = "variable::Kind", tag = "3")]
+        pub kind: i32,
+        #[prost(string, tag = "4")]
+        pub source: ::prost::alloc::string::String,
+        #[prost(bool, tag = "5")]
+        pub used: bool,
+    }
+    /// Nested message and enum types in `Variable`.
+    pub mod variable {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            PartialEq,
+            Eq,
+            Hash,
+            PartialOrd,
+            Ord,
+            ::prost::Enumeration
+        )]
+        #[repr(i32)]
+        pub enum Kind {
+            Unspecified = 0,
+            Exported = 1,
+            Imported = 2,
+            Local = 3,
+            Undefined = 4,
+            Unknown = 5,
+        }
+        impl Kind {
+            /// String value of the enum field names used in the ProtoBuf definition.
+            ///
+            /// The values are not transformed in any way and thus are considered stable
+            /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+            pub fn as_str_name(&self) -> &'static str {
+                match self {
+                    Kind::Unspecified => "KIND_UNSPECIFIED",
+                    Kind::Exported => "KIND_EXPORTED",
+                    Kind::Imported => "KIND_IMPORTED",
+                    Kind::Local => "KIND_LOCAL",
+                    Kind::Undefined => "KIND_UNDEFINED",
+                    Kind::Unknown => "KIND_UNKNOWN",
+                }
+            }
+            /// Creates an enum from field names used in the ProtoBuf definition.
+            pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+                match value {
+                    "KIND_UNSPECIFIED" => Some(Self::Unspecified),
+                    "KIND_EXPORTED" => Some(Self::Exported),
+                    "KIND_IMPORTED" => Some(Self::Imported),
+                    "KIND_LOCAL" => Some(Self::Local),
+                    "KIND_UNDEFINED" => Some(Self::Undefined),
+                    "KIND_UNKNOWN" => Some(Self::Unknown),
+                    _ => None,
+                }
+            }
+        }
+    }
+    #[allow(clippy::derive_partial_eq_without_eq)]
+    #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Result {
         #[prost(string, repeated, tag = "1")]
         pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+        #[prost(message, repeated, tag = "2")]
+        pub variables: ::prost::alloc::vec::Vec<Variable>,
+        #[prost(string, tag = "3")]
+        pub policy_id: ::prost::alloc::string::String,
+        #[prost(message, repeated, tag = "4")]
+        pub derived_roles: ::prost::alloc::vec::Vec<DerivedRole>,
+        #[prost(message, repeated, tag = "5")]
+        pub attributes: ::prost::alloc::vec::Vec<Attribute>,
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

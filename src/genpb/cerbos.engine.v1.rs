@@ -335,7 +335,10 @@ pub mod trace {
     pub struct Component {
         #[prost(enumeration = "component::Kind", tag = "1")]
         pub kind: i32,
-        #[prost(oneof = "component::Details", tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
+        #[prost(
+            oneof = "component::Details",
+            tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"
+        )]
         pub details: ::core::option::Option<component::Details>,
     }
     /// Nested message and enum types in `Component`.
@@ -376,6 +379,7 @@ pub mod trace {
             Variable = 12,
             Variables = 13,
             Output = 14,
+            RolePolicyScope = 15,
         }
         impl Kind {
             /// String value of the enum field names used in the ProtoBuf definition.
@@ -399,6 +403,7 @@ pub mod trace {
                     Kind::Variable => "KIND_VARIABLE",
                     Kind::Variables => "KIND_VARIABLES",
                     Kind::Output => "KIND_OUTPUT",
+                    Kind::RolePolicyScope => "KIND_ROLE_POLICY_SCOPE",
                 }
             }
             /// Creates an enum from field names used in the ProtoBuf definition.
@@ -419,6 +424,7 @@ pub mod trace {
                     "KIND_VARIABLE" => Some(Self::Variable),
                     "KIND_VARIABLES" => Some(Self::Variables),
                     "KIND_OUTPUT" => Some(Self::Output),
+                    "KIND_ROLE_POLICY_SCOPE" => Some(Self::RolePolicyScope),
                     _ => None,
                 }
             }
@@ -446,6 +452,8 @@ pub mod trace {
             Variable(Variable),
             #[prost(string, tag = "11")]
             Output(::prost::alloc::string::String),
+            #[prost(string, tag = "12")]
+            RolePolicyScope(::prost::alloc::string::String),
         }
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
@@ -530,6 +538,10 @@ pub mod request {
             ::prost::alloc::string::String,
             ::prost_types::Value,
         >,
+        #[prost(string, tag = "4")]
+        pub policy_version: ::prost::alloc::string::String,
+        #[prost(string, tag = "5")]
+        pub scope: ::prost::alloc::string::String,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -543,6 +555,10 @@ pub mod request {
             ::prost::alloc::string::String,
             ::prost_types::Value,
         >,
+        #[prost(string, tag = "4")]
+        pub policy_version: ::prost::alloc::string::String,
+        #[prost(string, tag = "5")]
+        pub scope: ::prost::alloc::string::String,
     }
 }
 /// Data from the runtime, provided to expressions as the top-level `runtime` variable.

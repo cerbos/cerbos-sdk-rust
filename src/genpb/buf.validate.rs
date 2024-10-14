@@ -135,8 +135,8 @@ pub struct OneofConstraints {
     #[prost(bool, optional, tag = "1")]
     pub required: ::core::option::Option<bool>,
 }
-/// FieldRules encapsulates the rules for each type of field. Depending on the
-/// field, the correct set should be used to ensure proper validations.
+/// FieldConstraints encapsulates the rules for each type of field. Depending on
+/// the field, the correct set should be used to ensure proper validations.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FieldConstraints {
@@ -156,28 +156,16 @@ pub struct FieldConstraints {
     /// ```
     #[prost(message, repeated, tag = "23")]
     pub cel: ::prost::alloc::vec::Vec<Constraint>,
-    /// `skipped` is an optional boolean attribute that specifies that the
-    /// validation rules of this field should not be evaluated. If skipped is set to
-    /// true, any validation rules set for the field will be ignored.
+    /// If `required` is true, the field must be populated. A populated field can be
+    /// described as "serialized in the wire format," which includes:
     ///
-    /// ```proto
-    /// message MyMessage {
-    ///    // The field `value` must not be set.
-    ///    optional MyOtherMessage value = 1 \[(buf.validate.field).skipped = true\];
-    /// }
-    /// ```
-    #[prost(bool, tag = "24")]
-    pub skipped: bool,
-    /// If `required` is true, the field must be populated. Field presence can be
-    /// described as "serialized in the wire format," which follows the following rules:
-    ///
-    /// - the following "nullable" fields must be explicitly set to be considered present:
-    ///    - singular message fields (may be their empty value)
+    /// - the following "nullable" fields must be explicitly set to be considered populated:
+    ///    - singular message fields (whose fields may be unpopulated/default values)
     ///    - member fields of a oneof (may be their default value)
     ///    - proto3 optional fields (may be their default value)
-    ///    - proto2 scalar fields
-    /// - proto3 scalar fields must be non-zero to be considered present
-    /// - repeated and map fields must be non-empty to be considered present
+    ///    - proto2 scalar fields (both optional and required)
+    /// - proto3 scalar fields must be non-zero to be considered populated
+    /// - repeated and map fields must be non-empty to be considered populated
     ///
     /// ```proto
     /// message MyMessage {
@@ -187,21 +175,27 @@ pub struct FieldConstraints {
     /// ```
     #[prost(bool, tag = "25")]
     pub required: bool,
-    /// If `ignore_empty` is true and applied to a non-nullable field (see
-    /// `required` for more details), validation is skipped on the field if it is
-    /// the default or empty value. Adding `ignore_empty` to a "nullable" field is
-    /// a noop as these unset fields already skip validation (with the exception
-    /// of `required`).
+    /// Skip validation on the field if its value matches the specified criteria.
+    /// See Ignore enum for details.
     ///
     /// ```proto
-    /// message MyRepeated {
-    ///    // The field `value` min_len rule is only applied if the field isn't empty.
-    ///    repeated string value = 1 [
-    ///      (buf.validate.field).ignore_empty = true,
-    ///      (buf.validate.field).min_len = 5
+    /// message UpdateRequest {
+    ///    // The uri rule only applies if the field is populated and not an empty
+    ///    // string.
+    ///    optional string url = 1 [
+    ///      (buf.validate.field).ignore = IGNORE_IF_DEFAULT_VALUE,
+    ///      (buf.validate.field).string.uri = true,
     ///    ];
     /// }
     /// ```
+    #[prost(enumeration = "Ignore", tag = "27")]
+    pub ignore: i32,
+    /// DEPRECATED: use ignore=IGNORE_ALWAYS instead. TODO: remove this field pre-v1.
+    #[deprecated]
+    #[prost(bool, tag = "24")]
+    pub skipped: bool,
+    /// DEPRECATED: use ignore=IGNORE_IF_UNPOPULATED instead. TODO: remove this field pre-v1.
+    #[deprecated]
     #[prost(bool, tag = "26")]
     pub ignore_empty: bool,
     #[prost(
@@ -1916,7 +1910,7 @@ pub struct StringRules {
     /// patterns
     #[prost(
         oneof = "string_rules::WellKnown",
-        tags = "12, 13, 14, 15, 16, 17, 18, 21, 22, 26, 27, 28, 29, 30, 31, 24"
+        tags = "12, 13, 14, 15, 16, 17, 18, 21, 22, 33, 26, 27, 28, 29, 30, 31, 32, 24"
     )]
     pub well_known: ::core::option::Option<string_rules::WellKnown>,
 }
@@ -2039,6 +2033,19 @@ pub mod string_rules {
         /// ```
         #[prost(bool, tag = "22")]
         Uuid(bool),
+        /// `tuuid` (trimmed UUID) specifies that the field value must be a valid UUID as
+        /// defined by [RFC 4122](<https://tools.ietf.org/html/rfc4122#section-4.1.2>) with all dashes
+        /// omitted. If the field value isn't a valid UUID without dashes, an error message
+        /// will be generated.
+        ///
+        /// ```proto
+        /// message MyString {
+        ///    // value must be a valid trimmed UUID
+        ///    string value = 1 \[(buf.validate.field).string.tuuid = true\];
+        /// }
+        /// ```
+        #[prost(bool, tag = "33")]
+        Tuuid(bool),
         /// `ip_with_prefixlen` specifies that the field value must be a valid IP (v4 or v6)
         /// address with prefix length. If the field value isn't a valid IP with prefix
         /// length, an error message will be generated.
@@ -2059,7 +2066,7 @@ pub mod string_rules {
         ///
         /// ```proto
         /// message MyString {
-        ///    // value must be a valid IPv4 address with prefix lentgh
+        ///    // value must be a valid IPv4 address with prefix length
         ///     string value = 1 \[(buf.validate.field).string.ipv4_with_prefixlen = true\];
         /// }
         /// ```
@@ -2117,6 +2124,12 @@ pub mod string_rules {
         /// ```
         #[prost(bool, tag = "31")]
         Ipv6Prefix(bool),
+        /// `host_and_port` specifies the field value must be a valid host and port
+        /// pair. The host must be a valid hostname or IP address while the port
+        /// must be in the range of 0-65535, inclusive. IPv6 addresses must be delimited
+        /// with square brackets (e.g., `\[::1\]:1234`).
+        #[prost(bool, tag = "32")]
+        HostAndPort(bool),
         /// `well_known_regex` specifies a common well-known pattern
         /// defined as a regex. If the field value doesn't match the well-known
         /// regex, an error message will be generated.
@@ -2124,7 +2137,7 @@ pub mod string_rules {
         /// ```proto
         /// message MyString {
         ///    // value must be a valid HTTP header value
-        ///    string value = 1 \[(buf.validate.field).string.well_known_regex = 2\];
+        ///    string value = 1 \[(buf.validate.field).string.well_known_regex = KNOWN_REGEX_HTTP_HEADER_VALUE\];
         /// }
         /// ```
         ///
@@ -2773,6 +2786,175 @@ pub mod timestamp_rules {
         /// ```
         #[prost(bool, tag = "8")]
         GtNow(bool),
+    }
+}
+/// Specifies how FieldConstraints.ignore behaves. See the documentation for
+/// FieldConstraints.required for definitions of "populated" and "nullable".
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum Ignore {
+    /// Validation is only skipped if it's an unpopulated nullable fields.
+    ///
+    /// ```proto
+    /// syntax="proto3";
+    ///
+    /// message Request {
+    ///    // The uri rule applies to any value, including the empty string.
+    ///    string foo = 1 [
+    ///      (buf.validate.field).string.uri = true
+    ///    ];
+    ///
+    ///    // The uri rule only applies if the field is set, including if it's
+    ///    // set to the empty string.
+    ///    optional string bar = 2 [
+    ///      (buf.validate.field).string.uri = true
+    ///    ];
+    ///
+    ///    // The min_items rule always applies, even if the list is empty.
+    ///    repeated string baz = 3 [
+    ///      (buf.validate.field).repeated.min_items = 3
+    ///    ];
+    ///
+    ///    // The custom CEL rule applies only if the field is set, including if
+    ///    // it's the "zero" value of that message.
+    ///    SomeMessage quux = 4 [
+    ///      (buf.validate.field).cel = {/* ... */}
+    ///    ];
+    /// }
+    /// ```
+    Unspecified = 0,
+    /// Validation is skipped if the field is unpopulated. This rule is redundant
+    /// if the field is already nullable. This value is equivalent behavior to the
+    /// deprecated ignore_empty rule.
+    ///
+    /// ```proto
+    /// syntax="proto3
+    ///
+    /// message Request {
+    ///    // The uri rule applies only if the value is not the empty string.
+    ///    string foo = 1 [
+    ///      (buf.validate.field).string.uri = true,
+    ///      (buf.validate.field).ignore = IGNORE_IF_UNPOPULATED
+    ///    ];
+    ///
+    ///    // IGNORE_IF_UNPOPULATED is equivalent to IGNORE_UNSPECIFIED in this
+    ///    // case: the uri rule only applies if the field is set, including if
+    ///    // it's set to the empty string.
+    ///    optional string bar = 2 [
+    ///      (buf.validate.field).string.uri = true,
+    ///      (buf.validate.field).ignore = IGNORE_IF_UNPOPULATED
+    ///    ];
+    ///
+    ///    // The min_items rule only applies if the list has at least one item.
+    ///    repeated string baz = 3 [
+    ///      (buf.validate.field).repeated.min_items = 3,
+    ///      (buf.validate.field).ignore = IGNORE_IF_UNPOPULATED
+    ///    ];
+    ///
+    ///    // IGNORE_IF_UNPOPULATED is equivalent to IGNORE_UNSPECIFIED in this
+    ///    // case: the custom CEL rule applies only if the field is set, including
+    ///    // if it's the "zero" value of that message.
+    ///    SomeMessage quux = 4 [
+    ///      (buf.validate.field).cel = {/* ... */},
+    ///      (buf.validate.field).ignore = IGNORE_IF_UNPOPULATED
+    ///    ];
+    /// }
+    /// ```
+    IfUnpopulated = 1,
+    /// Validation is skipped if the field is unpopulated or if it is a nullable
+    /// field populated with its default value. This is typically the zero or
+    /// empty value, but proto2 scalars support custom defaults. For messages, the
+    /// default is a non-null message with all its fields unpopulated.
+    ///
+    /// ```proto
+    /// syntax="proto3
+    ///
+    /// message Request {
+    ///    // IGNORE_IF_DEFAULT_VALUE is equivalent to IGNORE_IF_UNPOPULATED in
+    ///    // this case; the uri rule applies only if the value is not the empty
+    ///    // string.
+    ///    string foo = 1 [
+    ///      (buf.validate.field).string.uri = true,
+    ///      (buf.validate.field).ignore = IGNORE_IF_DEFAULT_VALUE
+    ///    ];
+    ///
+    ///    // The uri rule only applies if the field is set to a value other than
+    ///    // the empty string.
+    ///    optional string bar = 2 [
+    ///      (buf.validate.field).string.uri = true,
+    ///      (buf.validate.field).ignore = IGNORE_IF_DEFAULT_VALUE
+    ///    ];
+    ///
+    ///    // IGNORE_IF_DEFAULT_VALUE is equivalent to IGNORE_IF_UNPOPULATED in
+    ///    // this case; the min_items rule only applies if the list has at least
+    ///    // one item.
+    ///    repeated string baz = 3 [
+    ///      (buf.validate.field).repeated.min_items = 3,
+    ///      (buf.validate.field).ignore = IGNORE_IF_DEFAULT_VALUE
+    ///    ];
+    ///
+    ///    // The custom CEL rule only applies if the field is set to a value other
+    ///    // than an empty message (i.e., fields are unpopulated).
+    ///    SomeMessage quux = 4 [
+    ///      (buf.validate.field).cel = {/* ... */},
+    ///      (buf.validate.field).ignore = IGNORE_IF_DEFAULT_VALUE
+    ///    ];
+    /// }
+    /// ```
+    ///
+    /// This rule is affected by proto2 custom default values:
+    ///
+    /// ```proto
+    /// syntax="proto2";
+    ///
+    /// message Request {
+    ///    // The gt rule only applies if the field is set and it's value is not
+    ///    the default (i.e., not -42). The rule even applies if the field is set
+    ///    to zero since the default value differs.
+    ///    optional int32 value = 1 [
+    ///      default = -42,
+    ///      (buf.validate.field).int32.gt = 0,
+    ///      (buf.validate.field).ignore = IGNORE_IF_DEFAULT_VALUE
+    ///    ];
+    /// }
+    IfDefaultValue = 2,
+    /// The validation rules of this field will be skipped and not evaluated. This
+    /// is useful for situations that necessitate turning off the rules of a field
+    /// containing a message that may not make sense in the current context, or to
+    /// temporarily disable constraints during development.
+    ///
+    /// ```proto
+    /// message MyMessage {
+    ///    // The field's rules will always be ignored, including any validation's
+    ///    // on value's fields.
+    ///    MyOtherMessage value = 1 [
+    ///      (buf.validate.field).ignore = IGNORE_ALWAYS];
+    /// }
+    /// ```
+    Always = 3,
+}
+impl Ignore {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Ignore::Unspecified => "IGNORE_UNSPECIFIED",
+            Ignore::IfUnpopulated => "IGNORE_IF_UNPOPULATED",
+            Ignore::IfDefaultValue => "IGNORE_IF_DEFAULT_VALUE",
+            Ignore::Always => "IGNORE_ALWAYS",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "IGNORE_UNSPECIFIED" => Some(Self::Unspecified),
+            "IGNORE_IF_UNPOPULATED" => Some(Self::IfUnpopulated),
+            "IGNORE_IF_DEFAULT_VALUE" => Some(Self::IfDefaultValue),
+            "IGNORE_ALWAYS" => Some(Self::Always),
+            _ => None,
+        }
     }
 }
 /// WellKnownRegex contain some well-known patterns.
