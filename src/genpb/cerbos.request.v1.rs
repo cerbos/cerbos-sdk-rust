@@ -280,6 +280,8 @@ pub struct ListPoliciesRequest {
     pub scope_regexp: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
     pub version_regexp: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "5")]
+    pub policy_id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -310,6 +312,8 @@ pub struct InspectPoliciesRequest {
     pub scope_regexp: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
     pub version_regexp: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "5")]
+    pub policy_id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

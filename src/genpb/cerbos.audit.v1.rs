@@ -28,12 +28,15 @@ pub struct DecisionLogEntry {
     #[prost(message, optional, tag = "3")]
     pub peer: ::core::option::Option<Peer>,
     /// Deprecated. Use method.check_resources.inputs instead.
+    #[deprecated]
     #[prost(message, repeated, tag = "4")]
     pub inputs: ::prost::alloc::vec::Vec<super::super::engine::v1::CheckInput>,
     /// Deprecated. Use method.check_resources.outputs instead.
+    #[deprecated]
     #[prost(message, repeated, tag = "5")]
     pub outputs: ::prost::alloc::vec::Vec<super::super::engine::v1::CheckOutput>,
     /// Deprecated. Use method.check_resources.error instead.
+    #[deprecated]
     #[prost(string, tag = "6")]
     pub error: ::prost::alloc::string::String,
     #[prost(map = "string, message", tag = "15")]
