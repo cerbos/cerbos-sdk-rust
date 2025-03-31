@@ -326,9 +326,7 @@ impl<'a> ResourceResult<'a> {
         self.result
             .actions
             .get(action.as_ref())
-            .map_or(false, |effect| {
-                Effect::Allow == Effect::try_from(*effect).unwrap()
-            })
+            .is_some_and(|effect| Effect::Allow == Effect::try_from(*effect).unwrap())
     }
 
     pub fn output(&self, key: &str) -> Option<&'a Value> {
@@ -361,7 +359,7 @@ impl CheckResourcesResponse {
             .response
             .results
             .iter()
-            .find(|r| r.resource.as_ref().map_or(false, |rr| rr.id == id_str));
+            .find(|r| r.resource.as_ref().is_some_and(|rr| rr.id == id_str));
 
         entry.map(ResourceResult::new)
     }
@@ -373,7 +371,7 @@ impl CheckResourcesResponse {
     ) -> Option<ResourceResult> {
         let id_str = id.as_ref();
         let entry = self.response.results.iter().find(|r| {
-            r.resource.as_ref().map_or(false, |rr| {
+            r.resource.as_ref().is_some_and(|rr| {
                 if rr.id != id_str {
                     return false;
                 }
