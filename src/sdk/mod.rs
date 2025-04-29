@@ -263,6 +263,7 @@ impl CerbosAsyncClient {
     where
         S: Into<String> + Clone,
     {
+        #[allow(deprecated)]
         let req = PlanResourcesRequest {
             request_id: (self.request_id_gen)(),
             action: action.into(),
