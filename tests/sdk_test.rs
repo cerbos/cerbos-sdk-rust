@@ -253,7 +253,7 @@ async fn plan_resources_plaintext() -> Result<()> {
 }
 
 async fn do_plan_resources(mut client: CerbosAsyncClient) -> Result<()> {
-    let principal = Principal::new("maggie", ["manager"])
+    let principal = Principal::new("maggie", ["manager", "employee"])
         .with_policy_version("20210210")
         .with_attributes([
             attr("department", "marketing"),
@@ -273,8 +273,9 @@ async fn do_plan_resources(mut client: CerbosAsyncClient) -> Result<()> {
     ));
 
     let response = client
-        .plan_resources_for_actions(vec!["approve"], principal, resource, None)
+        .plan_resources_for_actions(["approve", "view:public"], principal, resource, None)
         .await?;
+
     assert!(matches!(
         response.filter(),
         PlanResourcesFilter::Conditional(..)
