@@ -3,8 +3,11 @@
 pub struct PlanResourcesRequest {
     #[prost(string, tag = "1")]
     pub request_id: ::prost::alloc::string::String,
+    #[deprecated]
     #[prost(string, tag = "2")]
     pub action: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "7")]
+    pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub principal: ::core::option::Option<super::super::engine::v1::Principal>,
     #[prost(message, optional, tag = "4")]
