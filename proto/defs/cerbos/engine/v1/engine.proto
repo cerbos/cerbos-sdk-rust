@@ -1,4 +1,4 @@
-// Copyright 2021-2024 Zenauth Ltd.
+// Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
@@ -52,7 +52,8 @@ message PlanResourcesInput {
   }
 
   string request_id = 1;
-  string action = 2;
+  string action = 2 [deprecated = true];
+  repeated string actions = 7;
   Principal principal = 3;
   Resource resource = 4;
   AuxData aux_data = 5;
@@ -114,13 +115,15 @@ message PlanResourcesFilter {
 
 message PlanResourcesOutput {
   string request_id = 1;
-  string action = 2;
+  string action = 2 [deprecated = true];
   string kind = 3;
   string policy_version = 4;
   string scope = 5;
   PlanResourcesFilter filter = 6;
   string filter_debug = 7;
   repeated cerbos.schema.v1.ValidationError validation_errors = 8;
+  repeated string actions = 9;
+  map<string, string> matched_scopes = 10;
 }
 
 message CheckInput {
@@ -307,6 +310,7 @@ message Trace {
       KIND_VARIABLES = 13;
       KIND_OUTPUT = 14;
       KIND_ROLE_POLICY_SCOPE = 15;
+      KIND_ROLE = 16;
     }
 
     message Variable {
@@ -327,6 +331,7 @@ message Trace {
       Variable variable = 10;
       string output = 11;
       string role_policy_scope = 12;
+      string role = 13;
     }
   }
 
