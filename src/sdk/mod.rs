@@ -159,7 +159,7 @@ where
                 let uds: &'static str = Box::leak(path.into().into_boxed_str());
                 let connect = move |_: Uri| async {
                     UnixStream::connect(uds.to_string()).await.map(TokioIo::new)
-                } ;
+                };
                 Ok(endpoint.connect_with_connector_lazy(service_fn(connect)))
             }
         }
@@ -263,9 +263,43 @@ impl CerbosAsyncClient {
     where
         S: Into<String> + Clone,
     {
+        #[allow(deprecated)]
         let req = PlanResourcesRequest {
             request_id: (self.request_id_gen)(),
             action: action.into(),
+            principal: Some(principal.to_pb()),
+            resource: Some(resource.to_pb()),
+            aux_data: aux_data.map(|a| a.to_pb()),
+            ..Default::default()
+        };
+
+        let resp = self
+            .stub
+            .plan_resources(req)
+            .await
+            .with_context(|| "PlanResources call failed")?;
+
+        Ok(model::PlanResourcesResponse {
+            response: resp.get_ref().to_owned(),
+        })
+    }
+
+    /// Produce a query plan for selecting resources that the principal can perform the given
+    /// actions on. Requires Cerbos 0.44.0 and above.
+    pub async fn plan_resources_for_actions<A, S>(
+        &mut self,
+        actions: A,
+        principal: model::Principal,
+        resource: model::ResourceKind,
+        aux_data: Option<model::AuxData>,
+    ) -> Result<model::PlanResourcesResponse>
+    where
+        S: Into<String> + Clone,
+        A: IntoIterator<Item = S>,
+    {
+        let req = PlanResourcesRequest {
+            request_id: (self.request_id_gen)(),
+            actions: actions.into_iter().map(|a| a.into()).collect(),
             principal: Some(principal.to_pb()),
             resource: Some(resource.to_pb()),
             aux_data: aux_data.map(|a| a.to_pb()),
