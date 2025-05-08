@@ -25,6 +25,7 @@
 ///     produces: "application/json";
 ///   };
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Swagger {
     /// Specifies the OpenAPI Specification version being used. It can be
@@ -122,6 +123,7 @@ pub struct Swagger {
 ///       };
 ///     }
 ///   }
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Operation {
     /// A list of tags for API documentation control. Tags can be used for logical
@@ -194,6 +196,7 @@ pub struct Operation {
 /// allow header parameters to be set here since we do not want users specifying custom non-header
 /// parameters beyond those inferred from the Protobuf schema.
 /// See: <https://swagger.io/specification/v2/#parameter-object>
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Parameters {
     /// `Headers` is one or more HTTP header parameter.
@@ -203,6 +206,7 @@ pub struct Parameters {
 }
 /// `HeaderParameter` a HTTP header parameter.
 /// See: <https://swagger.io/specification/v2/#parameter-object>
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct HeaderParameter {
     /// `Name` is the header name.
@@ -252,11 +256,11 @@ pub mod header_parameter {
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
-                Self::Unknown => "UNKNOWN",
-                Self::String => "STRING",
-                Self::Number => "NUMBER",
-                Self::Integer => "INTEGER",
-                Self::Boolean => "BOOLEAN",
+                Type::Unknown => "UNKNOWN",
+                Type::String => "STRING",
+                Type::Number => "NUMBER",
+                Type::Integer => "INTEGER",
+                Type::Boolean => "BOOLEAN",
             }
         }
         /// Creates an enum from field names used in the ProtoBuf definition.
@@ -276,6 +280,7 @@ pub mod header_parameter {
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#headerObject>
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Header {
     /// `Description` is a short description of the header.
@@ -300,6 +305,7 @@ pub struct Header {
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#responseObject>
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Response {
     /// `Description` is a short description of the response.
@@ -355,6 +361,7 @@ pub struct Response {
 ///     ...
 ///   };
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Info {
     /// The title of the application.
@@ -405,6 +412,7 @@ pub struct Info {
 ///     ...
 ///   };
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Contact {
     /// The identifying name of the contact person/organization.
@@ -437,6 +445,7 @@ pub struct Contact {
 ///     ...
 ///   };
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct License {
     /// The license name used for the API.
@@ -462,6 +471,7 @@ pub struct License {
 ///     ...
 ///   };
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExternalDocumentation {
     /// A short description of the target documentation. GFM syntax can be used for
@@ -477,6 +487,7 @@ pub struct ExternalDocumentation {
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#schemaObject>
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Schema {
     #[prost(message, optional, tag = "1")]
@@ -531,6 +542,7 @@ pub struct Schema {
 ///         }];
 ///   }
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct JsonSchema {
     /// Ref is used to define an external reference to include in the message.
@@ -615,6 +627,7 @@ pub struct JsonSchema {
 pub mod json_schema {
     /// 'FieldConfiguration' provides additional field level properties used when generating the OpenAPI v2 file.
     /// These properties are not defined by OpenAPIv2, but they are used to control the generation.
+    #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct FieldConfiguration {
         /// Alternative parameter name when used as path parameter. If set, this will
@@ -653,14 +666,14 @@ pub mod json_schema {
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
-                Self::Unknown => "UNKNOWN",
-                Self::Array => "ARRAY",
-                Self::Boolean => "BOOLEAN",
-                Self::Integer => "INTEGER",
-                Self::Null => "NULL",
-                Self::Number => "NUMBER",
-                Self::Object => "OBJECT",
-                Self::String => "STRING",
+                JsonSchemaSimpleTypes::Unknown => "UNKNOWN",
+                JsonSchemaSimpleTypes::Array => "ARRAY",
+                JsonSchemaSimpleTypes::Boolean => "BOOLEAN",
+                JsonSchemaSimpleTypes::Integer => "INTEGER",
+                JsonSchemaSimpleTypes::Null => "NULL",
+                JsonSchemaSimpleTypes::Number => "NUMBER",
+                JsonSchemaSimpleTypes::Object => "OBJECT",
+                JsonSchemaSimpleTypes::String => "STRING",
             }
         }
         /// Creates an enum from field names used in the ProtoBuf definition.
@@ -683,6 +696,7 @@ pub mod json_schema {
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#tagObject>
 ///
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Tag {
     /// The name of the tag. Use it to allow override of the name of a
@@ -714,6 +728,7 @@ pub struct Tag {
 /// A declaration of the security schemes available to be used in the
 /// specification. This does not enforce the security schemes on the operations
 /// and only serves to provide the relevant details for each scheme.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SecurityDefinitions {
     /// A single security scheme definition, mapping a "name" to the scheme it
@@ -733,6 +748,7 @@ pub struct SecurityDefinitions {
 /// operations. Supported schemes are basic authentication, an API key (either as
 /// a header or as a query parameter) and OAuth2's common flows (implicit,
 /// password, application and access code).
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SecurityScheme {
     /// The type of the security scheme. Valid values are "basic",
@@ -808,10 +824,10 @@ pub mod security_scheme {
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
-                Self::Invalid => "TYPE_INVALID",
-                Self::Basic => "TYPE_BASIC",
-                Self::ApiKey => "TYPE_API_KEY",
-                Self::Oauth2 => "TYPE_OAUTH2",
+                Type::Invalid => "TYPE_INVALID",
+                Type::Basic => "TYPE_BASIC",
+                Type::ApiKey => "TYPE_API_KEY",
+                Type::Oauth2 => "TYPE_OAUTH2",
             }
         }
         /// Creates an enum from field names used in the ProtoBuf definition.
@@ -850,9 +866,9 @@ pub mod security_scheme {
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
-                Self::Invalid => "IN_INVALID",
-                Self::Query => "IN_QUERY",
-                Self::Header => "IN_HEADER",
+                In::Invalid => "IN_INVALID",
+                In::Query => "IN_QUERY",
+                In::Header => "IN_HEADER",
             }
         }
         /// Creates an enum from field names used in the ProtoBuf definition.
@@ -893,11 +909,11 @@ pub mod security_scheme {
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
-                Self::Invalid => "FLOW_INVALID",
-                Self::Implicit => "FLOW_IMPLICIT",
-                Self::Password => "FLOW_PASSWORD",
-                Self::Application => "FLOW_APPLICATION",
-                Self::AccessCode => "FLOW_ACCESS_CODE",
+                Flow::Invalid => "FLOW_INVALID",
+                Flow::Implicit => "FLOW_IMPLICIT",
+                Flow::Password => "FLOW_PASSWORD",
+                Flow::Application => "FLOW_APPLICATION",
+                Flow::AccessCode => "FLOW_ACCESS_CODE",
             }
         }
         /// Creates an enum from field names used in the ProtoBuf definition.
@@ -924,6 +940,7 @@ pub mod security_scheme {
 ///
 /// The name used for each property MUST correspond to a security scheme
 /// declared in the Security Definitions.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SecurityRequirement {
     /// Each name must correspond to a security scheme which is declared in
@@ -941,6 +958,7 @@ pub mod security_requirement {
     /// If the security scheme is of type "oauth2", then the value is a list of
     /// scope names required for the execution. For other security scheme types,
     /// the array MUST be empty.
+    #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct SecurityRequirementValue {
         #[prost(string, repeated, tag = "1")]
@@ -952,6 +970,7 @@ pub mod security_requirement {
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#scopesObject>
 ///
 /// Lists the available scopes for an OAuth2 security scheme.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Scopes {
     /// Maps between a name of a scope to a short description of it (as the value
@@ -980,11 +999,11 @@ impl Scheme {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            Self::Unknown => "UNKNOWN",
-            Self::Http => "HTTP",
-            Self::Https => "HTTPS",
-            Self::Ws => "WS",
-            Self::Wss => "WSS",
+            Scheme::Unknown => "UNKNOWN",
+            Scheme::Http => "HTTP",
+            Scheme::Https => "HTTPS",
+            Scheme::Ws => "WS",
+            Scheme::Wss => "WSS",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
