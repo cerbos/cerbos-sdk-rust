@@ -3,8 +3,11 @@
 pub struct PlanResourcesResponse {
     #[prost(string, tag = "1")]
     pub request_id: ::prost::alloc::string::String,
+    #[deprecated]
     #[prost(string, tag = "2")]
     pub action: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "9")]
+    pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, tag = "3")]
     pub resource_kind: ::prost::alloc::string::String,
     #[prost(string, tag = "4")]
@@ -26,8 +29,14 @@ pub mod plan_resources_response {
     pub struct Meta {
         #[prost(string, tag = "1")]
         pub filter_debug: ::prost::alloc::string::String,
+        #[deprecated]
         #[prost(string, tag = "2")]
         pub matched_scope: ::prost::alloc::string::String,
+        #[prost(map = "string, string", tag = "3")]
+        pub matched_scopes: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            ::prost::alloc::string::String,
+        >,
     }
 }
 /// Deprecated. See CheckResourcesResponse.
@@ -489,6 +498,70 @@ pub mod inspect_policies_response {
         }
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Constant {
+        #[prost(string, tag = "1")]
+        pub name: ::prost::alloc::string::String,
+        #[prost(message, optional, tag = "2")]
+        pub value: ::core::option::Option<::prost_types::Value>,
+        #[prost(enumeration = "constant::Kind", tag = "3")]
+        pub kind: i32,
+        #[prost(string, tag = "4")]
+        pub source: ::prost::alloc::string::String,
+        #[prost(bool, tag = "5")]
+        pub used: bool,
+    }
+    /// Nested message and enum types in `Constant`.
+    pub mod constant {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            PartialEq,
+            Eq,
+            Hash,
+            PartialOrd,
+            Ord,
+            ::prost::Enumeration
+        )]
+        #[repr(i32)]
+        pub enum Kind {
+            Unspecified = 0,
+            Exported = 1,
+            Imported = 2,
+            Local = 3,
+            Undefined = 4,
+            Unknown = 5,
+        }
+        impl Kind {
+            /// String value of the enum field names used in the ProtoBuf definition.
+            ///
+            /// The values are not transformed in any way and thus are considered stable
+            /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+            pub fn as_str_name(&self) -> &'static str {
+                match self {
+                    Self::Unspecified => "KIND_UNSPECIFIED",
+                    Self::Exported => "KIND_EXPORTED",
+                    Self::Imported => "KIND_IMPORTED",
+                    Self::Local => "KIND_LOCAL",
+                    Self::Undefined => "KIND_UNDEFINED",
+                    Self::Unknown => "KIND_UNKNOWN",
+                }
+            }
+            /// Creates an enum from field names used in the ProtoBuf definition.
+            pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+                match value {
+                    "KIND_UNSPECIFIED" => Some(Self::Unspecified),
+                    "KIND_EXPORTED" => Some(Self::Exported),
+                    "KIND_IMPORTED" => Some(Self::Imported),
+                    "KIND_LOCAL" => Some(Self::Local),
+                    "KIND_UNDEFINED" => Some(Self::Undefined),
+                    "KIND_UNKNOWN" => Some(Self::Unknown),
+                    _ => None,
+                }
+            }
+        }
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Variable {
         #[prost(string, tag = "1")]
         pub name: ::prost::alloc::string::String,
@@ -564,6 +637,8 @@ pub mod inspect_policies_response {
         pub derived_roles: ::prost::alloc::vec::Vec<DerivedRole>,
         #[prost(message, repeated, tag = "5")]
         pub attributes: ::prost::alloc::vec::Vec<Attribute>,
+        #[prost(message, repeated, tag = "6")]
+        pub constants: ::prost::alloc::vec::Vec<Constant>,
     }
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]

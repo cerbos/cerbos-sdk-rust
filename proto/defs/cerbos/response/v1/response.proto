@@ -1,4 +1,4 @@
-// Copyright 2021-2024 Zenauth Ltd.
+// Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
@@ -11,6 +11,7 @@ import "cerbos/engine/v1/engine.proto";
 import "cerbos/policy/v1/policy.proto";
 import "cerbos/schema/v1/schema.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
 option csharp_namespace = "Cerbos.Api.V1.Response";
@@ -29,10 +30,8 @@ message PlanResourcesResponse {
 
     string filter_debug = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter textual representation for debugging purposes."}];
 
-    string matched_scope = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description: "Policy scope that matched to produce this effect."
-      example: "\"acme.corp.base\""
-    }];
+    string matched_scope = 2 [deprecated = true];
+    map<string, string> matched_scopes = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Matched policy scope for each action."}];
   }
 
   string request_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
@@ -40,9 +39,11 @@ message PlanResourcesResponse {
     example: "\"c2db17b8-4f9f-4fb1-acfd-9162a02be42b\""
   }];
 
-  string action = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-    description: "Action"
-    example: "\"view:public\""
+  string action = 2 [deprecated = true];
+
+  repeated string actions = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Actions"
+    example: "[\"view:public\", \"edit:profile\"]"
   }];
 
   string resource_kind = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
@@ -469,6 +470,23 @@ message InspectPoliciesResponse {
     string source = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Source of the derived role defined in the policy."}];
   }
 
+  message Constant {
+    enum Kind {
+      KIND_UNSPECIFIED = 0;
+      KIND_EXPORTED = 1;
+      KIND_IMPORTED = 2;
+      KIND_LOCAL = 3;
+      KIND_UNDEFINED = 4;
+      KIND_UNKNOWN = 5;
+    }
+
+    string name = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Constant name defined in the policy."}];
+    google.protobuf.Value value = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Raw value of the constant defined in the policy."}];
+    Kind kind = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Kind of the constant defined in the policy."}];
+    string source = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Source of the constant defined in the policy. Only exists if the kind is imported."}];
+    bool used = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Whether the constant is used in a condition."}];
+  }
+
   message Variable {
     enum Kind {
       KIND_UNSPECIFIED = 0;
@@ -492,6 +510,7 @@ message InspectPoliciesResponse {
     string policy_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "For blob, disk, and git stores policy ID is the file name. For other stores it is <kind>.<name>.<version>/<scope>."}];
     repeated DerivedRole derived_roles = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Derived roles referenced in the policy."}];
     repeated Attribute attributes = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Attributes referenced in the policy."}];
+    repeated Constant constants = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Constants referenced in the policy."}];
   }
 
   map<string, Result> results = 1;
