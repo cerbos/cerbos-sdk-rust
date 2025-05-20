@@ -2032,8 +2032,8 @@ pub struct StringRules {
     /// ```proto
     /// message MyString {
     ///    string value = 1 [
-    ///      (buf.validate.field).string.example = 1,
-    ///      (buf.validate.field).string.example = 2
+    ///      (buf.validate.field).string.example = "hello",
+    ///      (buf.validate.field).string.example = "world"
     ///    ];
     /// }
     /// ```
@@ -2979,8 +2979,62 @@ pub struct Violations {
 /// ```
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Violation {
-    /// `field_path` is a machine-readable identifier that points to the specific field that failed the validation.
+    /// `field` is a machine-readable path to the field that failed validation.
     /// This could be a nested field, in which case the path will include all the parent fields leading to the actual field that caused the violation.
+    ///
+    /// For example, consider the following message:
+    ///
+    /// ```proto
+    /// message Message {
+    ///    bool a = 1 \[(buf.validate.field).required = true\];
+    /// }
+    /// ```
+    ///
+    /// It could produce the following violation:
+    ///
+    /// ```textproto
+    /// violation {
+    ///    field { element { field_number: 1, field_name: "a", field_type: 8 } }
+    ///    ...
+    /// }
+    /// ```
+    #[prost(message, optional, tag = "5")]
+    pub field: ::core::option::Option<FieldPath>,
+    /// `rule` is a machine-readable path that points to the specific constraint rule that failed validation.
+    /// This will be a nested field starting from the FieldConstraints of the field that failed validation.
+    /// For custom constraints, this will provide the path of the constraint, e.g. `cel\[0\]`.
+    ///
+    /// For example, consider the following message:
+    ///
+    /// ```proto
+    /// message Message {
+    ///    bool a = 1 \[(buf.validate.field).required = true\];
+    ///    bool b = 2 [(buf.validate.field).cel = {
+    ///      id: "custom_constraint",
+    ///      expression: "!this ? 'b must be true': ''"
+    ///    }]
+    /// }
+    /// ```
+    ///
+    /// It could produce the following violations:
+    ///
+    /// ```textproto
+    /// violation {
+    ///    rule { element { field_number: 25, field_name: "required", field_type: 8 } }
+    ///    ...
+    /// }
+    /// violation {
+    ///    rule { element { field_number: 23, field_name: "cel", field_type: 11, index: 0 } }
+    ///    ...
+    /// }
+    /// ```
+    #[prost(message, optional, tag = "6")]
+    pub rule: ::core::option::Option<FieldPath>,
+    /// `field_path` is a human-readable identifier that points to the specific field that failed the validation.
+    /// This could be a nested field, in which case the path will include all the parent fields leading to the actual field that caused the violation.
+    ///
+    /// Deprecated: use the `field` instead.
+    #[deprecated]
     #[prost(string, optional, tag = "1")]
     pub field_path: ::core::option::Option<::prost::alloc::string::String>,
     /// `constraint_id` is the unique identifier of the `Constraint` that was not fulfilled.
@@ -2994,6 +3048,89 @@ pub struct Violation {
     /// `for_key` indicates whether the violation was caused by a map key, rather than a value.
     #[prost(bool, optional, tag = "4")]
     pub for_key: ::core::option::Option<bool>,
+}
+/// `FieldPath` provides a path to a nested protobuf field.
+///
+/// This message provides enough information to render a dotted field path even without protobuf descriptors.
+/// It also provides enough information to resolve a nested field through unknown wire data.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FieldPath {
+    /// `elements` contains each element of the path, starting from the root and recursing downward.
+    #[prost(message, repeated, tag = "1")]
+    pub elements: ::prost::alloc::vec::Vec<FieldPathElement>,
+}
+/// `FieldPathElement` provides enough information to nest through a single protobuf field.
+///
+/// If the selected field is a map or repeated field, the `subscript` value selects a specific element from it.
+/// A path that refers to a value nested under a map key or repeated field index will have a `subscript` value.
+/// The `field_type` field allows unambiguous resolution of a field even if descriptors are not available.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FieldPathElement {
+    /// `field_number` is the field number this path element refers to.
+    #[prost(int32, optional, tag = "1")]
+    pub field_number: ::core::option::Option<i32>,
+    /// `field_name` contains the field name this path element refers to.
+    /// This can be used to display a human-readable path even if the field number is unknown.
+    #[prost(string, optional, tag = "2")]
+    pub field_name: ::core::option::Option<::prost::alloc::string::String>,
+    /// `field_type` specifies the type of this field. When using reflection, this value is not needed.
+    ///
+    /// This value is provided to make it possible to traverse unknown fields through wire data.
+    /// When traversing wire data, be mindful of both packed\[1\] and delimited\[2\] encoding schemes.
+    ///
+    /// \[1\]: <https://protobuf.dev/programming-guides/encoding/#packed>
+    /// \[2\]: <https://protobuf.dev/programming-guides/encoding/#groups>
+    ///
+    /// N.B.: Although groups are deprecated, the corresponding delimited encoding scheme is not, and
+    /// can be explicitly used in Protocol Buffers 2023 Edition.
+    #[prost(
+        enumeration = "::prost_types::field_descriptor_proto::Type",
+        optional,
+        tag = "3"
+    )]
+    pub field_type: ::core::option::Option<i32>,
+    /// `key_type` specifies the map key type of this field. This value is useful when traversing
+    /// unknown fields through wire data: specifically, it allows handling the differences between
+    /// different integer encodings.
+    #[prost(
+        enumeration = "::prost_types::field_descriptor_proto::Type",
+        optional,
+        tag = "4"
+    )]
+    pub key_type: ::core::option::Option<i32>,
+    /// `value_type` specifies map value type of this field. This is useful if you want to display a
+    /// value inside unknown fields through wire data.
+    #[prost(
+        enumeration = "::prost_types::field_descriptor_proto::Type",
+        optional,
+        tag = "5"
+    )]
+    pub value_type: ::core::option::Option<i32>,
+    /// `subscript` contains a repeated index or map key, if this path element nests into a repeated or map field.
+    #[prost(oneof = "field_path_element::Subscript", tags = "6, 7, 8, 9, 10")]
+    pub subscript: ::core::option::Option<field_path_element::Subscript>,
+}
+/// Nested message and enum types in `FieldPathElement`.
+pub mod field_path_element {
+    /// `subscript` contains a repeated index or map key, if this path element nests into a repeated or map field.
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Subscript {
+        /// `index` specifies a 0-based index into a repeated field.
+        #[prost(uint64, tag = "6")]
+        Index(u64),
+        /// `bool_key` specifies a map key of type bool.
+        #[prost(bool, tag = "7")]
+        BoolKey(bool),
+        /// `int_key` specifies a map key of type int32, int64, sint32, sint64, sfixed32 or sfixed64.
+        #[prost(int64, tag = "8")]
+        IntKey(i64),
+        /// `uint_key` specifies a map key of type uint32, uint64, fixed32 or fixed64.
+        #[prost(uint64, tag = "9")]
+        UintKey(u64),
+        /// `string_key` specifies a map key of type string.
+        #[prost(string, tag = "10")]
+        StringKey(::prost::alloc::string::String),
+    }
 }
 /// Specifies how FieldConstraints.ignore behaves. See the documentation for
 /// FieldConstraints.required for definitions of "populated" and "nullable".
