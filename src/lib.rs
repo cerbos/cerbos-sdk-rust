@@ -100,6 +100,14 @@ pub mod genpb {
             #[path = "cerbos.svc.v1.rs"]
             pub mod v1;
         }
+        #[path = ""]
+        pub mod cloud {
+            #[path = ""]
+            pub mod store {
+                #[path = "cerbos.cloud.store.v1.rs"]
+                pub mod v1;
+            }
+        }
     }
 
     #[path = ""]
