@@ -1,10 +1,8 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
-use std::io::{Cursor, Write};
-use zip::write::{FileOptions, ZipWriter};
-use zip::CompressionMethod;
+use std::io::{Cursor, Read, Write};
+use std::{collections::HashMap, path::Path};
 
 use crate::genpb::cerbos::cloud::store::v1::{
     cerbos_store_service_client::CerbosStoreServiceClient,
@@ -18,8 +16,9 @@ use crate::genpb::cerbos::cloud::store::v1::{
     ReplaceFilesResponse, StringMatch,
 };
 use anyhow::{Context, Result};
-use prost_types::{value::Kind, Struct, Timestamp, Value};
 use tonic::transport::Channel;
+use walkdir::WalkDir;
+use zip::write::SimpleFileOptions;
 
 /// Store client for interacting with Cerbos Hub file store
 pub struct StoreClient {
@@ -369,83 +368,81 @@ impl FileFilterBuilder {
 /// Utility function to create zipped data from a directory
 pub fn zip_directory(dir_path: &std::path::Path) -> Result<Vec<u8>> {
     let mut buffer = Vec::new();
-    {
-        let cursor = Cursor::new(&mut buffer);
-        let mut zip = ZipWriter::new(cursor);
-        let options = FileOptions::default().compression_method(CompressionMethod::Stored);
 
-        fn add_dir_to_zip(
-            zip: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
-            path: &std::path::Path,
-            prefix: &str,
-        ) -> Result<()> {
-            for entry in std::fs::read_dir(path)? {
-                let entry = entry?;
-                let file_path = entry.path();
-                let name = file_path
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .context("Invalid file name")?;
-                let zip_path = if prefix.is_empty() {
-                    name.to_string()
-                } else {
-                    format!("{}/{}", prefix, name)
-                };
+    let walkdir = WalkDir::new(dir_path);
+    let it = walkdir.into_iter();
 
-                if file_path.is_dir() {
-                    add_dir_to_zip(zip, &file_path, &zip_path)?;
-                } else {
-                    zip.start_file(&zip_path, options)?;
-                    let contents = std::fs::read(&file_path)?;
-                    zip.write_all(&contents)?;
-                }
-            }
-            Ok(())
+    let cursor = Cursor::new(&mut buffer);
+    let mut zip = zip::ZipWriter::new(cursor);
+    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
+
+    let prefix = Path::new(dir_path);
+    let mut file_buffer = Vec::new();
+    for entry in it.filter_map(|e| e.ok()) {
+        let path = entry.path();
+        let name = path.strip_prefix(prefix).unwrap();
+        let path_as_string = name
+            .to_str()
+            .map(str::to_owned)
+            .with_context(|| format!("{name:?} Is a Non UTF-8 Path"))?;
+
+        // Write file or directory explicitly
+        // Some unzip tools unzip files with directory paths correctly, some do not!
+        if path.is_file() {
+            zip.start_file(path_as_string, options)?;
+            let mut f = std::fs::File::open(path)?;
+
+            f.read_to_end(&mut file_buffer)?;
+            zip.write_all(&file_buffer)?;
+            file_buffer.clear();
+        } else if !name.as_os_str().is_empty() {
+            // Only if not root! Avoids path spec / warning
+            // and mapname conversion failed error on unzip
+            zip.add_directory(path_as_string, options)?;
         }
-
-        add_dir_to_zip(&mut zip, dir_path, "")?;
-        zip.finish()?;
     }
+    zip.finish()?;
+
     Ok(buffer)
 }
 
 /// Helper to convert metadata map to protobuf Value map
-pub fn to_metadata(metadata: HashMap<String, serde_json::Value>) -> Result<HashMap<String, Value>> {
-    let mut result = HashMap::new();
-    for (key, value) in metadata {
-        let pb_value = json_to_protobuf_value(value)?;
-        result.insert(key, pb_value);
-    }
-    Ok(result)
-}
+// pub fn to_metadata(metadata: HashMap<String, serde_json::Value>) -> Result<HashMap<String, Value>> {
+//     let mut result = HashMap::new();
+//     for (key, value) in metadata {
+//         let pb_value = json_to_protobuf_value(value)?;
+//         result.insert(key, pb_value);
+//     }
+//     Ok(result)
+// }
 
-fn json_to_protobuf_value(value: serde_json::Value) -> Result<Value> {
-    let kind = match value {
-        serde_json::Value::Null => Some(Kind::NullValue(0)),
-        serde_json::Value::Bool(b) => Some(Kind::BoolValue(b)),
-        serde_json::Value::Number(n) => {
-            if let Some(f) = n.as_f64() {
-                Some(Kind::NumberValue(f))
-            } else {
-                return Err(anyhow::anyhow!("Invalid number value"));
-            }
-        }
-        serde_json::Value::String(s) => Some(Kind::StringValue(s)),
-        serde_json::Value::Array(arr) => {
-            let values: Result<Vec<Value>> = arr.into_iter().map(json_to_protobuf_value).collect();
-            Some(Kind::ListValue(prost_types::ListValue { values: values? }))
-        }
-        serde_json::Value::Object(obj) => {
-            let mut fields = HashMap::new();
-            for (k, v) in obj {
-                fields.insert(k, json_to_protobuf_value(v)?);
-            }
-            Some(Kind::StructValue(Struct { fields }))
-        }
-    };
+// fn json_to_protobuf_value(value: serde_json::Value) -> Result<Value> {
+//     let kind = match value {
+//         serde_json::Value::Null => Some(Kind::NullValue(0)),
+//         serde_json::Value::Bool(b) => Some(Kind::BoolValue(b)),
+//         serde_json::Value::Number(n) => {
+//             if let Some(f) = n.as_f64() {
+//                 Some(Kind::NumberValue(f))
+//             } else {
+//                 return Err(anyhow::anyhow!("Invalid number value"));
+//             }
+//         }
+//         serde_json::Value::String(s) => Some(Kind::StringValue(s)),
+//         serde_json::Value::Array(arr) => {
+//             let values: Result<Vec<Value>> = arr.into_iter().map(json_to_protobuf_value).collect();
+//             Some(Kind::ListValue(prost_types::ListValue { values: values? }))
+//         }
+//         serde_json::Value::Object(obj) => {
+//             let mut fields = HashMap::new();
+//             for (k, v) in obj {
+//                 fields.insert(k, json_to_protobuf_value(v)?);
+//             }
+//             Some(Kind::StructValue(Struct { fields }))
+//         }
+//     };
 
-    Ok(Value { kind })
-}
+//     Ok(Value { kind })
+// }
 
 /// Extension trait for GetFilesResponse to provide convenient access methods
 pub trait GetFilesResponseExt {
