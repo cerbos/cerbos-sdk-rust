@@ -29,7 +29,9 @@ use hyper_util::rt::TokioIo;
 pub mod attr;
 #[cfg(feature = "testcontainers")]
 pub mod container;
+pub mod hub;
 pub mod model;
+pub mod store;
 
 pub type Result<T> = anyhow::Result<T>;
 
@@ -159,7 +161,7 @@ where
                 let uds: &'static str = Box::leak(path.into().into_boxed_str());
                 let connect = move |_: Uri| async {
                     UnixStream::connect(uds.to_string()).await.map(TokioIo::new)
-                } ;
+                };
                 Ok(endpoint.connect_with_connector_lazy(service_fn(connect)))
             }
         }
