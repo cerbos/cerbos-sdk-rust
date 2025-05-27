@@ -97,7 +97,7 @@ impl HubClientBuilder {
 
     /// Build the Hub client
     pub async fn build(self) -> Result<HubClient> {
-        let mut endpoint = Endpoint::from_shared(self.endpoint.clone())
+        let endpoint = Endpoint::from_shared(self.endpoint.clone())
             .with_context(|| format!("Failed to create endpoint for {}", self.endpoint))?
             .connect_timeout(self.connect_timeout)
             .timeout(self.request_timeout);

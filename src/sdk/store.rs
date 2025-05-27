@@ -384,7 +384,7 @@ pub fn zip_directory(dir_path: &std::path::Path) -> Result<Vec<u8>> {
         let path_as_string = name
             .to_str()
             .map(str::to_owned)
-            .with_context(|| format!("{name:?} Is a Non UTF-8 Path"))?;
+            .with_context(|| format!("{name:?} is a non UTF-8 path"))?;
 
         // Write file or directory explicitly
         // Some unzip tools unzip files with directory paths correctly, some do not!
