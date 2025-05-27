@@ -3,9 +3,9 @@
 
 use super::store::StoreClient;
 use anyhow::{Context, Result};
+use std::env;
 use std::time::Duration;
 use tonic::transport::{Channel, ClientTlsConfig, Endpoint};
-
 /// Hub client for interacting with Cerbos Hub services
 pub struct HubClient {
     channel: Channel,
@@ -70,19 +70,36 @@ impl HubClient {
 /// Builder for creating Hub clients with custom configuration
 pub struct HubClientBuilder {
     endpoint: String,
+    client_id: String,
+    client_secret: String,
     connect_timeout: Duration,
     request_timeout: Duration,
 }
 
 impl HubClientBuilder {
-    pub fn new(endpoint: impl Into<String>) -> Self {
-        Self {
-            endpoint: endpoint.into(),
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            endpoint: "https://api.cerbos.cloud".to_string(),
+            client_id: env::var("CERBOS_HUB_CLIENT_ID")?,
+            client_secret: env::var("CERBOS_HUB_CLIENT_SECRET")?,
             connect_timeout: Duration::from_secs(30),
-            request_timeout: Duration::from_secs(30),
-        }
+            request_timeout: Duration::from_secs(60),
+        })
+    }
+    pub fn with_api_endpoint(mut self, endpoint: impl Into<String>) -> Self {
+        self.endpoint = endpoint.into();
+        self
     }
 
+    pub fn with_client_credentials(
+        mut self,
+        client_id: impl Into<String>,
+        client_secret: impl Into<String>,
+    ) -> Self {
+        self.client_id = client_id.into();
+        self.client_secret = client_secret.into();
+        self
+    }
     /// Set connection timeout
     pub fn with_connect_timeout(mut self, timeout: Duration) -> Self {
         self.connect_timeout = timeout;
@@ -99,6 +116,8 @@ impl HubClientBuilder {
     pub async fn build(self) -> Result<HubClient> {
         let endpoint = Endpoint::from_shared(self.endpoint.clone())
             .with_context(|| format!("Failed to create endpoint for {}", self.endpoint))?
+            .tls_config(ClientTlsConfig::new())
+            .with_context(|| "Failed to apply TLS configuration")?
             .connect_timeout(self.connect_timeout)
             .timeout(self.request_timeout);
 
@@ -116,15 +135,16 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_hub_client_builder() {
+    async fn test_hub_client_builder() -> Result<()> {
         // This test would require a running Hub instance to connect to
         // For now, just test that the builder constructs properly
-        let builder = HubClientBuilder::new("https://api.cerbos.cloud")
+        let builder = HubClientBuilder::new()?
             .with_connect_timeout(Duration::from_secs(10))
             .with_request_timeout(Duration::from_secs(5));
 
         // We can't actually connect without a real endpoint, but we can verify the builder works
         assert_eq!(builder.connect_timeout, Duration::from_secs(10));
         assert_eq!(builder.request_timeout, Duration::from_secs(5));
+        Ok(())
     }
 }

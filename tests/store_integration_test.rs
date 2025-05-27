@@ -1,15 +1,12 @@
-// tests/store_integration_test.rs
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-#![cfg(test)]
-
-use cerbos::sdk::hub::{HubClient, HubClientBuilder};
+use anyhow::Result;
+use cerbos::sdk::hub::HubClientBuilder;
 use cerbos::sdk::store::{
     zip_directory, FileFilterBuilder, GetFilesRequestBuilder, GetFilesResponseExt,
     ListFilesRequestBuilder, ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder,
 };
-use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -83,16 +80,15 @@ struct TestSetup {
 }
 
 impl TestSetup {
-    async fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    async fn new() -> Result<Self> {
         let api_endpoint = env::var("CERBOS_HUB_API_ENDPOINT")
             .unwrap_or_else(|_| "https://api.cerbos.cloud".to_string());
 
         let store_id = env::var("CERBOS_HUB_STORE_ID")
             .expect("CERBOS_HUB_STORE_ID environment variable must be set for integration tests");
 
-        let hub_client = HubClientBuilder::new(api_endpoint)
-            .with_connect_timeout(std::time::Duration::from_secs(30))
-            .with_request_timeout(std::time::Duration::from_secs(60))
+        let hub_client = HubClientBuilder::new()?
+            .with_api_endpoint(api_endpoint)
             .build()
             .await?;
 
@@ -142,7 +138,7 @@ fn get_test_data_path(subpath: &str) -> PathBuf {
 }
 
 #[tokio::test]
-#[ignore] // Use #[ignore] for integration tests that require external setup
+#[ignore]
 async fn test_store_integration() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
 
