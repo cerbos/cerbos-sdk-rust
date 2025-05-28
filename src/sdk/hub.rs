@@ -116,7 +116,7 @@ impl HubClientBuilder {
     pub async fn build(self) -> Result<HubClient> {
         let endpoint = Endpoint::from_shared(self.endpoint.clone())
             .with_context(|| format!("Failed to create endpoint for {}", self.endpoint))?
-            .tls_config(ClientTlsConfig::new())
+            .tls_config(ClientTlsConfig::new().with_native_roots())
             .with_context(|| "Failed to apply TLS configuration")?
             .connect_timeout(self.connect_timeout)
             .timeout(self.request_timeout);
