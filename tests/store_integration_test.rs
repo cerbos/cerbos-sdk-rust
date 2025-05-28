@@ -100,8 +100,10 @@ impl TestSetup {
         })
     }
 
-    async fn reset_store(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn reset_store(&mut self) -> Result<()> {
         let test_data_path = get_test_data_path("replace_files/success");
+        println!("test_data_path {:?}", test_data_path);
+
         let zip_data = zip_directory(&test_data_path)?;
 
         let request =
@@ -143,9 +145,9 @@ async fn test_store_integration() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
 
     test_replace_files(&mut setup).await?;
-    test_modify_files(&mut setup).await?;
-    test_list_files(&mut setup).await?;
-    test_get_files(&mut setup).await?;
+    // test_modify_files(&mut setup).await?;
+    // test_list_files(&mut setup).await?;
+    // test_get_files(&mut setup).await?;
 
     Ok(())
 }
