@@ -27,6 +27,8 @@ use anyhow::Context;
 use hyper_util::rt::TokioIo;
 
 pub mod attr;
+pub mod auth;
+pub mod auth_client;
 #[cfg(feature = "testcontainers")]
 pub mod container;
 pub mod hub;
