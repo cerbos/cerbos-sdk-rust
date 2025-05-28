@@ -107,6 +107,11 @@ pub mod genpb {
                 #[path = "cerbos.cloud.store.v1.rs"]
                 pub mod v1;
             }
+            #[path = ""]
+            pub mod apikey {
+                #[path = "cerbos.cloud.apikey.v1.rs"]
+                pub mod v1;
+            }
         }
     }
 
