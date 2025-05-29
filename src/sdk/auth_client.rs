@@ -85,7 +85,7 @@ impl AuthClient {
         };
 
         *token_guard = Some(token_info);
-
+        println!("access token: {}", token_response.access_token);
         Ok(token_response.access_token)
     }
 
