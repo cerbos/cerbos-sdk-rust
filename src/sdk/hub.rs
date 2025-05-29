@@ -7,7 +7,7 @@ use super::store::StoreClient;
 use anyhow::{Context, Result};
 use std::time::Duration;
 use std::{env, sync::Arc};
-use tonic::transport::{Channel, ClientTlsConfig, Endpoint};
+use tonic::transport::{ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
 
 pub struct HubClient<T> {

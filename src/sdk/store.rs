@@ -16,7 +16,6 @@ use crate::genpb::cerbos::cloud::store::v1::{
     ReplaceFilesResponse, StringMatch,
 };
 use anyhow::{Context, Result};
-use tonic::transport::Channel;
 use walkdir::WalkDir;
 use zip::write::SimpleFileOptions;
 
