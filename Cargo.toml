@@ -25,6 +25,7 @@ uuid = { version = "1.10.0", features = ["v4"] }
 zip = { version = "4.0.0", default-features = false }
 walkdir = "2"
 http = "1"
+http-body = "1"
 
 [build-dependencies]
 tonic-build = "0.13.0"

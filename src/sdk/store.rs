@@ -21,12 +21,19 @@ use walkdir::WalkDir;
 use zip::write::SimpleFileOptions;
 
 /// Store client for interacting with Cerbos Hub file store
-pub struct StoreClient {
-    client: CerbosStoreServiceClient<Channel>,
+pub struct StoreClient<T> {
+    client: CerbosStoreServiceClient<T>,
 }
 
-impl StoreClient {
-    pub fn new(channel: Channel) -> Self {
+type StdError = Box<dyn std::error::Error + Send + Sync + 'static>;
+impl<T> StoreClient<T>
+where
+    T: tonic::client::GrpcService<tonic::body::Body>,
+    T::Error: Into<StdError>,
+    T::ResponseBody: http_body::Body<Data = prost::bytes::Bytes> + std::marker::Send + 'static,
+    <T::ResponseBody as http_body::Body>::Error: Into<StdError> + std::marker::Send,
+{
+    pub fn new(channel: T) -> Self {
         Self {
             client: CerbosStoreServiceClient::new(channel),
         }
