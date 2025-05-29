@@ -52,7 +52,6 @@ pub struct HubClientBuilder {
 
 impl HubClientBuilder {
     pub fn new() -> Self {
-        println!("ctor");
         Self {
             endpoint: "https://api.cerbos.cloud".to_string(),
             connect_timeout: Duration::from_secs(30),
@@ -99,13 +98,11 @@ impl HubClientBuilder {
             .connect_timeout(self.connect_timeout)
             .timeout(self.request_timeout);
 
-        println!("connect!");
         let channel = endpoint
             .connect()
             .await
             .with_context(|| format!("Failed to connect to {}", self.endpoint))?;
 
-        println!("Credentials {:?}", self.credentials);
         let credentials = Arc::new(self.credentials.with_context(|| "invalid credentials!")?);
 
         let auth_client = Arc::new(AuthClient::new(channel.clone(), credentials));
