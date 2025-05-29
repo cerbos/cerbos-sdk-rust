@@ -1,6 +1,6 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
-
+#![allow(dead_code)]
 use anyhow::Result;
 use cerbos::sdk::auth::AuthMiddleware;
 use cerbos::sdk::hub::HubClientBuilder;
