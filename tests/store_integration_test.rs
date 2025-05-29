@@ -103,16 +103,15 @@ impl TestSetup {
 
     async fn reset_store(&mut self) -> Result<()> {
         let test_data_path = get_test_data_path("replace_files/success");
-        println!("test_data_path {:?}", test_data_path);
 
-        let zip_data = zip_directory(&test_data_path)?;
+        let zip_data = zip_directory(dbg!(&test_data_path))?;
 
         let request =
             ReplaceFilesRequestBuilder::new(&self.store_id, "Reset store for test", zip_data)
                 .build();
 
         let response = self.store_client.replace_files(request).await?;
-        assert!(response.new_store_version > 0);
+        assert!(dbg!(response).new_store_version > 0);
 
         // Verify the reset worked
         let list_request = ListFilesRequestBuilder::new(&self.store_id).build();
