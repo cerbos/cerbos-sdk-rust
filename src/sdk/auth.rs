@@ -11,11 +11,11 @@ use super::auth_client::AuthClient;
 
 const AUTH_TOKEN_HEADER: &str = "x-cerbos-auth";
 
+#[derive(Clone)]
 pub struct AuthMiddleware {
     inner: Channel,
     auth_client: Arc<AuthClient>,
 }
-
 impl AuthMiddleware {
     pub fn new(inner: Channel, auth_client: Arc<AuthClient>) -> Self {
         AuthMiddleware { inner, auth_client }

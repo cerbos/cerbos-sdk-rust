@@ -7,7 +7,7 @@ use super::store::StoreClient;
 use anyhow::{Context, Result};
 use std::time::Duration;
 use std::{env, sync::Arc};
-use tonic::transport::{ClientTlsConfig, Endpoint};
+use tonic::transport::{Channel, ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
 
 pub struct HubClient<T> {
@@ -28,6 +28,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub struct Credentials {
     pub client_id: String,
     pub client_secret: String,
@@ -51,13 +52,14 @@ pub struct HubClientBuilder {
 
 impl HubClientBuilder {
     pub fn new() -> Self {
+        println!("ctor");
         Self {
             endpoint: "https://api.cerbos.cloud".to_string(),
             connect_timeout: Duration::from_secs(30),
             request_timeout: Duration::from_secs(60),
             credentials: if let (Ok(id), Ok(secret)) = (
                 env::var("CERBOS_HUB_CLIENT_ID"),
-                env::var("CEROBS_HUB_CLIENT_SECRET"),
+                env::var("CERBOS_HUB_CLIENT_SECRET"),
             ) {
                 Some(Credentials::new(id, secret))
             } else {
@@ -97,12 +99,14 @@ impl HubClientBuilder {
             .connect_timeout(self.connect_timeout)
             .timeout(self.request_timeout);
 
+        println!("connect!");
         let channel = endpoint
             .connect()
             .await
             .with_context(|| format!("Failed to connect to {}", self.endpoint))?;
 
-        let credentials = Arc::new(self.credentials.with_context(|| "invalid credentials")?);
+        println!("Credentials {:?}", self.credentials);
+        let credentials = Arc::new(self.credentials.with_context(|| "invalid credentials!")?);
 
         let auth_client = Arc::new(AuthClient::new(channel.clone(), credentials));
 

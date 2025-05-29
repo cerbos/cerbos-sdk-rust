@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::Result;
+use cerbos::sdk::auth::AuthMiddleware;
 use cerbos::sdk::hub::HubClientBuilder;
 use cerbos::sdk::store::{
     zip_directory, FileFilterBuilder, GetFilesRequestBuilder, GetFilesResponseExt,
@@ -75,7 +76,7 @@ const WANT_FILES_LIST: &[&str] = &[
 ];
 
 struct TestSetup {
-    store_client: cerbos::sdk::store::StoreClient,
+    store_client: cerbos::sdk::store::StoreClient<AuthMiddleware>,
     store_id: String,
 }
 
@@ -87,7 +88,7 @@ impl TestSetup {
         let store_id = env::var("CERBOS_HUB_STORE_ID")
             .expect("CERBOS_HUB_STORE_ID environment variable must be set for integration tests");
 
-        let hub_client = HubClientBuilder::new()?
+        let hub_client = HubClientBuilder::new()
             .with_api_endpoint(api_endpoint)
             .build()
             .await?;
