@@ -8,6 +8,7 @@ use cerbos::sdk::store::{
     zip_directory, FileFilterBuilder, GetFilesRequestBuilder, GetFilesResponseExt,
     ListFilesRequestBuilder, ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder,
 };
+use prost::Message;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -105,11 +106,11 @@ impl TestSetup {
         let test_data_path = get_test_data_path("replace_files/success");
 
         let zip_data = zip_directory(dbg!(&test_data_path))?;
+        println!("len {}", zip_data.encoded_len());
 
         let request =
             ReplaceFilesRequestBuilder::new(&self.store_id, "Reset store for test", zip_data)
                 .build();
-
         let response = self.store_client.replace_files(request).await?;
         assert!(dbg!(response).new_store_version > 0);
 
@@ -137,6 +138,18 @@ fn get_test_data_path(subpath: &str) -> PathBuf {
     path.push("testdata");
     path.push(subpath);
     path
+}
+
+#[tokio::test]
+async fn my_list_files() -> Result<(), Box<dyn std::error::Error>> {
+    let mut setup = TestSetup::new().await?;
+
+    let list_request = ListFilesRequestBuilder::new(&setup.store_id).build();
+    let list_response = setup.store_client.list_files(list_request).await?;
+    for f in list_response.files {
+        println!("{}", f);
+    }
+    Ok(())
 }
 
 #[tokio::test]
