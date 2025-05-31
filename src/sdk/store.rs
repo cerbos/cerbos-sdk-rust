@@ -174,7 +174,11 @@ impl ReplaceFilesRequestBuilder {
             store_id: store_id.into(),
             condition: None,
             zipped_contents,
-            change_details: Some(ChangeDetailsBuilder::new(description).build()),
+            change_details: Some(
+                ChangeDetailsBuilder::new(description)
+                    .with_origin_internal("test")
+                    .build(),
+            ),
         }
     }
 
@@ -380,7 +384,7 @@ pub fn zip_directory(dir_path: &std::path::Path) -> Result<Vec<u8>> {
 
     let cursor = Cursor::new(&mut buffer);
     let mut zip = zip::ZipWriter::new(cursor);
-    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
+    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::STORE);
 
     let prefix = Path::new(dir_path);
     let mut file_buffer = Vec::new();

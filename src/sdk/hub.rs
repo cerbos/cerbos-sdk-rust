@@ -7,7 +7,7 @@ use super::store::StoreClient;
 use anyhow::{Context, Result};
 use std::time::Duration;
 use std::{env, sync::Arc};
-use tonic::transport::{Channel, ClientTlsConfig, Endpoint};
+use tonic::transport::{ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
 
 pub struct HubClient<T> {
@@ -52,6 +52,7 @@ pub struct HubClientBuilder {
 
 impl HubClientBuilder {
     pub fn new() -> Self {
+        println!("ctor");
         Self {
             endpoint: "https://api.cerbos.cloud".to_string(),
             connect_timeout: Duration::from_secs(30),
@@ -67,7 +68,7 @@ impl HubClientBuilder {
         }
     }
     pub fn with_api_endpoint(mut self, endpoint: impl Into<String>) -> Self {
-        self.endpoint = endpoint.into();
+        self.endpoint = dbg!(endpoint.into());
         self
     }
 
