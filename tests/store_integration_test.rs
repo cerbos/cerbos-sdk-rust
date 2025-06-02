@@ -11,10 +11,10 @@ use cerbos::sdk::store::{
 };
 use prost::bytes::Buf;
 use prost::Message;
-use std::env;
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::{env, str};
 use tokio;
 
 // Expected files list from the Go test
@@ -142,9 +142,30 @@ fn get_test_data_path(subpath: &str) -> PathBuf {
     path.push(subpath);
     path
 }
-
 #[tokio::test]
-#[ignore]
+async fn my_test_modify_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut setup = TestSetup::new().await?;
+    test_modify_files_success(&mut setup).await?;
+    Ok(())
+}
+#[tokio::test]
+async fn my_get_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut setup = TestSetup::new().await?;
+    // Verify the file was added
+    let file_name = "export_constants/export_constants_01.yaml";
+    let get_request = GetFilesRequestBuilder::new(&setup.store_id, vec![file_name]).build();
+    let get_response = setup.store_client.get_files(get_request).await?;
+
+    let file_map = get_response.as_map();
+    assert_eq!(file_map.len(), 1);
+
+    let retrieved_content = file_map.get(file_name).unwrap();
+
+    println!("{}", String::from_utf8_lossy(retrieved_content));
+
+    Ok(())
+}
+#[tokio::test]
 async fn my_list_files() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
 
@@ -157,6 +178,7 @@ async fn my_list_files() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[tokio::test]
+#[ignore]
 async fn my_replace_files() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
     let mut f = fs::File::open(get_test_data_path("zipped_data.zip"))?;
