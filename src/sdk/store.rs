@@ -33,8 +33,7 @@ where
 {
     pub fn new(channel: T) -> Self {
         Self {
-            client: CerbosStoreServiceClient::new(channel)
-                .accept_compressed(tonic::codec::CompressionEncoding::Deflate),
+            client: CerbosStoreServiceClient::new(channel),
         }
     }
 
