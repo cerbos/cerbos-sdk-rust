@@ -5,8 +5,12 @@ use super::auth::AuthMiddleware;
 use super::auth_client::AuthClient;
 use super::store::StoreClient;
 use anyhow::{Context, Result};
-use std::time::Duration;
-use std::{env, sync::Arc};
+use std::{
+    env,
+    env::consts::{ARCH, OS},
+    sync::Arc,
+    time::Duration,
+};
 use tonic::transport::{ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
 
@@ -52,7 +56,6 @@ pub struct HubClientBuilder {
 
 impl HubClientBuilder {
     pub fn new() -> Self {
-        println!("ctor");
         Self {
             endpoint: "https://api.cerbos.cloud".to_string(),
             connect_timeout: Duration::from_secs(30),
@@ -68,7 +71,7 @@ impl HubClientBuilder {
         }
     }
     pub fn with_api_endpoint(mut self, endpoint: impl Into<String>) -> Self {
-        self.endpoint = dbg!(endpoint.into());
+        self.endpoint = endpoint.into();
         self
     }
 
@@ -97,6 +100,12 @@ impl HubClientBuilder {
             .tls_config(ClientTlsConfig::new().with_native_roots())
             .with_context(|| "Failed to apply TLS configuration")?
             .connect_timeout(self.connect_timeout)
+            .user_agent(format!(
+                "cerbos-sdk-rust/{} ({}; {})",
+                env!("CARGO_PKG_VERSION"),
+                OS,
+                ARCH
+            ))?
             .timeout(self.request_timeout);
 
         let channel = endpoint

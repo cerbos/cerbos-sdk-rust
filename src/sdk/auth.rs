@@ -46,13 +46,8 @@ impl Service<Request<Body>> for AuthMiddleware {
             // Add auth header to request
             let headers = req.headers_mut();
             headers.insert(
-                "User-Agent",
-                HeaderValue::from_str("cerbos-sdk-rust/1.0.0 (linux; x86_64)")?,
-            );
-
-            headers.insert(
                 AUTH_TOKEN_HEADER,
-                HeaderValue::from_str(dbg!(&token))
+                HeaderValue::from_str(&token)
                     .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)?,
             );
 
