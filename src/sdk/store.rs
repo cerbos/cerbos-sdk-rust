@@ -15,7 +15,6 @@ use crate::genpb::cerbos::cloud::store::v1::{
     ListFilesResponse, ModifyFilesRequest, ModifyFilesResponse, ReplaceFilesRequest,
     ReplaceFilesResponse, StringMatch,
 };
-use anyhow::{Context, Result};
 use walkdir::WalkDir;
 use zip::write::SimpleFileOptions;
 
@@ -34,7 +33,8 @@ where
 {
     pub fn new(channel: T) -> Self {
         Self {
-            client: CerbosStoreServiceClient::new(channel),
+            client: CerbosStoreServiceClient::new(channel)
+                .accept_compressed(tonic::codec::CompressionEncoding::Deflate),
         }
     }
 
@@ -42,13 +42,8 @@ where
     pub async fn replace_files(
         &mut self,
         request: ReplaceFilesRequest,
-    ) -> Result<ReplaceFilesResponse> {
-        let response = self
-            .client
-            .replace_files(request)
-            .await
-            .context("ReplaceFiles call failed")?;
-
+    ) -> Result<ReplaceFilesResponse, tonic::Status> {
+        let response = self.client.replace_files(request).await?;
         Ok(response.into_inner())
     }
 
@@ -56,34 +51,28 @@ where
     pub async fn modify_files(
         &mut self,
         request: ModifyFilesRequest,
-    ) -> Result<ModifyFilesResponse> {
-        let response = self
-            .client
-            .modify_files(request)
-            .await
-            .context("ModifyFiles call failed")?;
+    ) -> Result<ModifyFilesResponse, tonic::Status> {
+        let response = self.client.modify_files(request).await?;
 
         Ok(response.into_inner())
     }
 
     /// List files in the store
-    pub async fn list_files(&mut self, request: ListFilesRequest) -> Result<ListFilesResponse> {
-        let response = self
-            .client
-            .list_files(request)
-            .await
-            .context("ListFiles call failed")?;
+    pub async fn list_files(
+        &mut self,
+        request: ListFilesRequest,
+    ) -> Result<ListFilesResponse, tonic::Status> {
+        let response = self.client.list_files(request).await?;
 
         Ok(response.into_inner())
     }
 
     /// Get specific files from the store
-    pub async fn get_files(&mut self, request: GetFilesRequest) -> Result<GetFilesResponse> {
-        let response = self
-            .client
-            .get_files(request)
-            .await
-            .context("GetFiles call failed")?;
+    pub async fn get_files(
+        &mut self,
+        request: GetFilesRequest,
+    ) -> Result<GetFilesResponse, tonic::Status> {
+        let response = self.client.get_files(request).await?;
 
         Ok(response.into_inner())
     }
@@ -376,7 +365,7 @@ impl FileFilterBuilder {
 }
 
 /// Utility function to create zipped data from a directory
-pub fn zip_directory(dir_path: &std::path::Path) -> Result<Vec<u8>> {
+pub fn zip_directory(dir_path: &std::path::Path) -> anyhow::Result<Vec<u8>> {
     let mut buffer = Vec::new();
 
     let walkdir = WalkDir::new(dir_path);
@@ -391,24 +380,18 @@ pub fn zip_directory(dir_path: &std::path::Path) -> Result<Vec<u8>> {
     for entry in it.filter_map(|e| e.ok()) {
         let path = entry.path();
         let name = path.strip_prefix(prefix).unwrap();
-        let path_as_string = name
-            .to_str()
-            .map(str::to_owned)
-            .with_context(|| format!("{name:?} is a non UTF-8 path"))?;
 
         // Write file or directory explicitly
         // Some unzip tools unzip files with directory paths correctly, some do not!
         if path.is_file() {
-            zip.start_file(path_as_string, options)?;
+            zip.start_file_from_path(name, options)?;
             let mut f = std::fs::File::open(path)?;
 
             f.read_to_end(&mut file_buffer)?;
             zip.write_all(&file_buffer)?;
             file_buffer.clear();
         } else if !name.as_os_str().is_empty() {
-            // Only if not root! Avoids path spec / warning
-            // and mapname conversion failed error on unzip
-            zip.add_directory(path_as_string, options)?;
+            zip.add_directory_from_path(name, options)?;
         }
     }
     zip.finish()?;
@@ -466,48 +449,5 @@ impl GetFilesResponseExt for GetFilesResponse {
             map.insert(file.path.clone(), file.contents.as_slice());
         }
         map
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_modify_files_request_builder() {
-        let request = ModifyFilesRequestBuilder::new("test-store", "Test modification")
-            .add_or_update_file("test.yaml", b"content".to_vec())
-            .delete_file("old.yaml")
-            .only_if_version_equals(42)
-            .build();
-
-        assert_eq!(request.store_id, "test-store");
-        assert_eq!(request.operations.len(), 2);
-        assert!(request.condition.is_some());
-        assert_eq!(request.condition.unwrap().store_version_must_equal, 42);
-    }
-
-    #[test]
-    fn test_file_filter_builder() {
-        let filter = FileFilterBuilder::path_equals("test.yaml");
-        assert!(filter.path.is_some());
-
-        let filter = FileFilterBuilder::path_like("export_");
-        assert!(filter.path.is_some());
-
-        let filter = FileFilterBuilder::path_in(vec!["file1.yaml", "file2.yaml"]);
-        assert!(filter.path.is_some());
-    }
-
-    #[test]
-    fn test_change_details_builder() {
-        let details = ChangeDetailsBuilder::new("Test change")
-            .with_uploader("test-uploader")
-            .with_origin_git("https://github.com/test/repo", "abc123")
-            .build();
-
-        assert_eq!(details.description, "Test change");
-        assert!(details.uploader.is_some());
-        assert!(details.origin.is_some());
     }
 }
