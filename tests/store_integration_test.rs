@@ -1,16 +1,13 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
-use anyhow::Result;
-use cerbos::genpb::cerbos::cloud::store::v1::{change_details, ChangeDetails};
+use anyhow::{bail, Context, Result};
 use cerbos::sdk::auth::AuthMiddleware;
 use cerbos::sdk::hub::HubClientBuilder;
 use cerbos::sdk::store::{
     zip_directory, FileFilterBuilder, GetFilesRequestBuilder, GetFilesResponseExt,
     ListFilesRequestBuilder, ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder,
 };
-use prost::bytes::Buf;
-use prost::Message;
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -108,14 +105,20 @@ impl TestSetup {
     async fn reset_store(&mut self) -> Result<()> {
         let test_data_path = get_test_data_path("replace_files/success");
 
-        let zip_data = zip_directory(dbg!(&test_data_path))?;
+        let zip_data = zip_directory(dbg!(&test_data_path)).context("failed to zip data")?;
         println!("zipped data length {}", zip_data.len());
 
         let request =
             ReplaceFilesRequestBuilder::new(&self.store_id, "Reset store for test", zip_data)
                 .build();
-        let response = self.store_client.replace_files(request).await?;
-        assert!(dbg!(response).new_store_version > 0);
+        let result = self.store_client.replace_files(request).await;
+        match result {
+            Ok(response) => assert!(dbg!(response).new_store_version > 0),
+            Err(e) if e.code() != tonic::Code::AlreadyExists => {
+                bail!("Fail to replace files: {}", e.to_string())
+            }
+            Err(_) => {}
+        }
 
         // Verify the reset worked
         let list_request = ListFilesRequestBuilder::new(&self.store_id).build();
@@ -142,72 +145,15 @@ fn get_test_data_path(subpath: &str) -> PathBuf {
     path.push(subpath);
     path
 }
-#[tokio::test]
-async fn my_test_modify_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut setup = TestSetup::new().await?;
-    test_modify_files_success(&mut setup).await?;
-    Ok(())
-}
-#[tokio::test]
-async fn my_get_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut setup = TestSetup::new().await?;
-    // Verify the file was added
-    let file_name = "export_constants/export_constants_01.yaml";
-    let get_request = GetFilesRequestBuilder::new(&setup.store_id, vec![file_name]).build();
-    let get_response = setup.store_client.get_files(get_request).await?;
-
-    let file_map = get_response.as_map();
-    assert_eq!(file_map.len(), 1);
-
-    let retrieved_content = file_map.get(file_name).unwrap();
-
-    println!("{}", String::from_utf8_lossy(retrieved_content));
-
-    Ok(())
-}
-#[tokio::test]
-async fn my_list_files() -> Result<(), Box<dyn std::error::Error>> {
-    let mut setup = TestSetup::new().await?;
-
-    let list_request = ListFilesRequestBuilder::new(&setup.store_id).build();
-    let list_response = setup.store_client.list_files(list_request).await?;
-    for f in list_response.files {
-        println!("{}", f);
-    }
-    Ok(())
-}
 
 #[tokio::test]
-#[ignore]
-async fn my_replace_files() -> Result<(), Box<dyn std::error::Error>> {
-    let mut setup = TestSetup::new().await?;
-    let mut f = fs::File::open(get_test_data_path("zipped_data.zip"))?;
-    let mut buf = Vec::new();
-    let n = f.read_to_end(&mut buf)?;
-    println!("read {} bytes", n);
-    buf.truncate(100);
-    let mut request =
-        ReplaceFilesRequestBuilder::new(&setup.store_id, "Reset store for test", buf).build();
-    println!("request.store_id {}", request.store_id);
-    println!(
-        "request.zipped_contents length {}",
-        request.zipped_contents.len()
-    );
-    println!("request.change {:?}", request.change_details);
-    let response = setup.store_client.replace_files(request).await?;
-    assert!(dbg!(response).new_store_version > 0);
-    Ok(())
-}
-
-#[tokio::test]
-#[ignore]
 async fn test_store_integration() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
 
     test_replace_files(&mut setup).await?;
-    // test_modify_files(&mut setup).await?;
-    // test_list_files(&mut setup).await?;
-    // test_get_files(&mut setup).await?;
+    test_modify_files(&mut setup).await?;
+    test_list_files(&mut setup).await?;
+    test_get_files(&mut setup).await?;
 
     Ok(())
 }
@@ -216,16 +162,16 @@ async fn test_replace_files(setup: &mut TestSetup) -> Result<(), Box<dyn std::er
     setup.reset_store().await?;
 
     // Test invalid request
-    // test_replace_files_invalid_request(setup).await?;
+    test_replace_files_invalid_request(setup).await?;
 
     // Test invalid files
-    // test_replace_files_invalid_files(setup).await?;
+    test_replace_files_invalid_files(setup).await?;
 
     // Test unusable files
-    // test_replace_files_unusable_files(setup).await?;
+    test_replace_files_unusable_files(setup).await?;
 
     // Test unsuccessful condition
-    // test_replace_files_unsuccessful_condition(setup).await?;
+    test_replace_files_unsuccessful_condition(setup).await?;
 
     Ok(())
 }
@@ -684,31 +630,4 @@ test: content
             file_path
         )
     }
-}
-
-// Helper to set up test data directory if needed
-#[tokio::test]
-#[ignore]
-async fn setup_test_data() -> Result<(), Box<dyn std::error::Error>> {
-    let test_data_root = get_test_data_path("");
-
-    // Create success test data
-    let success_path = test_data_root.join("replace_files").join("success");
-    if !success_path.exists() {
-        create_success_test_data(&success_path)?;
-        println!("Created success test data at: {:?}", success_path);
-    }
-
-    // Create other test data directories
-    let invalid_path = test_data_root.join("replace_files").join("invalid");
-    create_invalid_test_data(&invalid_path)?;
-
-    let unusable_path = test_data_root.join("replace_files").join("unusable");
-    create_unusable_test_data(&unusable_path)?;
-
-    let conditional_path = test_data_root.join("replace_files").join("conditional");
-    create_conditional_test_data(&conditional_path)?;
-
-    println!("Test data setup complete");
-    Ok(())
 }
