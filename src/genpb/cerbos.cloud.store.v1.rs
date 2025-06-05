@@ -96,16 +96,20 @@ pub mod change_details {
         #[prost(string, tag = "1")]
         pub source: ::prost::alloc::string::String,
         #[prost(map = "string, message", tag = "2")]
-        pub metadata:
-            ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
+        pub metadata: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            ::prost_types::Value,
+        >,
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Uploader {
         #[prost(string, tag = "1")]
         pub name: ::prost::alloc::string::String,
         #[prost(map = "string, message", tag = "2")]
-        pub metadata:
-            ::std::collections::HashMap<::prost::alloc::string::String, ::prost_types::Value>,
+        pub metadata: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            ::prost_types::Value,
+        >,
     }
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Origin {
@@ -160,7 +164,17 @@ pub struct FileError {
 }
 /// Nested message and enum types in `FileError`.
 pub mod file_error {
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+    #[derive(
+        Clone,
+        Copy,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+        PartialOrd,
+        Ord,
+        ::prost::Enumeration
+    )]
     #[repr(i32)]
     pub enum Cause {
         Unspecified = 0,
@@ -190,7 +204,9 @@ pub mod file_error {
             match value {
                 "CAUSE_UNSPECIFIED" => Some(Self::Unspecified),
                 "CAUSE_INVALID_FILE_PATH" => Some(Self::InvalidFilePath),
-                "CAUSE_UNSUPPORTED_FILE_EXTENSION" => Some(Self::UnsupportedFileExtension),
+                "CAUSE_UNSUPPORTED_FILE_EXTENSION" => {
+                    Some(Self::UnsupportedFileExtension)
+                }
                 "CAUSE_INVALID_FILE_CONTENTS" => Some(Self::InvalidFileContents),
                 "CAUSE_DUPLICATE_FILE_PATH" => Some(Self::DuplicateFilePath),
                 "CAUSE_FILE_TOO_LARGE" => Some(Self::FileTooLarge),
@@ -247,10 +263,10 @@ pub mod cerbos_store_service_client {
         dead_code,
         missing_docs,
         clippy::wildcard_imports,
-        clippy::let_unit_value
+        clippy::let_unit_value,
     )]
-    use tonic::codegen::http::Uri;
     use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
     pub struct CerbosStoreServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -266,7 +282,6 @@ pub mod cerbos_store_service_client {
             Ok(Self::new(conn))
         }
     }
-
     impl<T> CerbosStoreServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::Body>,
@@ -295,8 +310,9 @@ pub mod cerbos_store_service_client {
                     <T as tonic::client::GrpcService<tonic::body::Body>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<http::Request<tonic::body::Body>>>::Error:
-                Into<StdError> + std::marker::Send + std::marker::Sync,
+            <T as tonic::codegen::Service<
+                http::Request<tonic::body::Body>,
+            >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
         {
             CerbosStoreServiceClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -334,75 +350,117 @@ pub mod cerbos_store_service_client {
         pub async fn list_files(
             &mut self,
             request: impl tonic::IntoRequest<super::ListFilesRequest>,
-        ) -> std::result::Result<tonic::Response<super::ListFilesResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
-            })?;
+        ) -> std::result::Result<
+            tonic::Response<super::ListFilesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.cloud.store.v1.CerbosStoreService/ListFiles",
             );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new(
-                "cerbos.cloud.store.v1.CerbosStoreService",
-                "ListFiles",
-            ));
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.store.v1.CerbosStoreService",
+                        "ListFiles",
+                    ),
+                );
             self.inner.unary(req, path, codec).await
         }
         pub async fn get_files(
             &mut self,
             request: impl tonic::IntoRequest<super::GetFilesRequest>,
-        ) -> std::result::Result<tonic::Response<super::GetFilesResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
-            })?;
+        ) -> std::result::Result<
+            tonic::Response<super::GetFilesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.cloud.store.v1.CerbosStoreService/GetFiles",
             );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new(
-                "cerbos.cloud.store.v1.CerbosStoreService",
-                "GetFiles",
-            ));
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.store.v1.CerbosStoreService",
+                        "GetFiles",
+                    ),
+                );
             self.inner.unary(req, path, codec).await
         }
         pub async fn modify_files(
             &mut self,
             request: impl tonic::IntoRequest<super::ModifyFilesRequest>,
-        ) -> std::result::Result<tonic::Response<super::ModifyFilesResponse>, tonic::Status>
-        {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
-            })?;
+        ) -> std::result::Result<
+            tonic::Response<super::ModifyFilesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.cloud.store.v1.CerbosStoreService/ModifyFiles",
             );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new(
-                "cerbos.cloud.store.v1.CerbosStoreService",
-                "ModifyFiles",
-            ));
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.store.v1.CerbosStoreService",
+                        "ModifyFiles",
+                    ),
+                );
             self.inner.unary(req, path, codec).await
         }
         pub async fn replace_files(
             &mut self,
             request: impl tonic::IntoRequest<super::ReplaceFilesRequest>,
-        ) -> std::result::Result<tonic::Response<super::ReplaceFilesResponse>, tonic::Status>
-        {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
-            })?;
+        ) -> std::result::Result<
+            tonic::Response<super::ReplaceFilesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.cloud.store.v1.CerbosStoreService/ReplaceFiles",
             );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new(
-                "cerbos.cloud.store.v1.CerbosStoreService",
-                "ReplaceFiles",
-            ));
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.store.v1.CerbosStoreService",
+                        "ReplaceFiles",
+                    ),
+                );
             self.inner.unary(req, path, codec).await
         }
     }
