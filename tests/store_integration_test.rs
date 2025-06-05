@@ -5,11 +5,10 @@ use anyhow::{bail, Context, Result};
 use cerbos::sdk::auth::AuthMiddleware;
 use cerbos::sdk::hub::HubClientBuilder;
 use cerbos::sdk::store::{
-    zip_directory, FileFilterBuilder, GetFilesRequestBuilder, GetFilesResponseExt,
-    ListFilesRequestBuilder, ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder,
+    zip_directory, FileFilterBuilder, GetFilesRequestBuilder, ListFilesRequestBuilder,
+    ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder,
 };
 use std::fs;
-use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::{env, str};
 use tokio;
@@ -105,15 +104,14 @@ impl TestSetup {
     async fn reset_store(&mut self) -> Result<()> {
         let test_data_path = get_test_data_path("replace_files/success");
 
-        let zip_data = zip_directory(dbg!(&test_data_path)).context("failed to zip data")?;
-        println!("zipped data length {}", zip_data.len());
+        let zip_data = zip_directory(&test_data_path).context("failed to zip data")?;
 
         let request =
             ReplaceFilesRequestBuilder::new(&self.store_id, "Reset store for test", zip_data)
                 .build();
         let result = self.store_client.replace_files(request).await;
         match result {
-            Ok(response) => assert!(dbg!(response).new_store_version > 0),
+            Ok(response) => assert!(response.new_store_version > 0),
             Err(e) if e.code() != tonic::Code::AlreadyExists => {
                 bail!("Fail to replace files: {}", e.to_string())
             }
@@ -338,12 +336,17 @@ resourcePolicy:
     let get_request = GetFilesRequestBuilder::new(&setup.store_id, vec!["example.yaml"]).build();
     let get_response = setup.store_client.get_files(get_request).await?;
 
-    let file_map = get_response.as_map();
-    assert_eq!(file_map.len(), 1);
+    assert_eq!(get_response.files.len(), 1);
 
-    let retrieved_content = file_map.get("example.yaml").unwrap();
+    let retrieved_content = &get_response
+        .files
+        .iter()
+        .find(|&x| x.path == "example.yaml")
+        .unwrap()
+        .contents;
+
     assert_eq!(
-        std::str::from_utf8(retrieved_content)?.trim(),
+        std::str::from_utf8(&retrieved_content)?.trim(),
         example_content.trim()
     );
 
