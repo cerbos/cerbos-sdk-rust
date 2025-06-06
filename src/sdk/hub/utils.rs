@@ -1,3 +1,6 @@
+// Copyright 2021-2025 Zenauth Ltd.
+// SPDX-License-Identifier: Apache-2.0
+
 use std::{
     io::{Cursor, Read, Write},
     path::Path,

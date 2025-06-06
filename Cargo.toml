@@ -11,6 +11,7 @@ homepage = "https://cerbos.dev"
 
 [features]
 testcontainers = []
+hub = []
 
 [dependencies]
 anyhow = "1.0.86"
