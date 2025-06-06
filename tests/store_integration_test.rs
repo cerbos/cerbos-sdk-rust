@@ -8,8 +8,7 @@ use cerbos::sdk::hub::store::{
     ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder, StoreClient,
 };
 use cerbos::sdk::hub::HubClientBuilder;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::{env, str};
 use tokio;
 
@@ -199,10 +198,6 @@ async fn test_replace_files_invalid_files(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let test_data_path = get_test_data_path("replace_files/invalid");
-    if !test_data_path.exists() {
-        // Create test data if it doesn't exist
-        create_invalid_test_data(&test_data_path)?;
-    }
 
     let zip_data = zip_directory(&test_data_path)?;
     let request =
@@ -232,9 +227,6 @@ async fn test_replace_files_unusable_files(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let test_data_path = get_test_data_path("replace_files/unusable");
-    if !test_data_path.exists() {
-        create_unusable_test_data(&test_data_path)?;
-    }
 
     let zip_data = zip_directory(&test_data_path)?;
     let request =
@@ -257,9 +249,6 @@ async fn test_replace_files_unsuccessful_condition(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let test_data_path = get_test_data_path("replace_files/conditional");
-    if !test_data_path.exists() {
-        create_conditional_test_data(&test_data_path)?;
-    }
 
     let zip_data = zip_directory(&test_data_path)?;
     let request = ReplaceFilesRequestBuilder::new(&setup.store_id, "Conditional test", zip_data)
@@ -480,157 +469,4 @@ async fn test_get_files_invalid_request(
     assert!(result.is_err(), "Expected error for empty file list");
 
     Ok(())
-}
-
-// Helper functions to create test data
-
-fn create_invalid_test_data(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    fs::create_dir_all(path)?;
-
-    // Create an invalid policy file
-    let invalid_policy = r#"
-apiVersion: api.cerbos.dev/v1
-resourcePolicy:
-  version: "default"
-  resource: ""  # Empty resource should be invalid
-  rules: []
-"#;
-
-    fs::write(path.join("invalid_policy.yaml"), invalid_policy)?;
-    Ok(())
-}
-
-fn create_unusable_test_data(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    fs::create_dir_all(path)?;
-
-    // Create files that should be ignored
-    fs::write(path.join(".hidden.yaml"), "hidden: file")?;
-    fs::write(path.join("README.md"), "# This is a readme file")?;
-
-    Ok(())
-}
-
-fn create_conditional_test_data(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    fs::create_dir_all(path)?;
-
-    let policy = r#"
-apiVersion: api.cerbos.dev/v1
-resourcePolicy:
-  version: "default"
-  resource: "conditional_test"
-  rules:
-    - actions: ["read"]
-      effect: EFFECT_ALLOW
-      roles: ["user"]
-"#;
-
-    fs::write(path.join("conditional_policy.yaml"), policy)?;
-    Ok(())
-}
-
-fn create_success_test_data(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    fs::create_dir_all(path)?;
-
-    // Create the full set of expected files for testing
-    for file_path in WANT_FILES_LIST {
-        let full_path = path.join(file_path);
-
-        // Create parent directories
-        if let Some(parent) = full_path.parent() {
-            fs::create_dir_all(parent)?;
-        }
-
-        // Create appropriate content based on file type
-        let content = if file_path.ends_with(".json") {
-            create_json_schema_content(file_path)
-        } else {
-            create_yaml_policy_content(file_path)
-        };
-
-        fs::write(full_path, content)?;
-    }
-
-    Ok(())
-}
-
-fn create_json_schema_content(file_path: &str) -> String {
-    match file_path {
-        "_schemas/principal.json" => r#"{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "id": {"type": "string"},
-    "roles": {"type": "array", "items": {"type": "string"}}
-  }
-}"#
-        .to_string(),
-        _ => r#"{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "id": {"type": "string"}
-  }
-}"#
-        .to_string(),
-    }
-}
-
-fn create_yaml_policy_content(file_path: &str) -> String {
-    if file_path.starts_with("resource_policies/") {
-        let resource_name = file_path
-            .strip_prefix("resource_policies/")
-            .unwrap_or("resource")
-            .strip_suffix(".yaml")
-            .unwrap_or("resource");
-
-        format!(
-            r#"
-apiVersion: api.cerbos.dev/v1
-resourcePolicy:
-  version: "default"
-  resource: "{}"
-  rules:
-    - actions: ["read"]
-      effect: EFFECT_ALLOW
-      roles: ["user"]
-"#,
-            resource_name
-        )
-    } else if file_path.starts_with("principal_policies/") {
-        format!(
-            r#"
-apiVersion: api.cerbos.dev/v1
-principalPolicy:
-  version: "default"
-  principal: "user"
-  rules:
-    - resource: "document"
-      actions:
-        - action: "read"
-          effect: EFFECT_ALLOW
-"#
-        )
-    } else if file_path.starts_with("derived_roles/") {
-        format!(
-            r#"
-apiVersion: api.cerbos.dev/v1
-derivedRoles:
-  name: "common_roles"
-  definitions:
-    - name: "owner"
-      parentRoles: ["user"]
-      condition:
-        match:
-          expr: "resource.attr.owner == principal.id"
-"#
-        )
-    } else {
-        format!(
-            r#"
-# Test file: {}
-test: content
-"#,
-            file_path
-        )
-    }
 }
