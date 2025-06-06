@@ -295,8 +295,11 @@ async fn test_modify_files() -> Result<(), Box<dyn std::error::Error>> {
 async fn test_modify_files_success(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let example_content =
-        std::fs::read_to_string(get_test_data_path(&["modify_files", "success"]))?;
+    let example_content = std::fs::read_to_string(get_test_data_path(&[
+        "modify_files",
+        "success",
+        "example.yaml",
+    ]))?;
     let request = ModifyFilesRequestBuilder::new(&setup.store_id, "Test modification")
         .add_or_update_file("example.yaml", example_content.as_bytes().to_vec())
         .build();
