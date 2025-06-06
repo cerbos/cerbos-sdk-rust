@@ -1,8 +1,8 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::io::{Cursor, Read, Write};
-use std::{collections::HashMap, path::Path};
+use std::collections::HashMap;
+use thiserror::Error;
 
 use crate::genpb::cerbos::cloud::store::v1::{
     cerbos_store_service_client::CerbosStoreServiceClient,
@@ -15,9 +15,29 @@ use crate::genpb::cerbos::cloud::store::v1::{
     ListFilesResponse, ModifyFilesRequest, ModifyFilesResponse, ReplaceFilesRequest,
     ReplaceFilesResponse, StringMatch,
 };
-use walkdir::WalkDir;
-use zip::write::SimpleFileOptions;
 
+#[derive(Error, Debug)]
+pub enum StoreError {
+    #[error("entity already exists")]
+    OperationDiscarded,
+    #[error("store not found")]
+    StoreNotFound,
+    #[error("validation error: `{0}`")]
+    ValidationError(String),
+    #[error("unknown store error: {0}")]
+    Unknown(tonic::Status),
+}
+
+impl From<tonic::Status> for StoreError {
+    fn from(e: tonic::Status) -> Self {
+        match e.code() {
+            tonic::Code::InvalidArgument => StoreError::ValidationError(e.to_string()),
+            tonic::Code::NotFound => StoreError::StoreNotFound,
+            tonic::Code::AlreadyExists => StoreError::OperationDiscarded,
+            _ => StoreError::Unknown(e),
+        }
+    }
+}
 /// Store client for interacting with Cerbos Hub file store
 pub struct StoreClient<T> {
     client: CerbosStoreServiceClient<T>,
@@ -41,8 +61,9 @@ where
     pub async fn replace_files(
         &mut self,
         request: ReplaceFilesRequest,
-    ) -> Result<ReplaceFilesResponse, tonic::Status> {
+    ) -> Result<ReplaceFilesResponse, StoreError> {
         let response = self.client.replace_files(request).await?;
+
         Ok(response.into_inner())
     }
 
@@ -50,7 +71,7 @@ where
     pub async fn modify_files(
         &mut self,
         request: ModifyFilesRequest,
-    ) -> Result<ModifyFilesResponse, tonic::Status> {
+    ) -> Result<ModifyFilesResponse, StoreError> {
         let response = self.client.modify_files(request).await?;
 
         Ok(response.into_inner())
@@ -60,7 +81,7 @@ where
     pub async fn list_files(
         &mut self,
         request: ListFilesRequest,
-    ) -> Result<ListFilesResponse, tonic::Status> {
+    ) -> Result<ListFilesResponse, StoreError> {
         let response = self.client.list_files(request).await?;
 
         Ok(response.into_inner())
@@ -361,39 +382,4 @@ impl FileFilterBuilder {
             }),
         }
     }
-}
-
-/// Utility function to create zipped data from a directory
-pub fn zip_directory(dir_path: &std::path::Path) -> anyhow::Result<Vec<u8>> {
-    let mut buffer = Vec::new();
-
-    let walkdir = WalkDir::new(dir_path);
-    let it = walkdir.into_iter();
-
-    let cursor = Cursor::new(&mut buffer);
-    let mut zip = zip::ZipWriter::new(cursor);
-    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::STORE);
-
-    let prefix = Path::new(dir_path);
-    let mut file_buffer = Vec::new();
-    for entry in it.filter_map(|e| e.ok()) {
-        let path = entry.path();
-        let name = path.strip_prefix(prefix).unwrap();
-
-        // Write file or directory explicitly
-        // Some unzip tools unzip files with directory paths correctly, some do not!
-        if path.is_file() {
-            zip.start_file_from_path(name, options)?;
-            let mut f = std::fs::File::open(path)?;
-
-            f.read_to_end(&mut file_buffer)?;
-            zip.write_all(&file_buffer)?;
-            file_buffer.clear();
-        } else if !name.as_os_str().is_empty() {
-            zip.add_directory_from_path(name, options)?;
-        }
-    }
-    zip.finish()?;
-
-    Ok(buffer)
 }

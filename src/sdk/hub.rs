@@ -15,6 +15,7 @@ use tower::ServiceBuilder;
 
 pub mod auth;
 pub mod store;
+pub mod utils;
 
 pub struct HubClient<T> {
     channel: T,

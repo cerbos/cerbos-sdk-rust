@@ -26,6 +26,7 @@ zip = { version = "4.0.0", default-features = false }
 walkdir = "2"
 http = "1"
 http-body = "1"
+thiserror = "2.0.12"
 
 [build-dependencies]
 tonic-build = "0.13.0"

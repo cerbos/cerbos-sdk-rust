@@ -4,9 +4,10 @@
 use anyhow::{bail, Context, Result};
 use cerbos::sdk::hub::auth::AuthMiddleware;
 use cerbos::sdk::hub::store::{
-    zip_directory, FileFilterBuilder, GetFilesRequestBuilder, ListFilesRequestBuilder,
-    ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder, StoreClient,
+    FileFilterBuilder, GetFilesRequestBuilder, ListFilesRequestBuilder, ModifyFilesRequestBuilder,
+    ReplaceFilesRequestBuilder, StoreClient, StoreError,
 };
+use cerbos::sdk::hub::utils::zip_directory;
 use cerbos::sdk::hub::HubClientBuilder;
 use std::path::PathBuf;
 use std::{env, str};
@@ -111,10 +112,8 @@ impl TestSetup {
         let result = self.store_client.replace_files(request).await;
         match result {
             Ok(response) => assert!(response.new_store_version > 0),
-            Err(e) if e.code() != tonic::Code::AlreadyExists => {
-                bail!("Fail to replace files: {}", e.to_string())
-            }
-            Err(_) => {}
+            Err(StoreError::OperationDiscarded) => {}
+            Err(e) => bail!("Fail to replace files: {}", e.to_string()),
         }
 
         // Verify the reset worked
