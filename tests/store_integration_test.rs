@@ -101,7 +101,7 @@ impl TestSetup {
     }
 
     async fn reset_store(&mut self) -> Result<()> {
-        let test_data_path = get_test_data_path("replace_files/success");
+        let test_data_path = get_test_data_path(&["replace_files", "success"]);
 
         let zip_data = zip_directory(&test_data_path).context("failed to zip data")?;
 
@@ -135,40 +135,30 @@ impl TestSetup {
     }
 }
 
-fn get_test_data_path(subpath: &str) -> PathBuf {
+fn get_test_data_path(subpath: &[&str]) -> PathBuf {
     let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     path.push("tests");
     path.push("testdata");
-    path.push(subpath);
+    subpath.iter().for_each(|p| path.push(p));
     path
 }
 
 #[tokio::test]
-async fn test_store_integration() -> Result<(), Box<dyn std::error::Error>> {
+async fn test_replace_files() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
-
-    test_replace_files(&mut setup).await?;
-    test_modify_files(&mut setup).await?;
-    test_list_files(&mut setup).await?;
-    test_get_files(&mut setup).await?;
-
-    Ok(())
-}
-
-async fn test_replace_files(setup: &mut TestSetup) -> Result<(), Box<dyn std::error::Error>> {
     setup.reset_store().await?;
 
     // Test invalid request
-    test_replace_files_invalid_request(setup).await?;
+    test_replace_files_invalid_request(&mut setup).await?;
 
     // Test invalid files
-    test_replace_files_invalid_files(setup).await?;
+    test_replace_files_invalid_files(&mut setup).await?;
 
     // Test unusable files
-    test_replace_files_unusable_files(setup).await?;
+    test_replace_files_unusable_files(&mut setup).await?;
 
     // Test unsuccessful condition
-    test_replace_files_unsuccessful_condition(setup).await?;
+    test_replace_files_unsuccessful_condition(&mut setup).await?;
 
     Ok(())
 }
@@ -197,7 +187,7 @@ async fn test_replace_files_invalid_request(
 async fn test_replace_files_invalid_files(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let test_data_path = get_test_data_path("replace_files/invalid");
+    let test_data_path = get_test_data_path(&["replace_files", "invalid"]);
 
     let zip_data = zip_directory(&test_data_path)?;
     let request =
@@ -226,7 +216,7 @@ async fn test_replace_files_invalid_files(
 async fn test_replace_files_unusable_files(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let test_data_path = get_test_data_path("replace_files/unusable");
+    let test_data_path = get_test_data_path(&["replace_files", "unusable"]);
 
     let zip_data = zip_directory(&test_data_path)?;
     let request =
@@ -248,7 +238,7 @@ async fn test_replace_files_unusable_files(
 async fn test_replace_files_unsuccessful_condition(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let test_data_path = get_test_data_path("replace_files/conditional");
+    let test_data_path = get_test_data_path(&["replace_files", "conditional"]);
 
     let zip_data = zip_directory(&test_data_path)?;
     let request = ReplaceFilesRequestBuilder::new(&setup.store_id, "Conditional test", zip_data)
@@ -282,20 +272,22 @@ async fn test_replace_files_unsuccessful_condition(
     Ok(())
 }
 
-async fn test_modify_files(setup: &mut TestSetup) -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::test]
+async fn test_modify_files() -> Result<(), Box<dyn std::error::Error>> {
+    let mut setup = TestSetup::new().await?;
     setup.reset_store().await?;
 
     // Test successful modification
-    test_modify_files_success(setup).await?;
+    test_modify_files_success(&mut setup).await?;
 
     // Test invalid request
-    test_modify_files_invalid_request(setup).await?;
+    test_modify_files_invalid_request(&mut setup).await?;
 
     // Test invalid files
-    test_modify_files_invalid_files(setup).await?;
+    test_modify_files_invalid_files(&mut setup).await?;
 
     // Test unsuccessful condition
-    test_modify_files_unsuccessful_condition(setup).await?;
+    test_modify_files_unsuccessful_condition(&mut setup).await?;
 
     Ok(())
 }
@@ -303,17 +295,8 @@ async fn test_modify_files(setup: &mut TestSetup) -> Result<(), Box<dyn std::err
 async fn test_modify_files_success(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let example_content = r#"
-apiVersion: api.cerbos.dev/v1
-resourcePolicy:
-  version: "default"
-  resource: "example"
-  rules:
-    - actions: ["read"]
-      effect: EFFECT_ALLOW
-      roles: ["user"]
-"#;
-
+    let example_content =
+        std::fs::read_to_string(get_test_data_path(&["modify_files", "success"]))?;
     let request = ModifyFilesRequestBuilder::new(&setup.store_id, "Test modification")
         .add_or_update_file("example.yaml", example_content.as_bytes().to_vec())
         .build();
@@ -385,14 +368,16 @@ async fn test_modify_files_unsuccessful_condition(
     Ok(())
 }
 
-async fn test_list_files(setup: &mut TestSetup) -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::test]
+async fn test_list_files() -> Result<(), Box<dyn std::error::Error>> {
+    let mut setup = TestSetup::new().await?;
     setup.reset_store().await?;
 
     // Test filter with matches
-    test_list_files_with_filter_match(setup).await?;
+    test_list_files_with_filter_match(&mut setup).await?;
 
     // Test filter with no matches
-    test_list_files_with_no_filter_match(setup).await?;
+    test_list_files_with_no_filter_match(&mut setup).await?;
 
     Ok(())
 }
@@ -437,14 +422,16 @@ async fn test_list_files_with_no_filter_match(
     Ok(())
 }
 
-async fn test_get_files(setup: &mut TestSetup) -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::test]
+async fn test_get_files() -> Result<(), Box<dyn std::error::Error>> {
+    let mut setup = TestSetup::new().await?;
     setup.reset_store().await?;
 
     // Test non-existent file
-    test_get_files_non_existent(setup).await?;
+    test_get_files_non_existent(&mut setup).await?;
 
     // Test invalid request
-    test_get_files_invalid_request(setup).await?;
+    test_get_files_invalid_request(&mut setup).await?;
 
     Ok(())
 }
