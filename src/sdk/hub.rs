@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{Context, Result};
-use auth::AuthMiddleware;
-use auth_client::AuthClient;
+use auth::{AuthClient, AuthMiddleware};
 use std::{
     env,
     env::consts::{ARCH, OS},
@@ -15,7 +14,6 @@ use tonic::transport::{ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
 
 pub mod auth;
-pub mod auth_client;
 pub mod store;
 
 pub struct HubClient<T> {
