@@ -48,7 +48,7 @@
 //!
 //! ```
 
-#[allow(clippy::large_enum_variant)]
+#[allow(clippy::large_enum_variant, clippy::doc_overindented_list_items)]
 #[path = "genpb"]
 pub mod genpb {
     #[path = ""]

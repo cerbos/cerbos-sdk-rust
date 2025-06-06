@@ -14,10 +14,10 @@ impl Effect {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            Self::Unspecified => "EFFECT_UNSPECIFIED",
-            Self::Allow => "EFFECT_ALLOW",
-            Self::Deny => "EFFECT_DENY",
-            Self::NoMatch => "EFFECT_NO_MATCH",
+            Effect::Unspecified => "EFFECT_UNSPECIFIED",
+            Effect::Allow => "EFFECT_ALLOW",
+            Effect::Deny => "EFFECT_DENY",
+            Effect::NoMatch => "EFFECT_NO_MATCH",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
