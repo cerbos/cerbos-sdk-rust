@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 #![allow(dead_code)]
 use anyhow::{bail, Context, Result};
-use cerbos::sdk::auth::AuthMiddleware;
-use cerbos::sdk::hub::HubClientBuilder;
-use cerbos::sdk::store::{
+use cerbos::sdk::hub::auth::AuthMiddleware;
+use cerbos::sdk::hub::store::{
     zip_directory, FileFilterBuilder, GetFilesRequestBuilder, ListFilesRequestBuilder,
-    ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder,
+    ModifyFilesRequestBuilder, ReplaceFilesRequestBuilder, StoreClient,
 };
+use cerbos::sdk::hub::HubClientBuilder;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::{env, str};
@@ -76,7 +76,7 @@ const WANT_FILES_LIST: &[&str] = &[
 ];
 
 struct TestSetup {
-    store_client: cerbos::sdk::store::StoreClient<AuthMiddleware>,
+    store_client: StoreClient<AuthMiddleware>,
     store_id: String,
 }
 

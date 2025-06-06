@@ -1,18 +1,22 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use super::auth::AuthMiddleware;
-use super::auth_client::AuthClient;
-use super::store::StoreClient;
 use anyhow::{Context, Result};
+use auth::AuthMiddleware;
+use auth_client::AuthClient;
 use std::{
     env,
     env::consts::{ARCH, OS},
     sync::Arc,
     time::Duration,
 };
+use store::StoreClient;
 use tonic::transport::{ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
+
+pub mod auth;
+pub mod auth_client;
+pub mod store;
 
 pub struct HubClient<T> {
     channel: T,
