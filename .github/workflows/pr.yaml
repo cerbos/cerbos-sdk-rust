@@ -53,4 +53,5 @@ jobs:
           CERBOS_HUB_CLIENT_SECRET: "${{ secrets.CERBOS_HUB_CLIENT_SECRET }}"
           CERBOS_HUB_STORE_ID: "${{ secrets.CERBOS_HUB_STORE_ID }}"
         run: |
+          echo "ENDPOINT ${CERBOS_HUB_API_ENDPOINT}"
           cargo test --features hub --test store_integration_test -- --test-threads=1
