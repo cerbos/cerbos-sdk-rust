@@ -9,15 +9,12 @@ categories = ["api-bindings"]
 repository = "https://github.com/cerbos/cerbos-sdk-rust"
 homepage = "https://cerbos.dev"
 
-[features]
-testcontainers = []
-
 [dependencies]
 anyhow = "1.0.86"
 hyper-util = { version = "0.1.7", features = ["tokio"] }
 prost = "0.13.1"
 prost-types = "0.13.1"
-testcontainers = "0.23.0"
+testcontainers = { version = "0.24.0", optional = true }
 tokio = { version = "1.39.2", features = ["full"] }
 tonic = { version = "0.13.0", features = ["transport", "tls-native-roots"]}
 tower = { version =  "0.5.0", features = ["util"] }
