@@ -116,7 +116,10 @@ impl TestSetup {
             Err(e) => bail!("Fail to replace files: {}", e.to_string()),
         }
 
-        // Verify the reset worked
+        self.check_store_has_all_files().await
+    }
+
+    async fn check_store_has_all_files(&mut self) -> Result<()> {
         let list_request = ListFilesRequestBuilder::new(&self.store_id).build();
         let list_response = self.store_client.list_files(list_request).await?;
 
@@ -125,11 +128,7 @@ impl TestSetup {
         want_files.sort();
         have_files.sort();
 
-        assert_eq!(
-            want_files, have_files,
-            "Store reset did not produce expected files"
-        );
-
+        assert_eq!(want_files, have_files, "Store does not have expected files");
         Ok(())
     }
 }
@@ -195,21 +194,7 @@ async fn test_replace_files_invalid_files(
     let result = setup.store_client.replace_files(request).await;
     assert!(result.is_err(), "Expected error for invalid files");
 
-    // Verify store wasn't changed
-    let list_request = ListFilesRequestBuilder::new(&setup.store_id).build();
-    let list_response = setup.store_client.list_files(list_request).await?;
-
-    let mut want_files: Vec<String> = WANT_FILES_LIST.iter().map(|s| s.to_string()).collect();
-    let mut have_files = list_response.files.clone();
-    want_files.sort();
-    have_files.sort();
-
-    assert_eq!(
-        want_files, have_files,
-        "Store should not have changed after invalid files"
-    );
-
-    Ok(())
+    self.check_store_has_all_files().await
 }
 
 async fn test_replace_files_unusable_files(
@@ -254,21 +239,7 @@ async fn test_replace_files_unsuccessful_condition(
         error_msg
     );
 
-    // Verify store wasn't changed
-    let list_request = ListFilesRequestBuilder::new(&setup.store_id).build();
-    let list_response = setup.store_client.list_files(list_request).await?;
-
-    let mut want_files: Vec<String> = WANT_FILES_LIST.iter().map(|s| s.to_string()).collect();
-    let mut have_files = list_response.files.clone();
-    want_files.sort();
-    have_files.sort();
-
-    assert_eq!(
-        want_files, have_files,
-        "Store should not have changed after failed condition"
-    );
-
-    Ok(())
+    self.check_store_has_all_files().await
 }
 
 #[tokio::test]
