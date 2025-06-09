@@ -116,10 +116,10 @@ impl TestSetup {
             Err(e) => bail!("Fail to replace files: {}", e.to_string()),
         }
 
-        self.check_store_has_all_files().await
+        self.check_store_has_expected_files().await
     }
 
-    async fn check_store_has_all_files(&mut self) -> Result<()> {
+    async fn check_store_has_expected_files(&mut self) -> Result<()> {
         let list_request = ListFilesRequestBuilder::new(&self.store_id).build();
         let list_response = self.store_client.list_files(list_request).await?;
 
@@ -364,17 +364,13 @@ async fn test_list_files_with_filter_match(
 
     let response = setup.store_client.list_files(request).await?;
 
-    let expected_files = vec![
-        "export_constants/export_constants_01.yaml",
-        "export_variables/export_variables_01.yaml",
+    let mut want_files = vec![
+        "export_constants/export_constants_01.yaml".to_string(),
+        "export_variables/export_variables_01.yaml".to_string(),
     ];
 
     let mut have_files = response.files.clone();
     have_files.sort();
-    let mut want_files = expected_files
-        .into_iter()
-        .map(String::from)
-        .collect::<Vec<_>>();
     want_files.sort();
 
     assert_eq!(have_files, want_files);

@@ -39,24 +39,20 @@ impl Service<http::Request<Body>> for AuthMiddleware {
     }
 
     fn call(&mut self, mut req: http::Request<Body>) -> Self::Future {
-        // Clone the service for the async block
         let clone = self.inner.clone();
         let mut inner = std::mem::replace(&mut self.inner, clone);
 
         let auth_client = self.auth_client.clone();
 
         Box::pin(async move {
-            // Get authentication token
             let token = auth_client.authenticate().await?;
 
-            // Add auth header to request
             let headers = req.headers_mut();
             headers.insert(
                 AUTH_TOKEN_HEADER,
                 HeaderValue::from_str(&token).map_err(|e| Box::new(e) as Self::Error)?,
             );
 
-            // Forward the request
             let response = inner.call(req).await?;
             Ok(response)
         })
@@ -87,7 +83,6 @@ impl AuthClient {
         }
     }
 
-    /// Get a valid authentication token, refreshing if necessary
     pub async fn authenticate(&self) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
         // Try to use existing token first
         {

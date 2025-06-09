@@ -38,7 +38,7 @@ impl From<tonic::Status> for StoreError {
         }
     }
 }
-/// Store client for interacting with Cerbos Hub file store
+
 pub struct StoreClient<T> {
     client: CerbosStoreServiceClient<T>,
 }
@@ -121,7 +121,6 @@ where
     }
 }
 
-/// Builder for ModifyFilesRequest
 #[derive(Debug, Clone)]
 pub struct ModifyFilesRequestBuilder {
     store_id: String,
@@ -187,7 +186,6 @@ impl ModifyFilesRequestBuilder {
     }
 }
 
-/// Builder for ReplaceFilesRequest
 #[derive(Debug, Clone)]
 pub struct ReplaceFilesRequestBuilder {
     store_id: String,
@@ -236,7 +234,6 @@ impl ReplaceFilesRequestBuilder {
     }
 }
 
-/// Builder for ListFilesRequest
 #[derive(Debug, Clone)]
 pub struct ListFilesRequestBuilder {
     store_id: String,
@@ -264,7 +261,6 @@ impl ListFilesRequestBuilder {
     }
 }
 
-/// Builder for GetFilesRequest
 #[derive(Debug, Clone)]
 pub struct GetFilesRequestBuilder {
     store_id: String,
@@ -291,7 +287,6 @@ impl GetFilesRequestBuilder {
     }
 }
 
-/// Builder for ChangeDetails
 #[derive(Debug, Clone)]
 pub struct ChangeDetailsBuilder {
     description: String,
@@ -369,11 +364,9 @@ impl ChangeDetailsBuilder {
     }
 }
 
-/// File filter utilities
 pub struct FileFilterBuilder;
 
 impl FileFilterBuilder {
-    /// Create a filter that matches the given path exactly
     pub fn path_equals(path: impl Into<String>) -> FileFilter {
         FileFilter {
             path: Some(StringMatch {
@@ -382,7 +375,6 @@ impl FileFilterBuilder {
         }
     }
 
-    /// Create a filter that matches one or more of the set of paths exactly
     pub fn path_in<I, S>(paths: I) -> FileFilter
     where
         I: IntoIterator<Item = S>,
@@ -397,7 +389,6 @@ impl FileFilterBuilder {
         }
     }
 
-    /// Create a filter that partially matches the given path
     pub fn path_like(path: impl Into<String>) -> FileFilter {
         FileFilter {
             path: Some(StringMatch {
