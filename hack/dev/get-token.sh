@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export TOKEN=$(curl -s -X POST https://api.stg-spitfire.cerbos.tech/cerbos.cloud.apikey.v1.ApiKeyService/IssueAccessToken \
+export TOKEN=$(curl -s -X POST ${CERBOS_HUB_API_ENDPOINT}/cerbos.cloud.apikey.v1.ApiKeyService/IssueAccessToken \
   -H "Content-Type: application/json" \
   -d "{
     \"client_id\": \"$CERBOS_HUB_CLIENT_ID\",
