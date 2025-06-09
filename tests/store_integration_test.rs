@@ -194,7 +194,8 @@ async fn test_replace_files_invalid_files(
     let result = setup.store_client.replace_files(request).await;
     assert!(result.is_err(), "Expected error for invalid files");
 
-    self.check_store_has_all_files().await
+    setup.check_store_has_expected_files().await?;
+    Ok(())
 }
 
 async fn test_replace_files_unusable_files(
@@ -239,7 +240,8 @@ async fn test_replace_files_unsuccessful_condition(
         error_msg
     );
 
-    self.check_store_has_all_files().await
+    setup.check_store_has_expected_files().await?;
+    Ok(())
 }
 
 #[tokio::test]
