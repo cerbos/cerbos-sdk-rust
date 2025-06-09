@@ -57,11 +57,25 @@ where
         }
     }
 
+    fn validation_error(msg: &str) -> StoreError {
+        StoreError::ValidationError(msg.to_string())
+    }
     /// Replace all files in the store with the provided zip content
     pub async fn replace_files(
         &mut self,
         request: ReplaceFilesRequest,
     ) -> Result<ReplaceFilesResponse, StoreError> {
+        if request.store_id.is_empty() {
+            return Err(Self::validation_error("store_id is required"));
+        }
+        let len = request.zipped_contents.len();
+        const MIN_SIZE: usize = 22;
+        const MAX_SIZE: usize = 15728640;
+        if len < MIN_SIZE || len > MAX_SIZE {
+            return Err(StoreError::ValidationError(format!(
+                "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"
+            )));
+        }
         let response = self.client.replace_files(request).await?;
 
         Ok(response.into_inner())
@@ -72,6 +86,9 @@ where
         &mut self,
         request: ModifyFilesRequest,
     ) -> Result<ModifyFilesResponse, StoreError> {
+        if request.store_id.is_empty() {
+            return Err(Self::validation_error("store_id is required"));
+        }
         let response = self.client.modify_files(request).await?;
 
         Ok(response.into_inner())
@@ -82,6 +99,9 @@ where
         &mut self,
         request: ListFilesRequest,
     ) -> Result<ListFilesResponse, StoreError> {
+        if request.store_id.is_empty() {
+            return Err(Self::validation_error("store_id is required"));
+        }
         let response = self.client.list_files(request).await?;
 
         Ok(response.into_inner())
@@ -91,7 +111,10 @@ where
     pub async fn get_files(
         &mut self,
         request: GetFilesRequest,
-    ) -> Result<GetFilesResponse, tonic::Status> {
+    ) -> Result<GetFilesResponse, StoreError> {
+        if request.store_id.is_empty() {
+            return Err(Self::validation_error("store_id is required"));
+        }
         let response = self.client.get_files(request).await?;
 
         Ok(response.into_inner())
