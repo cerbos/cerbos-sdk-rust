@@ -17,7 +17,7 @@ pub struct Policy {
     >,
     #[prost(string, tag = "9")]
     pub json_schema: ::prost::alloc::string::String,
-    #[prost(oneof = "policy::PolicyType", tags = "5, 6, 7, 10, 11")]
+    #[prost(oneof = "policy::PolicyType", tags = "5, 6, 7, 10, 11, 12")]
     pub policy_type: ::core::option::Option<policy::PolicyType>,
 }
 /// Nested message and enum types in `Policy`.
@@ -35,6 +35,8 @@ pub mod policy {
         ExportVariables(super::ExportVariables),
         #[prost(message, tag = "11")]
         RolePolicy(super::RolePolicy),
+        #[prost(message, tag = "12")]
+        ExportConstants(super::ExportConstants),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -85,6 +87,8 @@ pub struct ResourcePolicy {
     pub variables: ::core::option::Option<Variables>,
     #[prost(enumeration = "ScopePermissions", tag = "8")]
     pub scope_permissions: i32,
+    #[prost(message, optional, tag = "9")]
+    pub constants: ::core::option::Option<Constants>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -107,10 +111,14 @@ pub struct ResourceRule {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RolePolicy {
+    #[prost(string, repeated, tag = "5")]
+    pub parent_roles: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, tag = "2")]
     pub scope: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "3")]
     pub rules: ::prost::alloc::vec::Vec<RoleRule>,
+    /// Deprecated: no-op.
+    #[deprecated]
     #[prost(enumeration = "ScopePermissions", tag = "4")]
     pub scope_permissions: i32,
     #[prost(oneof = "role_policy::PolicyType", tags = "1")]
@@ -131,7 +139,9 @@ pub struct RoleRule {
     #[prost(string, tag = "1")]
     pub resource: ::prost::alloc::string::String,
     #[prost(string, repeated, tag = "2")]
-    pub permissible_actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    pub allow_actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(message, optional, tag = "3")]
+    pub condition: ::core::option::Option<Condition>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -148,6 +158,8 @@ pub struct PrincipalPolicy {
     pub variables: ::core::option::Option<Variables>,
     #[prost(enumeration = "ScopePermissions", tag = "6")]
     pub scope_permissions: i32,
+    #[prost(message, optional, tag = "7")]
+    pub constants: ::core::option::Option<Constants>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -183,6 +195,8 @@ pub struct DerivedRoles {
     pub definitions: ::prost::alloc::vec::Vec<RoleDef>,
     #[prost(message, optional, tag = "3")]
     pub variables: ::core::option::Option<Variables>,
+    #[prost(message, optional, tag = "4")]
+    pub constants: ::core::option::Option<Constants>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -195,6 +209,26 @@ pub struct RoleDef {
     pub condition: ::core::option::Option<Condition>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ExportConstants {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(map = "string, message", tag = "2")]
+    pub definitions: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost_types::Value,
+    >,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Constants {
+    #[prost(string, repeated, tag = "1")]
+    pub import: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(map = "string, message", tag = "2")]
+    pub local: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost_types::Value,
+    >,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExportVariables {
     #[prost(string, tag = "1")]
@@ -320,6 +354,11 @@ pub mod test_fixture {
         >,
         #[prost(string, tag = "2")]
         pub json_schema: ::prost::alloc::string::String,
+        #[prost(map = "string, message", tag = "3")]
+        pub principal_groups: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            super::test_fixture_group::Principals,
+        >,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -331,6 +370,11 @@ pub mod test_fixture {
         >,
         #[prost(string, tag = "2")]
         pub json_schema: ::prost::alloc::string::String,
+        #[prost(map = "string, message", tag = "3")]
+        pub resource_groups: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            super::test_fixture_group::Resources,
+        >,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -356,6 +400,8 @@ pub struct TestOptions {
         ::prost::alloc::string::String,
         ::prost_types::Value,
     >,
+    #[prost(string, tag = "4")]
+    pub default_policy_version: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -389,6 +435,16 @@ pub struct TestSuite {
     pub options: ::core::option::Option<TestOptions>,
     #[prost(string, tag = "10")]
     pub json_schema: ::prost::alloc::string::String,
+    #[prost(map = "string, message", tag = "11")]
+    pub principal_groups: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        test_fixture_group::Principals,
+    >,
+    #[prost(map = "string, message", tag = "12")]
+    pub resource_groups: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        test_fixture_group::Resources,
+    >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -421,6 +477,10 @@ pub mod test_table {
         pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
         #[prost(string, tag = "4")]
         pub aux_data: ::prost::alloc::string::String,
+        #[prost(string, repeated, tag = "5")]
+        pub principal_groups: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+        #[prost(string, repeated, tag = "6")]
+        pub resource_groups: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -446,6 +506,14 @@ pub mod test_table {
         pub actions: ::std::collections::HashMap<::prost::alloc::string::String, i32>,
         #[prost(message, repeated, tag = "4")]
         pub outputs: ::prost::alloc::vec::Vec<OutputExpectations>,
+        #[prost(string, repeated, tag = "5")]
+        pub principals: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+        #[prost(string, repeated, tag = "6")]
+        pub resources: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+        #[prost(string, repeated, tag = "7")]
+        pub principal_groups: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+        #[prost(string, repeated, tag = "8")]
+        pub resource_groups: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -539,6 +607,8 @@ pub mod test_results {
         pub test_cases: ::prost::alloc::vec::Vec<TestCase>,
         #[prost(string, tag = "7")]
         pub description: ::prost::alloc::string::String,
+        #[prost(string, tag = "8")]
+        pub skip_reason: ::prost::alloc::string::String,
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -581,7 +651,7 @@ pub mod test_results {
         pub engine_trace: ::prost::alloc::vec::Vec<
             super::super::super::engine::v1::Trace,
         >,
-        #[prost(oneof = "details::Outcome", tags = "2, 3, 5")]
+        #[prost(oneof = "details::Outcome", tags = "2, 3, 5, 6")]
         pub outcome: ::core::option::Option<details::Outcome>,
     }
     /// Nested message and enum types in `Details`.
@@ -595,6 +665,8 @@ pub mod test_results {
             Error(::prost::alloc::string::String),
             #[prost(message, tag = "5")]
             Success(super::Success),
+            #[prost(string, tag = "6")]
+            SkipReason(::prost::alloc::string::String),
         }
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
@@ -705,6 +777,7 @@ pub enum Kind {
     Principal = 3,
     Resource = 4,
     RolePolicy = 5,
+    ExportConstants = 6,
 }
 impl Kind {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -730,6 +803,7 @@ impl Kind {
             "KIND_PRINCIPAL" => Some(Self::Principal),
             "KIND_RESOURCE" => Some(Self::Resource),
             "KIND_ROLE_POLICY" => Some(Self::RolePolicy),
+            "KIND_EXPORT_CONSTANTS" => Some(Self::ExportConstants),
             _ => None,
         }
     }

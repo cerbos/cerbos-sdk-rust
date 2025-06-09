@@ -4,8 +4,11 @@
 pub struct PlanResourcesInput {
     #[prost(string, tag = "1")]
     pub request_id: ::prost::alloc::string::String,
+    #[deprecated]
     #[prost(string, tag = "2")]
     pub action: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "7")]
+    pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub principal: ::core::option::Option<Principal>,
     #[prost(message, optional, tag = "4")]
@@ -202,6 +205,7 @@ pub mod plan_resources_filter {
 pub struct PlanResourcesOutput {
     #[prost(string, tag = "1")]
     pub request_id: ::prost::alloc::string::String,
+    #[deprecated]
     #[prost(string, tag = "2")]
     pub action: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
@@ -217,6 +221,13 @@ pub struct PlanResourcesOutput {
     #[prost(message, repeated, tag = "8")]
     pub validation_errors: ::prost::alloc::vec::Vec<
         super::super::schema::v1::ValidationError,
+    >,
+    #[prost(string, repeated, tag = "9")]
+    pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(map = "string, string", tag = "10")]
+    pub matched_scopes: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost::alloc::string::String,
     >,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -337,7 +348,7 @@ pub mod trace {
         pub kind: i32,
         #[prost(
             oneof = "component::Details",
-            tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12"
+            tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13"
         )]
         pub details: ::core::option::Option<component::Details>,
     }
@@ -380,6 +391,7 @@ pub mod trace {
             Variables = 13,
             Output = 14,
             RolePolicyScope = 15,
+            Role = 16,
         }
         impl Kind {
             /// String value of the enum field names used in the ProtoBuf definition.
@@ -425,6 +437,7 @@ pub mod trace {
                     "KIND_VARIABLES" => Some(Self::Variables),
                     "KIND_OUTPUT" => Some(Self::Output),
                     "KIND_ROLE_POLICY_SCOPE" => Some(Self::RolePolicyScope),
+                    "KIND_ROLE" => Some(Self::Role),
                     _ => None,
                 }
             }
@@ -454,6 +467,8 @@ pub mod trace {
             Output(::prost::alloc::string::String),
             #[prost(string, tag = "12")]
             RolePolicyScope(::prost::alloc::string::String),
+            #[prost(string, tag = "13")]
+            Role(::prost::alloc::string::String),
         }
     }
     #[allow(clippy::derive_partial_eq_without_eq)]
