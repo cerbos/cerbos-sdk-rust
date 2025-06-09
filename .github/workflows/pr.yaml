@@ -45,3 +45,7 @@ jobs:
           cerbos run --set=storage.disk.directory=resources/store -- cargo test --test sdk_test
         env:
           CERBOS_NO_TELEMETRY: "1"
+
+      - name: Run Hub Store tests
+        run: |
+          cargo test --features hub --test store_integration_test -- --test-threads=1
