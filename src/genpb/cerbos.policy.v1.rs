@@ -215,6 +215,26 @@ pub struct Constants {
     >,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ExportConstants {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(map = "string, message", tag = "2")]
+    pub definitions: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost_types::Value,
+    >,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Constants {
+    #[prost(string, repeated, tag = "1")]
+    pub import: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(map = "string, message", tag = "2")]
+    pub local: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        ::prost_types::Value,
+    >,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExportVariables {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,

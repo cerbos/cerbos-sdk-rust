@@ -145,6 +145,14 @@ pub struct FieldRules {
     /// ```
     #[prost(enumeration = "Ignore", optional, tag = "27")]
     pub ignore: ::core::option::Option<i32>,
+    /// DEPRECATED: use ignore=IGNORE_ALWAYS instead. TODO: remove this field pre-v1.
+    #[deprecated]
+    #[prost(bool, optional, tag = "24")]
+    pub skipped: ::core::option::Option<bool>,
+    /// DEPRECATED: use ignore=IGNORE_IF_UNPOPULATED instead. TODO: remove this field pre-v1.
+    #[deprecated]
+    #[prost(bool, optional, tag = "26")]
+    pub ignore_empty: ::core::option::Option<bool>,
     #[prost(
         oneof = "field_rules::Type",
         tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22"
@@ -202,10 +210,10 @@ pub mod field_rules {
         Timestamp(super::TimestampRules),
     }
 }
-/// PredefinedRules are custom rules that can be re-used with
+/// PredefinedConstraints are custom constraints that can be re-used with
 /// multiple fields.
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct PredefinedRules {
+pub struct PredefinedConstraints {
     /// `cel` is a repeated field used to represent a textual expression
     /// in the Common Expression Language (CEL) syntax. For more information on
     /// CEL, [see our documentation](<https://github.com/bufbuild/protovalidate/blob/main/docs/cel.md>).
@@ -221,9 +229,9 @@ pub struct PredefinedRules {
     /// }
     /// ```
     #[prost(message, repeated, tag = "1")]
-    pub cel: ::prost::alloc::vec::Vec<Rule>,
+    pub cel: ::prost::alloc::vec::Vec<Constraint>,
 }
-/// FloatRules describes the rules applied to `float` values. These
+/// FloatRules describes the constraints applied to `float` values. These
 /// rules may also be applied to the `google.protobuf.FloatValue` Well-Known-Type.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FloatRules {
@@ -267,7 +275,7 @@ pub struct FloatRules {
     #[prost(bool, optional, tag = "8")]
     pub finite: ::core::option::Option<bool>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -402,7 +410,7 @@ pub struct DoubleRules {
     #[prost(bool, optional, tag = "8")]
     pub finite: ::core::option::Option<bool>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -533,7 +541,7 @@ pub struct Int32Rules {
     #[prost(int32, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<i32>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -664,7 +672,7 @@ pub struct Int64Rules {
     #[prost(int64, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<i64>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -795,7 +803,7 @@ pub struct UInt32Rules {
     #[prost(uint32, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<u32>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -926,7 +934,7 @@ pub struct UInt64Rules {
     #[prost(uint64, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<u64>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1056,7 +1064,7 @@ pub struct SInt32Rules {
     #[prost(sint32, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<i32>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1186,7 +1194,7 @@ pub struct SInt64Rules {
     #[prost(sint64, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<i64>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1316,7 +1324,7 @@ pub struct Fixed32Rules {
     #[prost(fixed32, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<u32>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1446,7 +1454,7 @@ pub struct Fixed64Rules {
     #[prost(fixed64, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<u64>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1576,7 +1584,7 @@ pub struct SFixed32Rules {
     #[prost(sfixed32, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<i32>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1706,7 +1714,7 @@ pub struct SFixed64Rules {
     #[prost(sfixed64, repeated, packed = "false", tag = "7")]
     pub not_in: ::prost::alloc::vec::Vec<i64>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -1813,7 +1821,7 @@ pub struct BoolRules {
     #[prost(bool, optional, tag = "1")]
     pub r#const: ::core::option::Option<bool>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -2018,21 +2026,21 @@ pub struct StringRules {
     #[prost(bool, optional, tag = "25")]
     pub strict: ::core::option::Option<bool>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
     /// message MyString {
     ///    string value = 1 [
-    ///      (buf.validate.field).string.example = "hello",
-    ///      (buf.validate.field).string.example = "world"
+    ///      (buf.validate.field).string.example = 1,
+    ///      (buf.validate.field).string.example = 2
     ///    ];
     /// }
     /// ```
     #[prost(string, repeated, tag = "34")]
     pub example: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    /// `WellKnown` rules provide advanced rules against common string
-    /// patterns.
+    /// `WellKnown` rules provide advanced constraints against common string
+    /// patterns
     #[prost(
         oneof = "string_rules::WellKnown",
         tags = "12, 13, 14, 15, 16, 17, 18, 21, 22, 33, 26, 27, 28, 29, 30, 31, 32, 24"
@@ -2456,7 +2464,7 @@ pub struct BytesRules {
     #[prost(bytes = "vec", repeated, tag = "9")]
     pub not_in: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -2469,7 +2477,7 @@ pub struct BytesRules {
     /// ```
     #[prost(bytes = "vec", repeated, tag = "14")]
     pub example: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
-    /// WellKnown rules provide advanced rules against common byte
+    /// WellKnown rules provide advanced constraints against common byte
     /// patterns
     #[prost(oneof = "bytes_rules::WellKnown", tags = "10, 11, 12")]
     pub well_known: ::core::option::Option<bytes_rules::WellKnown>,
@@ -2588,7 +2596,7 @@ pub struct EnumRules {
     #[prost(int32, repeated, packed = "false", tag = "4")]
     pub not_in: ::prost::alloc::vec::Vec<i32>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -2790,7 +2798,7 @@ pub struct DurationRules {
     #[prost(message, repeated, tag = "8")]
     pub not_in: ::prost::alloc::vec::Vec<::prost_types::Duration>,
     /// `example` specifies values that the field may have. These values SHOULD
-    /// conform to other rules. `example` values will not impact validation
+    /// conform to other constraints. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
     ///
     /// ```proto
@@ -3001,7 +3009,7 @@ pub mod timestamp_rules {
     }
 }
 /// `Violations` is a collection of `Violation` messages. This message type is returned by
-/// protovalidate when a proto message fails to meet the requirements set by the `Rule` validation rules.
+/// protovalidate when a proto message fails to meet the requirements set by the `Constraint` validation rules.
 /// Each individual violation is represented by a `Violation` message.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Violations {
@@ -3010,167 +3018,37 @@ pub struct Violations {
     pub violations: ::prost::alloc::vec::Vec<Violation>,
 }
 /// `Violation` represents a single instance where a validation rule, expressed
-/// as a `Rule`, was not met. It provides information about the field that
-/// caused the violation, the specific rule that wasn't fulfilled, and a
+/// as a `Constraint`, was not met. It provides information about the field that
+/// caused the violation, the specific constraint that wasn't fulfilled, and a
 /// human-readable error message.
 ///
 /// ```json
 /// {
 ///    "fieldPath": "bar",
-///    "ruleId": "foo.bar",
+///    "constraintId": "foo.bar",
 ///    "message": "bar must be greater than 0"
 /// }
 /// ```
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Violation {
-    /// `field` is a machine-readable path to the field that failed validation.
+    /// `field_path` is a machine-readable identifier that points to the specific field that failed the validation.
     /// This could be a nested field, in which case the path will include all the parent fields leading to the actual field that caused the violation.
-    ///
-    /// For example, consider the following message:
-    ///
-    /// ```proto
-    /// message Message {
-    ///    bool a = 1 \[(buf.validate.field).required = true\];
-    /// }
-    /// ```
-    ///
-    /// It could produce the following violation:
-    ///
-    /// ```textproto
-    /// violation {
-    ///    field { element { field_number: 1, field_name: "a", field_type: 8 } }
-    ///    ...
-    /// }
-    /// ```
-    #[prost(message, optional, tag = "5")]
-    pub field: ::core::option::Option<FieldPath>,
-    /// `rule` is a machine-readable path that points to the specific rule rule that failed validation.
-    /// This will be a nested field starting from the FieldRules of the field that failed validation.
-    /// For custom rules, this will provide the path of the rule, e.g. `cel\[0\]`.
-    ///
-    /// For example, consider the following message:
-    ///
-    /// ```proto
-    /// message Message {
-    ///    bool a = 1 \[(buf.validate.field).required = true\];
-    ///    bool b = 2 [(buf.validate.field).cel = {
-    ///      id: "custom_rule",
-    ///      expression: "!this ? 'b must be true': ''"
-    ///    }]
-    /// }
-    /// ```
-    ///
-    /// It could produce the following violations:
-    ///
-    /// ```textproto
-    /// violation {
-    ///    rule { element { field_number: 25, field_name: "required", field_type: 8 } }
-    ///    ...
-    /// }
-    /// violation {
-    ///    rule { element { field_number: 23, field_name: "cel", field_type: 11, index: 0 } }
-    ///    ...
-    /// }
-    /// ```
-    #[prost(message, optional, tag = "6")]
-    pub rule: ::core::option::Option<FieldPath>,
-    /// `rule_id` is the unique identifier of the `Rule` that was not fulfilled.
-    /// This is the same `id` that was specified in the `Rule` message, allowing easy tracing of which rule was violated.
+    #[prost(string, optional, tag = "1")]
+    pub field_path: ::core::option::Option<::prost::alloc::string::String>,
+    /// `constraint_id` is the unique identifier of the `Constraint` that was not fulfilled.
+    /// This is the same `id` that was specified in the `Constraint` message, allowing easy tracing of which rule was violated.
     #[prost(string, optional, tag = "2")]
-    pub rule_id: ::core::option::Option<::prost::alloc::string::String>,
+    pub constraint_id: ::core::option::Option<::prost::alloc::string::String>,
     /// `message` is a human-readable error message that describes the nature of the violation.
-    /// This can be the default error message from the violated `Rule`, or it can be a custom message that gives more context about the violation.
+    /// This can be the default error message from the violated `Constraint`, or it can be a custom message that gives more context about the violation.
     #[prost(string, optional, tag = "3")]
     pub message: ::core::option::Option<::prost::alloc::string::String>,
     /// `for_key` indicates whether the violation was caused by a map key, rather than a value.
     #[prost(bool, optional, tag = "4")]
     pub for_key: ::core::option::Option<bool>,
 }
-/// `FieldPath` provides a path to a nested protobuf field.
-///
-/// This message provides enough information to render a dotted field path even without protobuf descriptors.
-/// It also provides enough information to resolve a nested field through unknown wire data.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FieldPath {
-    /// `elements` contains each element of the path, starting from the root and recursing downward.
-    #[prost(message, repeated, tag = "1")]
-    pub elements: ::prost::alloc::vec::Vec<FieldPathElement>,
-}
-/// `FieldPathElement` provides enough information to nest through a single protobuf field.
-///
-/// If the selected field is a map or repeated field, the `subscript` value selects a specific element from it.
-/// A path that refers to a value nested under a map key or repeated field index will have a `subscript` value.
-/// The `field_type` field allows unambiguous resolution of a field even if descriptors are not available.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FieldPathElement {
-    /// `field_number` is the field number this path element refers to.
-    #[prost(int32, optional, tag = "1")]
-    pub field_number: ::core::option::Option<i32>,
-    /// `field_name` contains the field name this path element refers to.
-    /// This can be used to display a human-readable path even if the field number is unknown.
-    #[prost(string, optional, tag = "2")]
-    pub field_name: ::core::option::Option<::prost::alloc::string::String>,
-    /// `field_type` specifies the type of this field. When using reflection, this value is not needed.
-    ///
-    /// This value is provided to make it possible to traverse unknown fields through wire data.
-    /// When traversing wire data, be mindful of both packed\[1\] and delimited\[2\] encoding schemes.
-    ///
-    /// \[1\]: <https://protobuf.dev/programming-guides/encoding/#packed>
-    /// \[2\]: <https://protobuf.dev/programming-guides/encoding/#groups>
-    ///
-    /// N.B.: Although groups are deprecated, the corresponding delimited encoding scheme is not, and
-    /// can be explicitly used in Protocol Buffers 2023 Edition.
-    #[prost(
-        enumeration = "::prost_types::field_descriptor_proto::Type",
-        optional,
-        tag = "3"
-    )]
-    pub field_type: ::core::option::Option<i32>,
-    /// `key_type` specifies the map key type of this field. This value is useful when traversing
-    /// unknown fields through wire data: specifically, it allows handling the differences between
-    /// different integer encodings.
-    #[prost(
-        enumeration = "::prost_types::field_descriptor_proto::Type",
-        optional,
-        tag = "4"
-    )]
-    pub key_type: ::core::option::Option<i32>,
-    /// `value_type` specifies map value type of this field. This is useful if you want to display a
-    /// value inside unknown fields through wire data.
-    #[prost(
-        enumeration = "::prost_types::field_descriptor_proto::Type",
-        optional,
-        tag = "5"
-    )]
-    pub value_type: ::core::option::Option<i32>,
-    /// `subscript` contains a repeated index or map key, if this path element nests into a repeated or map field.
-    #[prost(oneof = "field_path_element::Subscript", tags = "6, 7, 8, 9, 10")]
-    pub subscript: ::core::option::Option<field_path_element::Subscript>,
-}
-/// Nested message and enum types in `FieldPathElement`.
-pub mod field_path_element {
-    /// `subscript` contains a repeated index or map key, if this path element nests into a repeated or map field.
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
-    pub enum Subscript {
-        /// `index` specifies a 0-based index into a repeated field.
-        #[prost(uint64, tag = "6")]
-        Index(u64),
-        /// `bool_key` specifies a map key of type bool.
-        #[prost(bool, tag = "7")]
-        BoolKey(bool),
-        /// `int_key` specifies a map key of type int32, int64, sint32, sint64, sfixed32 or sfixed64.
-        #[prost(int64, tag = "8")]
-        IntKey(i64),
-        /// `uint_key` specifies a map key of type uint32, uint64, fixed32 or fixed64.
-        #[prost(uint64, tag = "9")]
-        UintKey(u64),
-        /// `string_key` specifies a map key of type string.
-        #[prost(string, tag = "10")]
-        StringKey(::prost::alloc::string::String),
-    }
-}
-/// Specifies how FieldRules.ignore behaves. See the documentation for
-/// FieldRules.required for definitions of "populated" and "nullable".
+/// Specifies how FieldConstraints.ignore behaves. See the documentation for
+/// FieldConstraints.required for definitions of "populated" and "nullable".
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum Ignore {
