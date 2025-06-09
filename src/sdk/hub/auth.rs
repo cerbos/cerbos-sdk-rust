@@ -120,7 +120,7 @@ impl AuthClient {
             .expires_in
             .as_ref()
             .map(|duration| Duration::new(duration.seconds as u64, duration.nanos as u32))
-            .unwrap_or(Duration::from_secs(3600)); // Default 1 hour
+            .unwrap();
 
         let mut effective_duration = expires_in_duration;
         if effective_duration > EARLY_EXPIRY {
