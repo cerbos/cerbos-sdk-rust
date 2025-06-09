@@ -25,8 +25,6 @@ pub fn zip_directory(dir_path: &std::path::Path) -> anyhow::Result<Vec<u8>> {
         let path = entry.path();
         let name = path.strip_prefix(prefix).unwrap();
 
-        // Write file or directory explicitly
-        // Some unzip tools unzip files with directory paths correctly, some do not!
         if path.is_file() {
             zip.start_file_from_path(name, options)?;
             let mut f = std::fs::File::open(path)?;
