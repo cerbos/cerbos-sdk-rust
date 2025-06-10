@@ -14,6 +14,7 @@ use tonic::transport::{ClientTlsConfig, Endpoint};
 use tower::ServiceBuilder;
 
 pub mod auth;
+pub mod rpc_error;
 pub mod store;
 pub mod utils;
 
