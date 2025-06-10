@@ -206,7 +206,7 @@ impl ReplaceFilesRequestBuilder {
             zipped_contents,
             change_details: Some(
                 ChangeDetailsBuilder::new(description)
-                    .with_origin_internal("test")
+                    .with_origin_internal("cerbos-sdk-rust")
                     .build(),
             ),
         }
