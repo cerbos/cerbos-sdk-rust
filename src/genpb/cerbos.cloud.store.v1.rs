@@ -249,6 +249,18 @@ pub struct ErrDetailNoUsableFiles {
     #[prost(string, repeated, tag = "1")]
     pub ignored_files: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct ErrDetailConditionUnsatisfied {
+    #[prost(int64, tag = "1")]
+    pub current_store_version: i64,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct ErrDetailOperationDiscarded {
+    #[prost(int64, tag = "1")]
+    pub current_store_version: i64,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct ErrDetailCannotModifyGitConnectedStore {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ReplaceFilesResponse {
     #[prost(int64, tag = "1")]

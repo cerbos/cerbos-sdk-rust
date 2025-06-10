@@ -10,7 +10,9 @@ import "google/api/visibility.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
+option csharp_namespace = "Cerbos.Api.Cloud.V1.Store";
 option go_package = "github.com/cerbos/cloud-api/genpb/cerbos/cloud/store/v1;storev1";
+option java_package = "dev.cerbos.api.cloud.v1.store";
 
 message StringMatch {
   message InList {
@@ -163,6 +165,16 @@ message ErrDetailValidationFailure {
 message ErrDetailNoUsableFiles {
   repeated string ignored_files = 1;
 }
+
+message ErrDetailConditionUnsatisfied {
+  int64 current_store_version = 1;
+}
+
+message ErrDetailOperationDiscarded {
+  int64 current_store_version = 1;
+}
+
+message ErrDetailCannotModifyGitConnectedStore {}
 
 message ReplaceFilesResponse {
   int64 new_store_version = 1;
