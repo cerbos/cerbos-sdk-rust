@@ -10,7 +10,7 @@ use cerbos::sdk::{
 use prost::bytes::BufMut;
 use prost_types::value::Kind;
 use prost_types::{ListValue, Struct, Value};
-use testcontainers::core::{IntoContainerPort, WaitFor, Mount};
+use testcontainers::core::{IntoContainerPort, Mount, WaitFor};
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{GenericImage, ImageExt};
 
@@ -27,23 +27,27 @@ async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
     store_dir.push("resources");
     store_dir.push("store");
 
-    let container_port = 3593;
+    let http_port = 3592;
+    let grpc_port = 3593;
     let container = GenericImage::new("ghcr.io/cerbos/cerbos", "latest")
         .with_wait_for(WaitFor::message_on_stdout("Starting HTTP server"))
-        .with_exposed_port(3592.tcp())
-        .with_exposed_port(container_port.tcp())
+        .with_exposed_port(http_port.tcp())
+        .with_exposed_port(grpc_port.tcp())
         .with_env_var("CERBOS_NO_TELEMETRY", "1")
+        .with_cmd(vec!["server"])
         .with_mount(Mount::bind_mount(store_dir.to_str().unwrap(), "/policies"))
         .start()
         .await?;
-    tokio::time::sleep(Duration::from_secs(5)).await;
     let host = container.get_host().await?;
-    let port = container.get_host_port_ipv4(container_port).await?;
-    println!("host: {} port: {}", host, port);
+    // let host = container.get_bridge_ip_address().await?;
+    let gport = container.get_host_port_ipv4(grpc_port).await?;
+    let hport = container.get_host_port_ipv4(http_port).await?;
+    println!("host: {} gRPC port: {} HTTP port: {}", host, gport, hport);
+    tokio::time::sleep(Duration::from_secs(500)).await;
     let output = container.stdout_to_vec().await?;
-    println!("{}",  String::from_utf8(output)?);
-    let client_conf =
-        CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), port)).with_plaintext();
+    println!("{}", String::from_utf8(output)?);
+    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), gport))
+        .with_plaintext();
     CerbosAsyncClient::new(client_conf).await
 }
 
