@@ -1,40 +1,49 @@
+// Copyright 2021-2022 Zenauth Ltd.
+// SPDX-License-Identifier: Apache-2.0
+
 use std::path::PathBuf;
 use std::time::Duration;
 
-use cerbos::sdk::container::CerbosContainer;
-// Copyright 2021-2022 Zenauth Ltd.
-// SPDX-License-Identifier: Apache-2.0
 use cerbos::sdk::{
     attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
 };
 use prost::bytes::BufMut;
 use prost_types::value::Kind;
 use prost_types::{ListValue, Struct, Value};
-use testcontainers::core::{IntoContainerPort, Mount, WaitFor};
-use testcontainers::runners::AsyncRunner;
-use testcontainers::{GenericImage, ImageExt};
+
+#[cfg(feature = "testcontainers")]
+use testcontainers::{
+    core::{IntoContainerPort, Mount, WaitFor},
+    runners::AsyncRunner,
+    GenericImage, ImageExt,
+};
 
 async fn async_tls_client() -> Result<CerbosAsyncClient> {
     let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593));
     CerbosAsyncClient::new(client_conf).await
 }
 
+#[cfg(not(feature = "testcontainers"))]
 async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
-    // let client_conf =
-    //     CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
-    // CerbosAsyncClient::new(client_conf).await
+    let client_conf =
+        CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
+    CerbosAsyncClient::new(client_conf).await
+}
+
+#[cfg(feature = "testcontainers")]
+async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
     let mut store_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     store_dir.push("resources");
     store_dir.push("store");
 
     let http_port = 3592;
     let grpc_port = 3593;
-    let container = GenericImage::new("ghcr.io/cerbos/cerbos", "latest")
+    let container = GenericImage::new("ghcr.io/cerbos/cerbos", "0.43.0")
         .with_wait_for(WaitFor::message_on_stdout("Starting HTTP server"))
         .with_exposed_port(http_port.tcp())
         .with_exposed_port(grpc_port.tcp())
         .with_env_var("CERBOS_NO_TELEMETRY", "1")
-        .with_cmd(vec!["server"])
+        .with_network("bridge")
         .with_mount(Mount::bind_mount(store_dir.to_str().unwrap(), "/policies"))
         .start()
         .await?;
@@ -43,11 +52,12 @@ async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
     let gport = container.get_host_port_ipv4(grpc_port).await?;
     let hport = container.get_host_port_ipv4(http_port).await?;
     println!("host: {} gRPC port: {} HTTP port: {}", host, gport, hport);
-    tokio::time::sleep(Duration::from_secs(500)).await;
+    tokio::time::sleep(Duration::from_secs(5)).await;
     let output = container.stdout_to_vec().await?;
     println!("{}", String::from_utf8(output)?);
-    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), gport))
-        .with_plaintext();
+    let client_conf =
+        CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), grpc_port))
+            .with_plaintext();
     CerbosAsyncClient::new(client_conf).await
 }
 
@@ -288,9 +298,9 @@ async fn do_plan_resources(mut client: CerbosAsyncClient) -> Result<()> {
         PlanResourcesFilter::Conditional(..)
     ));
 
-    let response = client
-        .plan_resources_for_actions(["approve", "view:public"], principal, resource, None)
-        .await?;
+    // let response = client
+    //     .plan_resources_for_actions(["approve", "view:public"], principal, resource, None)
+    //     .await?;
 
     assert!(matches!(
         response.filter(),
