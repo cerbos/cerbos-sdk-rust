@@ -1,14 +1,19 @@
 // Copyright 2021-2022 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
+use std::borrow::Cow;
 use std::collections::HashMap;
 
-use testcontainers::{core::WaitFor, Image};
+use testcontainers::{
+    core::{ContainerPort, Mount, WaitFor},
+    Image,
+};
 
 pub struct CerbosContainer {
     image_name: String,
     image_tag: String,
-    volume_mounts: HashMap<String, String>,
+    volume_mounts: Vec<Mount>,
     environment_vars: HashMap<String, String>,
+    ports: Vec<ContainerPort>,
 }
 
 impl Default for CerbosContainer {
@@ -19,8 +24,9 @@ impl Default for CerbosContainer {
         Self {
             image_name: "ghcr.io/cerbos/cerbos".to_string(),
             image_tag: "latest".to_string(),
-            volume_mounts: HashMap::new(),
+            volume_mounts: vec![],
             environment_vars,
+            ports: vec![3592.into(), 3593.into()],
         }
     }
 }
@@ -54,7 +60,7 @@ impl CerbosContainer {
         Self {
             volume_mounts: mounts
                 .into_iter()
-                .map(|(k, v)| (k.into(), v.into()))
+                .map(|(k, v)| Mount::bind_mount(k.into(), v.into()))
                 .collect(),
             ..self
         }
@@ -76,26 +82,26 @@ impl CerbosContainer {
 }
 
 impl Image for CerbosContainer {
-    type Args = ();
-
-    fn name(&self) -> String {
-        self.image_name.to_string()
+    fn name(&self) -> &str {
+        &self.image_name
     }
 
-    fn tag(&self) -> String {
-        self.image_tag.to_string()
+    fn tag(&self) -> &str {
+        &self.image_tag
     }
 
-    fn expose_ports(&self) -> Vec<u16> {
-        vec![3592, 3593]
+    fn expose_ports(&self) -> &[ContainerPort] {
+        &self.ports
     }
 
-    fn volumes(&self) -> Box<dyn Iterator<Item = (&String, &String)> + '_> {
-        Box::new(self.volume_mounts.iter())
+    fn mounts(&self) -> impl IntoIterator<Item = &testcontainers::core::Mount> {
+        &self.volume_mounts
     }
 
-    fn env_vars(&self) -> Box<dyn Iterator<Item = (&String, &String)> + '_> {
-        Box::new(self.environment_vars.iter())
+    fn env_vars(
+        &self,
+    ) -> impl IntoIterator<Item = (impl Into<Cow<'_, str>>, impl Into<Cow<'_, str>>)> {
+        self.environment_vars.iter()
     }
 
     fn ready_conditions(&self) -> Vec<testcontainers::core::WaitFor> {

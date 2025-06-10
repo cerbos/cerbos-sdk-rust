@@ -1,10 +1,18 @@
+use std::path::PathBuf;
+use std::time::Duration;
+
+use cerbos::sdk::container::CerbosContainer;
 // Copyright 2021-2022 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 use cerbos::sdk::{
     attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
 };
+use prost::bytes::BufMut;
 use prost_types::value::Kind;
 use prost_types::{ListValue, Struct, Value};
+use testcontainers::core::{IntoContainerPort, WaitFor, Mount};
+use testcontainers::runners::AsyncRunner;
+use testcontainers::{GenericImage, ImageExt};
 
 async fn async_tls_client() -> Result<CerbosAsyncClient> {
     let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593));
@@ -12,27 +20,31 @@ async fn async_tls_client() -> Result<CerbosAsyncClient> {
 }
 
 async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
-    let client_conf =
-        CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
-    CerbosAsyncClient::new(client_conf).await
-    /*
+    // let client_conf =
+    //     CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
+    // CerbosAsyncClient::new(client_conf).await
     let mut store_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     store_dir.push("resources");
     store_dir.push("store");
 
-    let container_def = CerbosContainer::default()
-        .with_image_tag("dev")
-        .with_environment_vars([("CERBOS_NO_TELEMETRY", "1")])
-        .with_volume_mounts([(store_dir.to_str().unwrap(), "/policies")]);
-
-    let docker = clients::Cli::podman();
-    let cerbos_container = docker.run(container_def);
-    let host = cerbos_container.get_bridge_ip_address().to_string();
-    let port = cerbos_container.get_host_port(3593);
+    let container_port = 3593;
+    let container = GenericImage::new("ghcr.io/cerbos/cerbos", "latest")
+        .with_wait_for(WaitFor::message_on_stdout("Starting HTTP server"))
+        .with_exposed_port(3592.tcp())
+        .with_exposed_port(container_port.tcp())
+        .with_env_var("CERBOS_NO_TELEMETRY", "1")
+        .with_mount(Mount::bind_mount(store_dir.to_str().unwrap(), "/policies"))
+        .start()
+        .await?;
+    tokio::time::sleep(Duration::from_secs(5)).await;
+    let host = container.get_host().await?;
+    let port = container.get_host_port_ipv4(container_port).await?;
+    println!("host: {} port: {}", host, port);
+    let output = container.stdout_to_vec().await?;
+    println!("{}",  String::from_utf8(output)?);
     let client_conf =
-        CerbosClientOptions::new(CerbosEndpoint::HostPort(host, port)).with_plaintext();
+        CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), port)).with_plaintext();
     CerbosAsyncClient::new(client_conf).await
-    */
 }
 
 #[tokio::test]
