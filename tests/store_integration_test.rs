@@ -4,6 +4,7 @@
 use anyhow::{bail, Context, Result};
 use cerbos::genpb::google::rpc::Status;
 use cerbos::sdk::hub::auth::AuthMiddleware;
+use cerbos::sdk::hub::rpc_error::RPCError;
 use cerbos::sdk::hub::store::{
     FileFilterBuilder, GetFilesRequestBuilder, ListFilesRequestBuilder, ModifyFilesRequestBuilder,
     ReplaceFilesRequestBuilder, StoreClient, StoreError,
@@ -110,12 +111,8 @@ impl TestSetup {
         let request =
             ReplaceFilesRequestBuilder::new(&self.store_id, "Reset store for test", zip_data)
                 .build();
-        let _result = self.store_client.replace_files(request).await;
-        // match result {
-        //     Ok(response) => assert!(response.new_store_version > 0),
-        //     Err(StoreError::OperationDiscarded) => {}
-        //     Err(e) => bail!("Fail to replace files: {}", e.to_string()),
-        // }
+
+        self.store_client.replace_files_lenient(request).await?;
 
         self.check_store_has_expected_files().await
     }
@@ -149,7 +146,6 @@ fn test_parse() -> Result<()> {
 
     let message = Status::decode(&buf[..])?;
     println!("{:?}", message);
-    cerbos::genpb::cerbos::cloud::store::v1::ErrDetailValidationFailure::decode(message.details.)
     Ok(())
 }
 #[tokio::test]
@@ -158,16 +154,16 @@ async fn test_replace_files() -> Result<(), Box<dyn std::error::Error>> {
     setup.reset_store().await?;
 
     // Test invalid request
-    // test_replace_files_invalid_request(&mut setup).await?;
+    test_replace_files_invalid_request(&mut setup).await?;
 
     // Test invalid files
     test_replace_files_invalid_files(&mut setup).await?;
 
     // Test unusable files
-    // test_replace_files_unusable_files(&mut setup).await?;
+    test_replace_files_unusable_files(&mut setup).await?;
 
     // Test unsuccessful condition
-    // test_replace_files_unsuccessful_condition(&mut setup).await?;
+    test_replace_files_unsuccessful_condition(&mut setup).await?;
 
     Ok(())
 }
@@ -175,19 +171,19 @@ async fn test_replace_files() -> Result<(), Box<dyn std::error::Error>> {
 async fn test_replace_files_invalid_request(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let invalid_zip = b"invalid zip data";
+    let invalid_zip = b"invalid zip data exceeding 22 bytes in length";
     let request =
         ReplaceFilesRequestBuilder::new(&setup.store_id, "Invalid request", invalid_zip.to_vec())
             .build();
 
     let result = setup.store_client.replace_files(request).await;
-    assert!(result.is_err(), "Expected error for invalid zip data");
-    let error_msg = result.unwrap_err().to_string();
-    assert!(
-        error_msg.contains("validation") || error_msg.contains("invalid"),
-        "Expected validation error, got: {}",
-        error_msg
-    );
+    assert!(matches!(
+        result,
+        Err(RPCError::InvalidRequest {
+            message: _,
+            underlying: _
+        })
+    ));
 
     Ok(())
 }
@@ -202,9 +198,10 @@ async fn test_replace_files_invalid_files(
         ReplaceFilesRequestBuilder::new(&setup.store_id, "Invalid files test", zip_data).build();
 
     let result = setup.store_client.replace_files(request).await;
-    assert!(result.is_err(), "Expected error for invalid files");
-    let e = result.err().unwrap();
-    println!("{:?}", e);
+    assert!(
+        matches!(result, Err(RPCError::ValidationFailure {message: _, underlying: _, validation_errors}) if validation_errors.len() == 1)
+    );
+
     setup.check_store_has_expected_files().await?;
     Ok(())
 }
@@ -219,13 +216,8 @@ async fn test_replace_files_unusable_files(
         ReplaceFilesRequestBuilder::new(&setup.store_id, "Unusable files test", zip_data).build();
 
     let result = setup.store_client.replace_files(request).await;
-    assert!(result.is_err(), "Expected error for unusable files");
-
-    let error_msg = result.unwrap_err().to_string();
     assert!(
-        error_msg.contains("no usable files") || error_msg.contains("ignored"),
-        "Expected no usable files error, got: {}",
-        error_msg
+        matches!(result, Err(RPCError::NoUsableFiles {message: _, underlying: _, ignored_files: fs}) if fs.len() == 2 && fs.iter().all(|f| f == ".hidden.yaml" || f == "README.md"))
     );
 
     Ok(())
@@ -242,14 +234,13 @@ async fn test_replace_files_unsuccessful_condition(
         .build();
 
     let result = setup.store_client.replace_files(request).await;
-    assert!(result.is_err(), "Expected error for unsuccessful condition");
-
-    let error_msg = result.unwrap_err().to_string();
-    assert!(
-        error_msg.contains("condition") || error_msg.contains("version"),
-        "Expected condition error, got: {}",
-        error_msg
-    );
+    assert!(matches!(
+        result,
+        Err(RPCError::ConditionUnsatisfied {
+            message: _,
+            underlying: _
+        })
+    ));
 
     setup.check_store_has_expected_files().await?;
     Ok(())

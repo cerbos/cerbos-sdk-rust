@@ -51,7 +51,7 @@ fn parse_any_detail(any_detail: &Any, parsed_details: &mut ParsedErrorDetails) {
 */
 
 #[derive(Error, Debug, Clone)]
-pub enum RPCErrorKind {
+pub enum RPCError {
     #[error("{message:?}")]
     AuthenticationFailed {
         message: String,
@@ -119,18 +119,18 @@ impl TypeUrl for ErrDetailOperationDiscarded {
         "type.googleapis.com/cerbos.cloud.store.v1.ErrDetailOperationDiscarded"
     }
 }
-impl From<tonic::Status> for RPCErrorKind {
+impl From<tonic::Status> for RPCError {
     fn from(status: Status) -> Self {
         match status.code() {
-            tonic::Code::PermissionDenied => RPCErrorKind::PermissionDenied {
+            tonic::Code::PermissionDenied => RPCError::PermissionDenied {
                 message: status.message().to_string(),
                 underlying: status,
             },
-            tonic::Code::NotFound => RPCErrorKind::StoreNotFound {
+            tonic::Code::NotFound => RPCError::StoreNotFound {
                 message: status.message().to_string(),
                 underlying: status,
             },
-            tonic::Code::FailedPrecondition => RPCErrorKind::ConditionUnsatisfied {
+            tonic::Code::FailedPrecondition => RPCError::ConditionUnsatisfied {
                 message: status.message().to_string(),
                 underlying: status,
             },
@@ -142,7 +142,7 @@ impl From<tonic::Status> for RPCErrorKind {
                         if type_url == ErrDetailValidationFailure::type_url() {
                             if let Ok(inner) = ErrDetailValidationFailure::decode(value.as_slice())
                             {
-                                return RPCErrorKind::ValidationFailure {
+                                return RPCError::ValidationFailure {
                                     message: status.message().to_string(),
                                     underlying: status,
                                     validation_errors: inner.errors,
@@ -150,7 +150,7 @@ impl From<tonic::Status> for RPCErrorKind {
                             }
                         } else if type_url == ErrDetailNoUsableFiles::type_url() {
                             if let Ok(inner) = ErrDetailNoUsableFiles::decode(value.as_slice()) {
-                                return RPCErrorKind::NoUsableFiles {
+                                return RPCError::NoUsableFiles {
                                     message: status.message().to_string(),
                                     underlying: status,
                                     ignored_files: inner.ignored_files,
@@ -159,7 +159,7 @@ impl From<tonic::Status> for RPCErrorKind {
                         }
                     }
                 }
-                return RPCErrorKind::InvalidRequest {
+                return RPCError::InvalidRequest {
                     message: status.message().to_string(),
                     underlying: status,
                 };
@@ -170,7 +170,7 @@ impl From<tonic::Status> for RPCErrorKind {
                         if type_url == ErrDetailOperationDiscarded::type_url() {
                             if let Ok(inner) = ErrDetailOperationDiscarded::decode(value.as_slice())
                             {
-                                return RPCErrorKind::OperationDiscarded {
+                                return RPCError::OperationDiscarded {
                                     message: status.message().to_string(),
                                     underlying: status,
                                     current_store_version: inner.current_store_version,
@@ -178,15 +178,14 @@ impl From<tonic::Status> for RPCErrorKind {
                             }
                         }
                     }
-                } else {
-                    return RPCErrorKind::OperationDiscarded {
-                        message: status.message().to_string(),
-                        underlying: status,
-                        current_store_version: 0,
-                    };
                 }
+                return RPCError::OperationDiscarded {
+                    message: status.message().to_string(),
+                    underlying: status,
+                    current_store_version: 0,
+                };
             }
-            _ => RPCErrorKind::Unknown {
+            _ => RPCError::Unknown {
                 message: status.message().to_string(),
                 underlying: status,
             },
@@ -214,7 +213,7 @@ mod tests {
 
         let rpc_error = RPCError::from_status(status);
 
-        assert_eq!(rpc_error.kind, RPCErrorKind::ValidationFailure);
+        assert_eq!(rpc_error.kind, RPCError::ValidationFailure);
         assert_eq!(rpc_error.validation_errors.len(), 1);
 
         let validation_error = &rpc_error.validation_errors[0];

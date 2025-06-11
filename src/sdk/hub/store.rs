@@ -16,6 +16,8 @@ use crate::genpb::cerbos::cloud::store::v1::{
     ReplaceFilesResponse, StringMatch,
 };
 
+use super::rpc_error::RPCError;
+
 #[derive(Error, Debug)]
 pub enum StoreError {
     #[error("entity already exists")]
@@ -60,22 +62,41 @@ where
     fn validation_error(msg: &str) -> StoreError {
         StoreError::ValidationError(msg.to_string())
     }
+
+    pub async fn replace_files_lenient(
+        &mut self,
+        request: ReplaceFilesRequest,
+    ) -> Result<ReplaceFilesResponse, RPCError> {
+        let result = self.replace_files(request).await;
+        match result {
+            Ok(response) => Ok(response),
+            Err(RPCError::OperationDiscarded {
+                message: _,
+                underlying: _,
+                current_store_version,
+            }) => Ok(ReplaceFilesResponse {
+                new_store_version: current_store_version,
+                ignored_files: vec![],
+            }),
+            Err(e) => Err(e),
+        }
+    }
     /// Replace all files in the store with the provided zip content
     pub async fn replace_files(
         &mut self,
         request: ReplaceFilesRequest,
-    ) -> Result<ReplaceFilesResponse, StoreError> {
-        if request.store_id.is_empty() {
-            return Err(Self::validation_error("store_id is required"));
-        }
-        let len = request.zipped_contents.len();
-        const MIN_SIZE: usize = 22;
-        const MAX_SIZE: usize = 15728640;
-        if len < MIN_SIZE || len > MAX_SIZE {
-            return Err(StoreError::ValidationError(format!(
-                "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"
-            )));
-        }
+    ) -> Result<ReplaceFilesResponse, RPCError> {
+        // if request.store_id.is_empty() {
+        //     return Err(Self::validation_error("store_id is required"));
+        // }
+        // let len = request.zipped_contents.len();
+        // const MIN_SIZE: usize = 22;
+        // const MAX_SIZE: usize = 15728640;
+        // if len < MIN_SIZE || len > MAX_SIZE {
+        //     return Err(StoreError::ValidationError(format!(
+        //         "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"
+        //     )));
+        // }
         let response = self.client.replace_files(request).await?;
 
         Ok(response.into_inner())
