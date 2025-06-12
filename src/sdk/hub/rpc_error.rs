@@ -100,10 +100,8 @@ impl From<tonic::Status> for RPCError {
                 message: status.message().to_string(),
                 underlying: status,
             },
-
             tonic::Code::InvalidArgument => {
-                let copy = status.clone();
-                if let Ok(google_status) = GoogleStatus::decode(copy.details()) {
+                if let Ok(google_status) = GoogleStatus::decode(status.details()) {
                     for Any { type_url, value } in google_status.details {
                         if type_url == ErrDetailValidationFailure::type_url() {
                             if let Ok(inner) = ErrDetailValidationFailure::decode(value.as_slice())
