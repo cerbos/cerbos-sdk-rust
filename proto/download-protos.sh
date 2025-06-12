@@ -12,7 +12,6 @@ rm -rf "$PROTO_DIR"
 (
     cd "$SCRIPT_DIR"
     buf export "$CERBOS_MODULE" --output="${PROTO_DIR}"
-    buf export "$CERBOS_CLOUD_API" --output="${PROTO_DIR}" --path cerbos/cloud/store/v1
-    buf export "$CERBOS_CLOUD_API" --output="${PROTO_DIR}" --path cerbos/cloud/apikey/v1
+    buf export "$CERBOS_CLOUD_API" --output="${PROTO_DIR}" --path cerbos/cloud/store/v1 --path cerbos/cloud/apikey/v1
     buf export buf.build/googleapis/googleapis --output="${PROTO_DIR}" --path google/rpc/status.proto
 )
