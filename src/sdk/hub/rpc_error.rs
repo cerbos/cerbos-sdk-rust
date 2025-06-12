@@ -14,42 +14,6 @@ use crate::genpb::{
     google::rpc::Status as GoogleStatus,
 };
 
-/*
-fn parse_any_detail(any_detail: &Any, parsed_details: &mut ParsedErrorDetails) {
-    match any_detail.type_url.as_str() {
-        "type.googleapis.com/cerbos.cloud.store.v1.ErrDetailValidationFailure" => {
-            if let Ok(validation_failure) =
-                ErrDetailValidationFailure::decode(any_detail.value.as_slice())
-            {
-                parsed_details
-                    .validation_failures
-                    .extend(validation_failure.errors);
-            }
-        }
-        "type.googleapis.com/cerbos.cloud.store.v1.ErrDetailNoUsableFiles" => {
-            if let Ok(no_usable_files) = ErrDetailNoUsableFiles::decode(any_detail.value.as_slice())
-            {
-                parsed_details
-                    .ignored_files
-                    .extend(no_usable_files.ignored_files);
-            }
-        }
-        "type.googleapis.com/cerbos.cloud.store.v1.ErrDetailOperationDiscarded" => {
-            if let Ok(operation_discarded) =
-                ErrDetailOperationDiscarded::decode(any_detail.value.as_slice())
-            {
-                parsed_details.current_store_version =
-                    Some(operation_discarded.current_store_version);
-            }
-        }
-        _ => {
-            // Unknown type, log or handle as needed
-            eprintln!("Unknown error detail type: {}", any_detail.type_url);
-        }
-    }
-}
-*/
-
 #[derive(Error, Debug, Clone)]
 pub enum RPCError {
     #[error("{message:?}")]
