@@ -123,10 +123,10 @@ impl From<tonic::Status> for RPCError {
                         }
                     }
                 }
-                return RPCError::InvalidRequest {
+                RPCError::InvalidRequest {
                     message: status.message().to_string(),
                     underlying: status,
-                };
+                }
             }
             tonic::Code::AlreadyExists => {
                 if let Ok(google_status) = GoogleStatus::decode(status.details()) {
@@ -143,11 +143,11 @@ impl From<tonic::Status> for RPCError {
                         }
                     }
                 }
-                return RPCError::OperationDiscarded {
+                RPCError::OperationDiscarded {
                     message: status.message().to_string(),
                     underlying: status,
                     current_store_version: 0,
-                };
+                }
             }
             tonic::Code::Unauthenticated => RPCError::AuthenticationFailed {
                 message: status.message().to_string(),
