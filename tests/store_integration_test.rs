@@ -1,8 +1,7 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use anyhow::{bail, Context, Result};
-use cerbos::genpb::google::rpc::Status;
+use anyhow::{Context, Result};
 use cerbos::sdk::hub::auth::AuthMiddleware;
 use cerbos::sdk::hub::rpc_error::RPCError;
 use cerbos::sdk::hub::store::{
@@ -139,15 +138,6 @@ fn get_test_data_path(subpath: &[&str]) -> PathBuf {
     path
 }
 
-#[test]
-fn test_parse() -> Result<()> {
-    let buf = b"\x08\x03\x12\x12validation failure\x1a\x8e\x01\nDtype.googleapis.com/cerbos.cloud.store.v1.ErrDetailValidationFailure\x12F\nD\n\x0fbad_policy.yaml\x10\x03\x1a/failed to read policy: 1:1 unknown field \"this\"";
-    use prost::Message;
-
-    let message = Status::decode(&buf[..])?;
-    println!("{:?}", message);
-    Ok(())
-}
 #[tokio::test]
 async fn test_replace_files() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
@@ -309,7 +299,13 @@ async fn test_modify_files_invalid_request(
     let request = ModifyFilesRequestBuilder::new(&setup.store_id, "Empty modification").build();
 
     let result = setup.store_client.modify_files(request).await;
-    assert!(result.is_err(), "Expected error for empty operations");
+    assert!(matches!(
+        result,
+        Err(RPCError::InvalidRequest {
+            message: _,
+            underlying: _
+        })
+    ));
 
     Ok(())
 }
@@ -324,7 +320,9 @@ async fn test_modify_files_invalid_files(
         .build();
 
     let result = setup.store_client.modify_files(request).await;
-    assert!(result.is_err(), "Expected error for invalid file content");
+    assert!(
+        matches!(result, Err(RPCError::ValidationFailure { message: _, underlying: _, validation_errors }) if validation_errors.len() == 1 )
+    );
 
     Ok(())
 }
@@ -332,16 +330,30 @@ async fn test_modify_files_invalid_files(
 async fn test_modify_files_unsuccessful_condition(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let content = "test: content";
+    let content = std::fs::read_to_string(get_test_data_path(&[
+        "modify_files",
+        "conditional",
+        "new_policy.yaml",
+    ]))?;
 
     let request = ModifyFilesRequestBuilder::new(&setup.store_id, "Conditional modification")
-        .add_or_update_file("conditional.yaml", content.as_bytes().to_vec())
+        .add_or_update_file("new_policy.yaml", content.as_bytes().to_vec())
         .only_if_version_equals(i64::MAX) // This should fail
         .build();
 
     let result = setup.store_client.modify_files(request).await;
-    assert!(result.is_err(), "Expected error for unsuccessful condition");
 
+    assert!(
+        matches!(
+            result,
+            Err(RPCError::ConditionUnsatisfied {
+                message: _,
+                underlying: _
+            },)
+        ),
+        "Expected ConditionUnsatisfied, got: {:?}",
+        result
+    );
     Ok(())
 }
 

@@ -100,6 +100,8 @@ pub enum RPCError {
         underlying: tonic::Status,
         validation_errors: Vec<FileError>,
     },
+    #[error("{message:?}")]
+    ClientSideValidationError { message: String },
 }
 trait TypeUrl {
     fn type_url() -> &'static str;

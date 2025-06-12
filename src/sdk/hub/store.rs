@@ -59,8 +59,10 @@ where
         }
     }
 
-    fn validation_error(msg: &str) -> StoreError {
-        StoreError::ValidationError(msg.to_string())
+    fn validation_error(msg: &str) -> RPCError {
+        RPCError::ClientSideValidationError {
+            message: msg.to_string(),
+        }
     }
 
     pub async fn replace_files_lenient(
@@ -86,17 +88,17 @@ where
         &mut self,
         request: ReplaceFilesRequest,
     ) -> Result<ReplaceFilesResponse, RPCError> {
-        // if request.store_id.is_empty() {
-        //     return Err(Self::validation_error("store_id is required"));
-        // }
-        // let len = request.zipped_contents.len();
-        // const MIN_SIZE: usize = 22;
-        // const MAX_SIZE: usize = 15728640;
-        // if len < MIN_SIZE || len > MAX_SIZE {
-        //     return Err(StoreError::ValidationError(format!(
-        //         "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"
-        //     )));
-        // }
+        if request.store_id.is_empty() {
+            return Err(Self::validation_error("store_id is required"));
+        }
+        let len = request.zipped_contents.len();
+        const MIN_SIZE: usize = 22;
+        const MAX_SIZE: usize = 15728640;
+        if len < MIN_SIZE || len > MAX_SIZE {
+            return Err(RPCError::ClientSideValidationError {
+                message: format!("zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"),
+            });
+        }
         let response = self.client.replace_files(request).await?;
 
         Ok(response.into_inner())
@@ -106,7 +108,7 @@ where
     pub async fn modify_files(
         &mut self,
         request: ModifyFilesRequest,
-    ) -> Result<ModifyFilesResponse, StoreError> {
+    ) -> Result<ModifyFilesResponse, RPCError> {
         if request.store_id.is_empty() {
             return Err(Self::validation_error("store_id is required"));
         }
@@ -119,7 +121,7 @@ where
     pub async fn list_files(
         &mut self,
         request: ListFilesRequest,
-    ) -> Result<ListFilesResponse, StoreError> {
+    ) -> Result<ListFilesResponse, RPCError> {
         if request.store_id.is_empty() {
             return Err(Self::validation_error("store_id is required"));
         }
@@ -132,7 +134,7 @@ where
     pub async fn get_files(
         &mut self,
         request: GetFilesRequest,
-    ) -> Result<GetFilesResponse, StoreError> {
+    ) -> Result<GetFilesResponse, RPCError> {
         if request.store_id.is_empty() {
             return Err(Self::validation_error("store_id is required"));
         }
