@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashMap;
-use thiserror::Error;
 
 use crate::genpb::cerbos::cloud::store::v1::{
     cerbos_store_service_client::CerbosStoreServiceClient,
