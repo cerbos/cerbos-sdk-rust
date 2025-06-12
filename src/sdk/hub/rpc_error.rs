@@ -187,6 +187,10 @@ impl From<tonic::Status> for RPCError {
                     current_store_version: 0,
                 };
             }
+            tonic::Code::Unauthenticated => RPCError::AuthenticationFailed {
+                message: status.message().to_string(),
+                underlying: status,
+            },
             _ => RPCError::Unknown {
                 message: status.message().to_string(),
                 underlying: status,

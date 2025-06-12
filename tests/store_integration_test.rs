@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{Context, Result};
+use cerbos::genpb::cerbos::cloud::store::v1::GetFilesRequest;
 use cerbos::sdk::hub::auth::AuthMiddleware;
 use cerbos::sdk::hub::rpc_error::RPCError;
 use cerbos::sdk::hub::store::{
@@ -137,7 +138,34 @@ fn get_test_data_path(subpath: &[&str]) -> PathBuf {
     subpath.iter().for_each(|p| path.push(p));
     path
 }
+#[tokio::test]
+async fn test_auth_error() -> Result<(), Box<dyn std::error::Error>> {
+    let api_endpoint = env::var("CERBOS_HUB_API_ENDPOINT")
+        .unwrap_or_else(|_| "https://api.cerbos.cloud".to_string());
 
+    let store_id = env::var("CERBOS_HUB_STORE_ID")
+        .expect("CERBOS_HUB_STORE_ID environment variable must be set for integration tests");
+
+    let hub_client = HubClientBuilder::new()
+        .with_api_endpoint(api_endpoint)
+        .with_client_credentials("not a client", "not a secret")
+        .build()
+        .await?;
+
+    let mut store_client = hub_client.store_client();
+    let files = vec!["wibble.yaml".to_string()];
+    let result = store_client
+        .get_files(GetFilesRequest { store_id, files })
+        .await;
+    assert!(matches!(
+        result,
+        Err(RPCError::AuthenticationFailed {
+            message: _,
+            underlying: _
+        })
+    ));
+    Ok(())
+}
 #[tokio::test]
 async fn test_replace_files() -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = TestSetup::new().await?;
