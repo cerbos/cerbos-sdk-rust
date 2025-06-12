@@ -18,29 +18,6 @@ use crate::genpb::cerbos::cloud::store::v1::{
 
 use super::rpc_error::RPCError;
 
-#[derive(Error, Debug)]
-pub enum StoreError {
-    #[error("entity already exists")]
-    OperationDiscarded,
-    #[error("store not found")]
-    StoreNotFound,
-    #[error("validation error: `{0}`")]
-    ValidationError(String),
-    #[error("unknown store error: {0}")]
-    Unknown(tonic::Status),
-}
-
-impl From<tonic::Status> for StoreError {
-    fn from(e: tonic::Status) -> Self {
-        match e.code() {
-            tonic::Code::InvalidArgument => StoreError::ValidationError(e.to_string()),
-            tonic::Code::NotFound => StoreError::StoreNotFound,
-            tonic::Code::AlreadyExists => StoreError::OperationDiscarded,
-            _ => StoreError::Unknown(e),
-        }
-    }
-}
-
 pub struct StoreClient<T> {
     client: CerbosStoreServiceClient<T>,
 }

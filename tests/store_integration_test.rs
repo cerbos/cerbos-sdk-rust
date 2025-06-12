@@ -6,7 +6,7 @@ use cerbos::sdk::hub::auth::AuthMiddleware;
 use cerbos::sdk::hub::rpc_error::RPCError;
 use cerbos::sdk::hub::store::{
     FileFilterBuilder, GetFilesRequestBuilder, ListFilesRequestBuilder, ModifyFilesRequestBuilder,
-    ReplaceFilesRequestBuilder, StoreClient, StoreError,
+    ReplaceFilesRequestBuilder, StoreClient,
 };
 use cerbos::sdk::hub::utils::zip_directory;
 use cerbos::sdk::hub::HubClientBuilder;
@@ -438,7 +438,13 @@ async fn test_get_files_invalid_request(
     let request = GetFilesRequestBuilder::new(&setup.store_id, Vec::<String>::new()).build();
     let result = setup.store_client.get_files(request).await;
 
-    assert!(result.is_err(), "Expected error for empty file list");
+    assert!(matches!(
+        result,
+        Err(RPCError::InvalidRequest {
+            message: _,
+            underlying: _
+        })
+    ));
 
     Ok(())
 }
