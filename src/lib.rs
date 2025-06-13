@@ -100,6 +100,19 @@ pub mod genpb {
             #[path = "cerbos.svc.v1.rs"]
             pub mod v1;
         }
+        #[path = ""]
+        pub mod cloud {
+            #[path = ""]
+            pub mod store {
+                #[path = "cerbos.cloud.store.v1.rs"]
+                pub mod v1;
+            }
+            #[path = ""]
+            pub mod apikey {
+                #[path = "cerbos.cloud.apikey.v1.rs"]
+                pub mod v1;
+            }
+        }
     }
 
     #[path = ""]
@@ -112,6 +125,8 @@ pub mod genpb {
                 pub mod v1alpha1;
             }
         }
+        #[path = "google.rpc.rs"]
+        pub mod rpc;
     }
 }
 
