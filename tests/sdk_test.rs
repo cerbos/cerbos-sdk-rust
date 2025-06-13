@@ -18,6 +18,7 @@ use testcontainers::{
     GenericImage, ImageExt,
 };
 
+#[cfg(not(feature = "testcontainers"))]
 async fn async_tls_client() -> Result<CerbosAsyncClient> {
     let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593));
     CerbosAsyncClient::new(client_conf).await

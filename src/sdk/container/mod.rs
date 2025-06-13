@@ -8,6 +8,8 @@ use testcontainers::{
     Image,
 };
 
+pub mod certs;
+
 pub struct CerbosContainer {
     image_name: String,
     image_tag: String,
