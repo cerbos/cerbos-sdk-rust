@@ -75,7 +75,7 @@ enum AuthState {
 pub struct AuthClient {
     api_key_client: ApiKeyServiceClient<Channel>,
     credentials: Arc<Credentials>,
-    token_info: Arc<RwLock<AuthState>>,
+    auth_state: Arc<RwLock<AuthState>>,
 }
 
 impl AuthClient {
@@ -85,22 +85,22 @@ impl AuthClient {
         Self {
             api_key_client,
             credentials,
-            token_info: Arc::new(RwLock::new(AuthState::None)),
+            auth_state: Arc::new(RwLock::new(AuthState::None)),
         }
     }
 
     pub async fn authenticate(&self) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
         // Try to use existing token first
         {
-            let token_guard = self.token_info.read().await;
-            if let AuthState::BadCredentials = *token_guard {
+            let auth_state_guard = self.auth_state.read().await;
+            if let AuthState::BadCredentials = *auth_state_guard {
                 return Err(Box::new(tonic::Status::new(
                     tonic::Code::Unauthenticated,
                     "short-circuiting auth because credentials are invalid",
                 )));
             }
 
-            if let AuthState::Authenticated(ref token_info) = *token_guard {
+            if let AuthState::Authenticated(ref token_info) = *auth_state_guard {
                 if token_info.expires_at > Instant::now() {
                     return Ok(token_info.token.clone());
                 }
@@ -108,16 +108,16 @@ impl AuthClient {
         }
 
         // Need to get a new token - acquire write lock
-        let mut token_guard = self.token_info.write().await;
+        let mut auth_state_guard = self.auth_state.write().await;
 
         // Double-check after acquiring write lock (another thread might have refreshed)
-        if let AuthState::BadCredentials = *token_guard {
+        if let AuthState::BadCredentials = *auth_state_guard {
             return Err(Box::new(tonic::Status::new(
                 tonic::Code::Unauthenticated,
                 "short-circuiting auth because credentials are invalid",
             )));
         }
-        if let AuthState::Authenticated(ref token_info) = *token_guard {
+        if let AuthState::Authenticated(ref token_info) = *auth_state_guard {
             if token_info.expires_at > Instant::now() {
                 return Ok(token_info.token.clone());
             }
@@ -134,11 +134,12 @@ impl AuthClient {
             .await;
 
         match response {
-            Err(e) if e.code() == tonic::Code::Unauthenticated => {
-                *token_guard = AuthState::BadCredentials;
+            Err(e) => {
+                if e.code() == tonic::Code::Unauthenticated {
+                    *auth_state_guard = AuthState::BadCredentials;
+                }
                 Err(Box::new(e))
             }
-            Err(e) => Err(Box::new(e)),
             Ok(r) => {
                 let token_response = r.into_inner();
 
@@ -159,7 +160,7 @@ impl AuthClient {
                     expires_at: Instant::now() + effective_duration,
                 };
 
-                *token_guard = AuthState::Authenticated(token_info);
+                *auth_state_guard = AuthState::Authenticated(token_info);
                 Ok(token_response.access_token)
             }
         }
