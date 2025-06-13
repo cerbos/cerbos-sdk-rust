@@ -1,3 +1,6 @@
+// Copyright 2021-2025 Zenauth Ltd.
+// SPDX-License-Identifier: Apache-2.0
+
 use crate::genpb::cerbos::cloud::apikey::v1::{
     api_key_service_client::ApiKeyServiceClient, IssueAccessTokenRequest,
 };
@@ -67,9 +70,9 @@ struct TokenInfo {
 }
 
 enum AuthState {
-    None,
     Authenticated(TokenInfo),
     BadCredentials,
+    None,
 }
 
 pub struct AuthClient {
