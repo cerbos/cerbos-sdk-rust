@@ -66,10 +66,16 @@ struct TokenInfo {
     expires_at: Instant,
 }
 
+enum AuthState {
+    None,
+    Authenticated(TokenInfo),
+    BadCredentials,
+}
+
 pub struct AuthClient {
     api_key_client: ApiKeyServiceClient<Channel>,
     credentials: Arc<Credentials>,
-    token_info: Arc<RwLock<Option<TokenInfo>>>,
+    token_info: Arc<RwLock<AuthState>>,
 }
 
 impl AuthClient {
@@ -79,7 +85,7 @@ impl AuthClient {
         Self {
             api_key_client,
             credentials,
-            token_info: Arc::new(RwLock::new(None)),
+            token_info: Arc::new(RwLock::new(AuthState::None)),
         }
     }
 
@@ -87,7 +93,14 @@ impl AuthClient {
         // Try to use existing token first
         {
             let token_guard = self.token_info.read().await;
-            if let Some(ref token_info) = *token_guard {
+            if let AuthState::BadCredentials = *token_guard {
+                return Err(Box::new(tonic::Status::new(
+                    tonic::Code::Unauthenticated,
+                    "short-circuiting auth because credentials are invalid",
+                )));
+            }
+
+            if let AuthState::Authenticated(ref token_info) = *token_guard {
                 if token_info.expires_at > Instant::now() {
                     return Ok(token_info.token.clone());
                 }
@@ -98,7 +111,13 @@ impl AuthClient {
         let mut token_guard = self.token_info.write().await;
 
         // Double-check after acquiring write lock (another thread might have refreshed)
-        if let Some(ref token_info) = *token_guard {
+        if let AuthState::BadCredentials = *token_guard {
+            return Err(Box::new(tonic::Status::new(
+                tonic::Code::Unauthenticated,
+                "short-circuiting auth because credentials are invalid",
+            )));
+        }
+        if let AuthState::Authenticated(ref token_info) = *token_guard {
             if token_info.expires_at > Instant::now() {
                 return Ok(token_info.token.clone());
             }
@@ -114,26 +133,35 @@ impl AuthClient {
             .issue_access_token(request)
             .await;
 
-        let token_response = response?.into_inner();
+        match response {
+            Err(e) if e.code() == tonic::Code::Unauthenticated => {
+                *token_guard = AuthState::BadCredentials;
+                Err(Box::new(e))
+            }
+            Err(e) => Err(Box::new(e)),
+            Ok(r) => {
+                let token_response = r.into_inner();
 
-        let expires_in_duration = token_response
-            .expires_in
-            .as_ref()
-            .map(|duration| Duration::new(duration.seconds as u64, duration.nanos as u32))
-            .unwrap();
+                let expires_in_duration = token_response
+                    .expires_in
+                    .as_ref()
+                    .map(|duration| Duration::new(duration.seconds as u64, duration.nanos as u32))
+                    .unwrap();
 
-        let mut effective_duration = expires_in_duration;
-        if effective_duration > EARLY_EXPIRY {
-            effective_duration -= EARLY_EXPIRY;
+                let mut effective_duration = expires_in_duration;
+                if effective_duration > EARLY_EXPIRY {
+                    effective_duration -= EARLY_EXPIRY;
+                }
+
+                // Store the new token
+                let token_info = TokenInfo {
+                    token: token_response.access_token.clone(),
+                    expires_at: Instant::now() + effective_duration,
+                };
+
+                *token_guard = AuthState::Authenticated(token_info);
+                Ok(token_response.access_token)
+            }
         }
-
-        // Store the new token
-        let token_info = TokenInfo {
-            token: token_response.access_token.clone(),
-            expires_at: Instant::now() + effective_duration,
-        };
-
-        *token_guard = Some(token_info);
-        Ok(token_response.access_token)
     }
 }

@@ -154,15 +154,22 @@ async fn test_auth_error() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut store_client = hub_client.store_client();
     let files = vec!["wibble.yaml".to_string()];
-    let result = store_client
-        .get_files(GetFilesRequest { store_id, files })
-        .await;
+    let request = GetFilesRequest { store_id, files };
+    let result = store_client.get_files(request.clone()).await;
     assert!(matches!(
         result,
         Err(RPCError::AuthenticationFailed {
             message: _,
             underlying: _
         })
+    ));
+    let result = store_client.get_files(request).await;
+    assert!(matches!(
+        result,
+        Err(RPCError::AuthenticationFailed {
+            message: msg,
+            underlying: _
+        }) if msg.contains("short-circuiting")
     ));
     Ok(())
 }
