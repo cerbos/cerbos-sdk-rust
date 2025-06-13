@@ -156,13 +156,17 @@ async fn test_auth_error() -> Result<(), Box<dyn std::error::Error>> {
     let files = vec!["wibble.yaml".to_string()];
     let request = GetFilesRequest { store_id, files };
     let result = store_client.get_files(request.clone()).await;
-    assert!(matches!(
-        result,
-        Err(RPCError::AuthenticationFailed {
-            message: _,
-            underlying: _
-        })
-    ));
+    assert!(
+        matches!(
+            result,
+            Err(RPCError::AuthenticationFailed {
+                message: _,
+                underlying: _
+            })
+        ),
+        "{:?}",
+        result
+    );
     let result = store_client.get_files(request).await;
     assert!(matches!(
         result,
