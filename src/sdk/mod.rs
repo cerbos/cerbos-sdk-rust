@@ -1,4 +1,4 @@
-// Copyright 2021-2022 Zenauth Ltd.
+// Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 use std::time::Duration;
 
@@ -27,8 +27,13 @@ use anyhow::Context;
 use hyper_util::rt::TokioIo;
 
 pub mod attr;
+
 #[cfg(feature = "testcontainers")]
 pub mod container;
+
+#[cfg(feature = "hub")]
+pub mod hub;
+
 pub mod model;
 
 pub type Result<T> = anyhow::Result<T>;

@@ -16,6 +16,8 @@ pub struct AccessLogEntry {
     pub method: ::prost::alloc::string::String,
     #[prost(uint32, tag = "6")]
     pub status_code: u32,
+    #[prost(bool, tag = "7")]
+    pub oversized: bool,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DecisionLogEntry {
@@ -44,6 +46,8 @@ pub struct DecisionLogEntry {
     >,
     #[prost(message, optional, tag = "16")]
     pub audit_trail: ::core::option::Option<AuditTrail>,
+    #[prost(bool, tag = "17")]
+    pub oversized: bool,
     #[prost(oneof = "decision_log_entry::Method", tags = "7, 8")]
     pub method: ::core::option::Option<decision_log_entry::Method>,
 }
