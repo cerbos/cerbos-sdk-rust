@@ -1,60 +1,83 @@
 // Copyright 2021-2022 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
+
 use cerbos::sdk::{
     attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
 };
 use prost_types::value::Kind;
 use prost_types::{ListValue, Struct, Value};
 
-async fn async_tls_client() -> Result<CerbosAsyncClient> {
-    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593));
-    CerbosAsyncClient::new(client_conf).await
-}
-
+#[cfg(not(feature = "testcontainers"))]
 async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
     let client_conf =
         CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593)).with_plaintext();
     CerbosAsyncClient::new(client_conf).await
-    /*
-    let mut store_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+}
+
+#[cfg(feature = "testcontainers")]
+trait Stoppable {
+    async fn stop(&self) -> anyhow::Result<()>;
+}
+
+#[cfg(feature = "testcontainers")]
+impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
+    async fn stop(&self) -> anyhow::Result<()> {
+        use anyhow::Context;
+        self.stop().await.context("can't stop container")
+    }
+}
+#[cfg(feature = "testcontainers")]
+async fn async_tls_client(
+    temp_dir: &tempfile::TempDir,
+) -> Result<(CerbosAsyncClient, impl Stoppable)> {
+    use cerbos::sdk::container::{certs::CerbosTestTlsConfig, CerbosContainer};
+    use testcontainers::runners::AsyncRunner;
+
+    let mut store_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     store_dir.push("resources");
     store_dir.push("store");
 
-    let container_def = CerbosContainer::default()
-        .with_image_tag("dev")
-        .with_environment_vars([("CERBOS_NO_TELEMETRY", "1")])
-        .with_volume_mounts([(store_dir.to_str().unwrap(), "/policies")]);
-
-    let docker = clients::Cli::podman();
-    let cerbos_container = docker.run(container_def);
-    let host = cerbos_container.get_bridge_ip_address().to_string();
-    let port = cerbos_container.get_host_port(3593);
-    let client_conf =
-        CerbosClientOptions::new(CerbosEndpoint::HostPort(host, port)).with_plaintext();
-    CerbosAsyncClient::new(client_conf).await
-    */
+    let hostname = "localhost";
+    let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
+    let container = CerbosContainer::default()
+        .with_image_tag("0.44.0")
+        .with_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
+        .with_tls_config(&config)
+        .start()
+        .await?;
+    let host = container.get_host().await?;
+    let port = container.get_host_port_ipv4(3593).await?;
+    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), port))
+        .with_tls_ca_cert_pem(config.get_ca_cert());
+    Ok((CerbosAsyncClient::new(client_conf).await?, container))
 }
 
+#[cfg(feature = "testcontainers")]
 #[tokio::test]
-#[ignore]
 async fn check_resources_tls() -> Result<()> {
-    let client = async_tls_client().await?;
-    do_check_resources(client).await
+    let temp_dir = tempfile::TempDir::new()?;
+    let (client, container) = async_tls_client(&temp_dir).await?;
+    do_check_resources(client).await?;
+    container.stop().await
 }
 
 #[tokio::test]
+#[cfg(not(feature = "testcontainers"))]
 async fn check_resources_plaintext() -> Result<()> {
     let client = async_plaintext_client().await?;
     do_check_resources(client).await
 }
 
+#[cfg(feature = "testcontainers")]
 #[tokio::test]
-#[ignore]
 async fn check_resources_tls_with_output() -> Result<()> {
-    let client = async_tls_client().await?;
-    do_check_resources_with_output(client).await
+    let temp_dir = tempfile::TempDir::new()?;
+    let (client, contiainer) = async_tls_client(&temp_dir).await?;
+    do_check_resources_with_output(client).await?;
+    contiainer.stop().await
 }
 
+#[cfg(not(feature = "testcontainers"))]
 #[tokio::test]
 async fn check_resources_plaintext_with_output() -> Result<()> {
     let client = async_plaintext_client().await?;
@@ -199,13 +222,16 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     Ok(())
 }
 
+#[cfg(feature = "testcontainers")]
 #[tokio::test]
-#[ignore]
 async fn is_allowed_tls() -> Result<()> {
-    let client = async_tls_client().await?;
-    do_is_allowed(client).await
+    let temp_dir = tempfile::TempDir::new()?;
+    let (client, container) = async_tls_client(&temp_dir).await?;
+    do_is_allowed(client).await?;
+    container.stop().await
 }
 
+#[cfg(not(feature = "testcontainers"))]
 #[tokio::test]
 async fn is_allowed_plaintext() -> Result<()> {
     let client = async_plaintext_client().await?;
@@ -239,13 +265,16 @@ async fn do_is_allowed(mut client: CerbosAsyncClient) -> Result<()> {
     Ok(())
 }
 
+#[cfg(feature = "testcontainers")]
 #[tokio::test]
-#[ignore]
 async fn plan_resources_tls() -> Result<()> {
-    let client = async_tls_client().await?;
-    do_plan_resources(client).await
+    let temp_dir = tempfile::TempDir::new()?;
+    let (client, container) = async_tls_client(&temp_dir).await?;
+    do_plan_resources(client).await?;
+    container.stop().await
 }
 
+#[cfg(not(feature = "testcontainers"))]
 #[tokio::test]
 async fn plan_resources_plaintext() -> Result<()> {
     let client = async_plaintext_client().await?;
