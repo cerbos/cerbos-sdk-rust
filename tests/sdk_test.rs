@@ -230,6 +230,7 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     Ok(())
 }
 
+#[cfg(feature = "testcontainers")]
 #[tokio::test]
 async fn is_allowed_tls() -> Result<()> {
     let temp_dir = tempfile::TempDir::new()?;
