@@ -78,11 +78,11 @@ async fn check_resources_plaintext() -> Result<()> {
 
 #[cfg(feature = "testcontainers")]
 #[tokio::test]
-#[ignore]
 async fn check_resources_tls_with_output() -> Result<()> {
     let temp_dir = tempfile::TempDir::new()?;
-    let client = async_tls_client(&temp_dir).await?;
-    do_check_resources_with_output(client.0).await
+    let (client, contiainer) = async_tls_client(&temp_dir).await?;
+    do_check_resources_with_output(client).await?;
+    contiainer.stop().await
 }
 
 #[cfg(not(feature = "testcontainers"))]
@@ -231,12 +231,11 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
 }
 
 #[tokio::test]
-#[ignore]
 async fn is_allowed_tls() -> Result<()> {
     let temp_dir = tempfile::TempDir::new()?;
-    let client = async_tls_client(&temp_dir).await?;
-    do_is_allowed(client.0).await?;
-    client.1.stop().await
+    let (client, container) = async_tls_client(&temp_dir).await?;
+    do_is_allowed(client).await?;
+    container.stop().await
 }
 
 #[cfg(not(feature = "testcontainers"))]
@@ -275,11 +274,11 @@ async fn do_is_allowed(mut client: CerbosAsyncClient) -> Result<()> {
 
 #[cfg(feature = "testcontainers")]
 #[tokio::test]
-#[ignore]
 async fn plan_resources_tls() -> Result<()> {
     let temp_dir = tempfile::TempDir::new()?;
-    let client = async_tls_client(&temp_dir).await?;
-    do_plan_resources(client.0).await
+    let (client, container) = async_tls_client(&temp_dir).await?;
+    do_plan_resources(client).await?;
+    container.stop().await
 }
 
 #[cfg(not(feature = "testcontainers"))]

@@ -46,6 +46,10 @@ jobs:
         env:
           CERBOS_NO_TELEMETRY: "1"
 
+      - name: Run tests in testcontainers
+        run: |
+          cargo test --features testcontainers --test sdk_test
+
       - name: Run Hub Store tests
         env:
           CERBOS_HUB_API_ENDPOINT: "${{ secrets.CERBOS_HUB_API_ENDPOINT }}"

@@ -140,7 +140,6 @@ where
                     "https"
                 };
                 let endpoint_addr = format!("{}://{}:{}", protocol, host.into(), port);
-                eprintln!("{}", endpoint_addr);
                 let mut endpoint = Channel::from_shared(endpoint_addr.clone())
                     .with_context(|| format!("Failed to create channel for {}", endpoint_addr))?
                     .connect_timeout(self.timeout)
