@@ -1,23 +1,11 @@
 // Copyright 2021-2022 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::path::PathBuf;
-
-use anyhow::Context;
 use cerbos::sdk::{
     attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
 };
 use prost_types::value::Kind;
 use prost_types::{ListValue, Struct, Value};
-
-#[cfg(feature = "testcontainers")]
-use testcontainers::runners::AsyncRunner;
-
-#[cfg(not(feature = "testcontainers"))]
-async fn async_tls_client() -> Result<CerbosAsyncClient> {
-    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort("localhost", 3593));
-    CerbosAsyncClient::new(client_conf).await
-}
 
 #[cfg(not(feature = "testcontainers"))]
 async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
@@ -26,12 +14,15 @@ async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
     CerbosAsyncClient::new(client_conf).await
 }
 
+#[cfg(feature = "testcontainers")]
 trait Stoppable {
-    async fn stop(&self) -> Result<()>;
+    async fn stop(&self) -> anyhow::Result<()>;
 }
 
+#[cfg(feature = "testcontainers")]
 impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
-    async fn stop(&self) -> Result<()> {
+    async fn stop(&self) -> anyhow::Result<()> {
+        use anyhow::Context;
         self.stop().await.context("can't stop container")
     }
 }
@@ -40,8 +31,9 @@ async fn async_tls_client(
     temp_dir: &tempfile::TempDir,
 ) -> Result<(CerbosAsyncClient, impl Stoppable)> {
     use cerbos::sdk::container::{certs::CerbosTestTlsConfig, CerbosContainer};
+    use testcontainers::runners::AsyncRunner;
 
-    let mut store_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let mut store_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     store_dir.push("resources");
     store_dir.push("store");
 

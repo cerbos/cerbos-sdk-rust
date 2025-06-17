@@ -3,8 +3,8 @@
 
 use anyhow::{Context, Result};
 use rcgen::{
-    BasicConstraints, Certificate, CertificateParams,
-    DnType, ExtendedKeyUsagePurpose, IsCa, KeyPair, KeyUsagePurpose,
+    BasicConstraints, Certificate, CertificateParams, DnType, ExtendedKeyUsagePurpose, IsCa,
+    KeyPair, KeyUsagePurpose,
 };
 use std::fs;
 use tempfile::TempDir;
@@ -20,28 +20,22 @@ impl<'a> CerbosTestTlsConfig<'a> {
     pub const CERT_KEY: &'static str = "server.key";
 
     pub fn new(hostname: impl Into<String>, temp_dir: &'a TempDir) -> Result<Self> {
-
         let (ca_cert, ca_key) = Self::new_ca()?;
         let (cert, key) = Self::new_end_entity(hostname.into(), &ca_cert, &ca_key)?;
 
         let cert_path = temp_dir.path().join(Self::CERT_NAME);
-        fs::write(&cert_path, &cert.pem())
-            .context("Failed to write server certificate")?;
+        fs::write(&cert_path, cert.pem()).context("Failed to write server certificate")?;
 
         let key_path = temp_dir.path().join(Self::CERT_KEY);
-        fs::write(&key_path, &key.serialize_pem())
-            .context("Failed to write server private key")?;
+        fs::write(&key_path, key.serialize_pem()).context("Failed to write server private key")?;
 
         let ca_cert_path = temp_dir.path().join("ca.crt");
         let _ = fs::write(&ca_cert_path, ca_cert.pem());
 
-        Ok(Self {
-            ca_cert,
-            temp_dir,
-        })
+        Ok(Self { ca_cert, temp_dir })
     }
     pub fn get_ca_cert(&self) -> tonic::transport::Certificate {
-        tonic::transport::Certificate::from_pem(&self.ca_cert.pem())
+        tonic::transport::Certificate::from_pem(self.ca_cert.pem())
     }
     fn new_ca() -> anyhow::Result<(Certificate, KeyPair)> {
         let mut params = CertificateParams::new([])?;
@@ -63,7 +57,11 @@ impl<'a> CerbosTestTlsConfig<'a> {
 
         Ok((cert, key_pair))
     }
-    fn new_end_entity(name: String, ca: &Certificate, ca_key: &KeyPair) -> anyhow::Result<(Certificate, KeyPair)> {
+    fn new_end_entity(
+        name: String,
+        ca: &Certificate,
+        ca_key: &KeyPair,
+    ) -> anyhow::Result<(Certificate, KeyPair)> {
         let mut params = CertificateParams::new([name.clone()])?;
         let (yesterday, tomorrow) = Self::validity_period();
         params.distinguished_name.push(DnType::CommonName, name);
