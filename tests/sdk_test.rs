@@ -11,11 +11,7 @@ use prost_types::value::Kind;
 use prost_types::{ListValue, Struct, Value};
 
 #[cfg(feature = "testcontainers")]
-use testcontainers::{
-    core::{IntoContainerPort, Mount, WaitFor},
-    runners::AsyncRunner,
-    GenericImage, ImageExt,
-};
+use testcontainers::runners::AsyncRunner;
 
 #[cfg(not(feature = "testcontainers"))]
 async fn async_tls_client() -> Result<CerbosAsyncClient> {
@@ -43,45 +39,23 @@ impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
 async fn async_tls_client(
     temp_dir: &tempfile::TempDir,
 ) -> Result<(CerbosAsyncClient, impl Stoppable)> {
-    use cerbos::sdk::container::certs::CerbosTestTlsConfig;
+    use cerbos::sdk::container::{certs::CerbosTestTlsConfig, CerbosContainer};
 
     let mut store_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     store_dir.push("resources");
     store_dir.push("store");
 
-    let http_port = 3592;
-    let grpc_port = 3593;
-
     let hostname = "localhost";
     let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
-    let container = GenericImage::new("ghcr.io/cerbos/cerbos", "0.44.0")
-        .with_wait_for(WaitFor::message_on_stdout("Starting HTTP server"))
-        .with_exposed_port(http_port.tcp())
-        .with_exposed_port(grpc_port.tcp())
-        .with_env_var("CERBOS_NO_TELEMETRY", "1")
-        .with_mount(Mount::bind_mount(store_dir.to_str().unwrap(), "/policies"))
-        .with_mount(Mount::bind_mount(
-            temp_dir.path().to_string_lossy(),
-            "/certs",
-        ))
-        .with_cmd([
-            "server".to_string(),
-            "--set=server.tls.cert=/certs/".to_string() + CerbosTestTlsConfig::CERT_NAME,
-            "--set=server.tls.key=/certs/".to_string() + CerbosTestTlsConfig::CERT_KEY,
-            "--set=server.grpcListenAddr=:3593".to_string(),
-        ])
+    let container = CerbosContainer::default()
+        .with_image_tag("0.44.0")
+        .with_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
+        .with_tls_config(&config)
         .start()
         .await?;
     let host = container.get_host().await?;
-    // let host = container.get_bridge_ip_address().await?;
-    let gport = container.get_host_port_ipv4(grpc_port).await?;
-    let hport = container.get_host_port_ipv4(http_port).await?;
-    eprintln!("tempdir: {:?}", temp_dir);
-    eprintln!("host: {} gRPC port: {} HTTP port: {}", host, gport, hport);
-    let output = container.stdout_to_vec().await?;
-    eprintln!("{}", String::from_utf8(output)?);
-    // tokio::time::sleep(Duration::from_secs(20 * 60)).await;
-    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), gport))
+    let port = container.get_host_port_ipv4(3593).await?;
+    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), port))
         .with_tls_ca_cert_pem(config.get_ca_cert());
     Ok((CerbosAsyncClient::new(client_conf).await?, container))
 }

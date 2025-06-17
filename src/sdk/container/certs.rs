@@ -10,15 +10,16 @@ use std::fs;
 use tempfile::TempDir;
 use time::{Duration, OffsetDateTime};
 
-pub struct CerbosTestTlsConfig {
+pub struct CerbosTestTlsConfig<'a> {
     ca_cert: Certificate,
+    temp_dir: &'a TempDir,
 }
 
-impl CerbosTestTlsConfig {
+impl<'a> CerbosTestTlsConfig<'a> {
     pub const CERT_NAME: &'static str = "server.crt";
     pub const CERT_KEY: &'static str = "server.key";
 
-    pub fn new(hostname: impl Into<String>, temp_dir: &TempDir) -> Result<Self> {
+    pub fn new(hostname: impl Into<String>, temp_dir: &'a TempDir) -> Result<Self> {
 
         let (ca_cert, ca_key) = Self::new_ca()?;
         let (cert, key) = Self::new_end_entity(hostname.into(), &ca_cert, &ca_key)?;
@@ -36,6 +37,7 @@ impl CerbosTestTlsConfig {
 
         Ok(Self {
             ca_cert,
+            temp_dir,
         })
     }
     pub fn get_ca_cert(&self) -> tonic::transport::Certificate {
@@ -81,5 +83,8 @@ impl CerbosTestTlsConfig {
         let yesterday = OffsetDateTime::now_utc().checked_sub(day).unwrap();
         let tomorrow = OffsetDateTime::now_utc().checked_add(day).unwrap();
         (yesterday, tomorrow)
+    }
+    pub fn get_temp_dir(&self) -> &TempDir {
+        self.temp_dir
     }
 }

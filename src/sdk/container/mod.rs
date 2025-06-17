@@ -4,6 +4,7 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 
+use certs::CerbosTestTlsConfig;
 use testcontainers::{
     core::{ContainerPort, Mount, WaitFor},
     Image,
@@ -17,19 +18,20 @@ pub struct CerbosContainer {
     volume_mounts: Vec<Mount>,
     environment_vars: HashMap<String, String>,
     ports: Vec<ContainerPort>,
+    cmd: Vec<String>,
 }
 
 impl Default for CerbosContainer {
     fn default() -> Self {
-        let mut environment_vars = HashMap::new();
-        environment_vars.insert("CERBOS_NO_TELEMETRY".to_string(), "1".to_string());
-
+        let environment_vars =
+            HashMap::from([("CERBOS_NO_TELEMETRY".to_string(), "1".to_string())]);
         Self {
             image_name: "ghcr.io/cerbos/cerbos".to_string(),
             image_tag: "latest".to_string(),
             volume_mounts: vec![],
             environment_vars,
             ports: vec![3592.into(), 3593.into()],
+            cmd: vec![],
         }
     }
 }
@@ -44,7 +46,23 @@ impl CerbosContainer {
             ..self
         }
     }
-
+    const CERT_PATH: &str = "/certs";
+    pub fn with_tls_config(self, config: &CerbosTestTlsConfig) -> Self {
+        let mut mounts = vec![Mount::bind_mount(
+            config.get_temp_dir().path().to_string_lossy(),
+            Self::CERT_PATH,
+        )];
+        self.volume_mounts.into_iter().for_each(|x| mounts.push(x));
+        Self {
+            volume_mounts: mounts,
+            cmd: vec![
+                "server".to_string(),
+                "--set=server.tls.cert=/certs/".to_string() + CerbosTestTlsConfig::CERT_NAME,
+                "--set=server.tls.key=/certs/".to_string() + CerbosTestTlsConfig::CERT_KEY,
+            ],
+            ..self
+        }
+    }
     pub fn with_image_tag<S>(self, image_tag: S) -> Self
     where
         S: Into<String>,
@@ -109,5 +127,8 @@ impl Image for CerbosContainer {
 
     fn ready_conditions(&self) -> Vec<testcontainers::core::WaitFor> {
         vec![WaitFor::message_on_stdout("Starting HTTP server")]
+    }
+    fn cmd(&self) -> impl IntoIterator<Item = impl Into<Cow<'_, str>>> {
+        self.cmd.iter()
     }
 }
