@@ -301,9 +301,9 @@ async fn do_plan_resources(mut client: CerbosAsyncClient) -> Result<()> {
         PlanResourcesFilter::Conditional(..)
     ));
 
-    // let response = client
-    //     .plan_resources_for_actions(["approve", "view:public"], principal, resource, None)
-    //     .await?;
+    let response = client
+        .plan_resources_for_actions(["approve", "view:public"], principal, resource, None)
+        .await?;
 
     assert!(matches!(
         response.filter(),
