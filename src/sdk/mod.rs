@@ -88,11 +88,6 @@ where
         self
     }
 
-    pub fn assume_http2(mut self) -> Self {
-        self.tls_config = self.tls_config.map(|c| c.assume_http2(true));
-        self
-    }
-
     /// Domain name in the TLS certificate.
     pub fn with_tls_domain_name(mut self, domain: impl Into<String>) -> Self {
         self.tls_config = self
@@ -134,17 +129,12 @@ where
     pub(crate) fn build_channel(self) -> Result<Channel> {
         match self.endpoint {
             CerbosEndpoint::HostPort(host, port) => {
-                let protocol = if self.tls_config.is_none() {
-                    "http"
-                } else {
-                    "https"
-                };
+                let protocol = self.tls_config.as_ref().map_or_else(|| "http", |_| "https");
                 let endpoint_addr = format!("{}://{}:{}", protocol, host.into(), port);
                 let mut endpoint = Channel::from_shared(endpoint_addr.clone())
                     .with_context(|| format!("Failed to create channel for {}", endpoint_addr))?
                     .connect_timeout(self.timeout)
                     .timeout(self.timeout)
-                    .tcp_keepalive(Some(Duration::from_secs(10)))
                     .user_agent(self.user_agent.clone())
                     .with_context(|| "Failed to create channel")?;
 
