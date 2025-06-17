@@ -46,7 +46,7 @@ impl CerbosContainer {
             ..self
         }
     }
-    const CERT_PATH: &str = "/certs";
+    const CERT_PATH: &str = "/certs/";
     pub fn with_tls_config(self, config: &CerbosTestTlsConfig) -> Self {
         let mut mounts = vec![Mount::bind_mount(
             config.get_temp_dir().path().to_string_lossy(),
@@ -57,8 +57,12 @@ impl CerbosContainer {
             volume_mounts: mounts,
             cmd: vec![
                 "server".to_string(),
-                "--set=server.tls.cert=/certs/".to_string() + CerbosTestTlsConfig::CERT_NAME,
-                "--set=server.tls.key=/certs/".to_string() + CerbosTestTlsConfig::CERT_KEY,
+                "--set=server.tls.cert=".to_string()
+                    + Self::CERT_PATH
+                    + CerbosTestTlsConfig::CERT_NAME,
+                "--set=server.tls.key=".to_string()
+                    + Self::CERT_PATH
+                    + CerbosTestTlsConfig::CERT_KEY,
             ],
             ..self
         }
