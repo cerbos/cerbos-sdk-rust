@@ -45,6 +45,7 @@ where
     S: Into<String> + Send,
 {
     HostPort(S, u16),
+    #[cfg(unix)]
     UnixDomainSocket(S),
 }
 
@@ -147,6 +148,7 @@ where
 
                 Ok(endpoint.connect_lazy())
             }
+            #[cfg(unix)]
             CerbosEndpoint::UnixDomainSocket(path) => {
                 let mut endpoint = Channel::from_static("https://127.0.0.1:3593")
                     .connect_timeout(self.timeout)
