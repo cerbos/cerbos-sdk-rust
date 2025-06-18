@@ -10,11 +10,13 @@ repository = "https://github.com/cerbos/cerbos-sdk-rust"
 homepage = "https://cerbos.dev"
 
 [features]
+admin = ["dep:base64"]
 hub = []
 testcontainers = ["dep:testcontainers", "dep:rcgen", "dep:tempfile", "dep:time"]
 
 [dependencies]
 anyhow = "1.0.86"
+base64 = { version = "0.22.1", optional = true }
 hyper-util = { version = "0.1.7", features = ["tokio"] }
 prost = "0.13.1"
 prost-types = "0.13.1"
