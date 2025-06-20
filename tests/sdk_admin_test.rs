@@ -1,0 +1,64 @@
+// Copyright 2021-2025 Zenauth Ltd.
+// SPDX-License-Identifier: Apache-2.0
+
+use std::path::{Path, PathBuf};
+
+use anyhow::{Context, Result};
+use cerbos::sdk::{
+    admin::CerbosAdminClient,
+    container::{certs::CerbosTestTlsConfig, CerbosContainer},
+};
+
+const ADMIN_USERNAME: &'static str = "cerbos";
+const ADMIN_PASSWORD: &'static str = "cerbosAdmin";
+
+#[cfg(feature = "testcontainers")]
+trait Stoppable {
+    async fn stop(&self) -> anyhow::Result<()>;
+}
+
+#[cfg(feature = "testcontainers")]
+impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
+    async fn stop(&self) -> anyhow::Result<()> {
+        use anyhow::Context;
+        self.stop().await.context("can't stop container")
+    }
+}
+fn get_test_data_path(subpath: &[&str]) -> PathBuf {
+    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("tests");
+    path.push("testdata");
+    subpath.iter().for_each(|p| path.push(p));
+    path
+}
+
+#[cfg(feature = "testcontainers")]
+async fn async_tls_client(
+    temp_dir: &tempfile::TempDir,
+) -> Result<(CerbosAdminClient, impl Stoppable)> {
+    use testcontainers::runners::AsyncRunner;
+
+    let policies_dir = get_test_data_path(&["policies"]);
+    let config = get_test_data_path(&["configs", "tcp_with_tls.yaml"]);
+
+    let hostname = "localhost";
+    let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
+    let container = CerbosContainer::default()
+        .with_image_tag("0.44.0")
+        .with_config_path(&config)
+        .with_sqlite_in_memory_storage()
+        .with_tls_config(&config)
+        .with_extra_volume_mounts(vec![(policies_dir.to_str().unwrap(), "/policies")])
+        .start()
+        .await?;
+    let host = container.get_host().await?;
+    let port = container.get_host_port_ipv4(3593).await?;
+    let client_conf = CerbosClientOptions::new(CerbosEndpoint::HostPort(host.to_string(), port))
+        .with_tls_ca_cert_pem(config.get_ca_cert());
+    Ok((CerbosAdminClient::new(client_conf).await?, container))
+}
+
+#[tokio::test]
+pub fn test_admin_client() -> Result<()> {
+    Ok(())
+}

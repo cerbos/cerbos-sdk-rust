@@ -1,8 +1,8 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::borrow::Cow;
 use std::collections::HashMap;
+use std::{borrow::Cow, path::Path};
 
 use certs::CerbosTestTlsConfig;
 use testcontainers::{
@@ -77,7 +77,7 @@ impl CerbosContainer {
         }
     }
 
-    pub fn with_volume_mounts<S, I>(self, mounts: I) -> Self
+    pub fn with_extra_volume_mounts<S, I>(self, mounts: I) -> Self
     where
         S: Into<String>,
         I: IntoIterator<Item = (S, S)>,
@@ -103,6 +103,36 @@ impl CerbosContainer {
                 .collect(),
             ..self
         }
+    }
+
+    const CONFIG_PATH: &str = "/config/";
+
+    fn prepend_cmd_with_server(cmd: &mut Vec<String>) {
+        if cmd.len() == 0 {
+            cmd.push("server".to_string());
+        }
+    }
+    pub fn with_config_path(mut self, config: &Path) -> Self {
+        Self::prepend_cmd_with_server(&mut self.cmd);
+        if self.cmd.len() == 0 {
+            self.cmd.push("server".to_string());
+        }
+        let filename = config.file_name().unwrap();
+        self.cmd
+            .push("--config=".to_string() + Self::CONFIG_PATH + filename.to_str().unwrap());
+        self.volume_mounts.push(Mount::bind_mount(
+            config.to_str().unwrap(),
+            Self::CONFIG_PATH,
+        ));
+        self
+    }
+
+    pub fn with_sqlite_in_memory_storage(mut self) -> Self {
+        Self::prepend_cmd_with_server(&mut self.cmd);
+        self.cmd.push("--set=storage.driver=sqlite3".to_string());
+        self.cmd
+            .push("--set=storage.sqlite3.dsn=:memory:".to_string());
+        self
     }
 }
 
