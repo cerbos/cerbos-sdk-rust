@@ -11,7 +11,9 @@ pub struct IssueAccessTokenResponse {
     #[prost(string, tag = "1")]
     pub access_token: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
-    pub expires_in: ::core::option::Option<::prost_types::Duration>,
+    pub expires_in: ::core::option::Option<
+        super::super::super::super::google::protobuf::Duration,
+    >,
 }
 /// Generated client implementations.
 pub mod api_key_service_client {

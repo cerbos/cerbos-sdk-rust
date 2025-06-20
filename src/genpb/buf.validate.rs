@@ -2763,7 +2763,7 @@ pub struct DurationRules {
     /// }
     /// ```
     #[prost(message, optional, tag = "2")]
-    pub r#const: ::core::option::Option<::prost_types::Duration>,
+    pub r#const: ::core::option::Option<super::super::google::protobuf::Duration>,
     /// `in` asserts that the field must be equal to one of the specified values of the `google.protobuf.Duration` type.
     /// If the field's value doesn't correspond to any of the specified values,
     /// an error message will be generated.
@@ -2775,7 +2775,7 @@ pub struct DurationRules {
     /// }
     /// ```
     #[prost(message, repeated, tag = "7")]
-    pub r#in: ::prost::alloc::vec::Vec<::prost_types::Duration>,
+    pub r#in: ::prost::alloc::vec::Vec<super::super::google::protobuf::Duration>,
     /// `not_in` denotes that the field must not be equal to
     /// any of the specified values of the `google.protobuf.Duration` type.
     /// If the field's value matches any of these values, an error message will be
@@ -2788,7 +2788,7 @@ pub struct DurationRules {
     /// }
     /// ```
     #[prost(message, repeated, tag = "8")]
-    pub not_in: ::prost::alloc::vec::Vec<::prost_types::Duration>,
+    pub not_in: ::prost::alloc::vec::Vec<super::super::google::protobuf::Duration>,
     /// `example` specifies values that the field may have. These values SHOULD
     /// conform to other rules. `example` values will not impact validation
     /// but may be used as helpful guidance on how to populate the given field.
@@ -2802,7 +2802,7 @@ pub struct DurationRules {
     /// }
     /// ```
     #[prost(message, repeated, tag = "9")]
-    pub example: ::prost::alloc::vec::Vec<::prost_types::Duration>,
+    pub example: ::prost::alloc::vec::Vec<super::super::google::protobuf::Duration>,
     #[prost(oneof = "duration_rules::LessThan", tags = "3, 4")]
     pub less_than: ::core::option::Option<duration_rules::LessThan>,
     #[prost(oneof = "duration_rules::GreaterThan", tags = "5, 6")]
@@ -2823,7 +2823,7 @@ pub mod duration_rules {
         /// }
         /// ```
         #[prost(message, tag = "3")]
-        Lt(::prost_types::Duration),
+        Lt(super::super::super::google::protobuf::Duration),
         /// `lte` indicates that the field must be less than or equal to the specified
         /// value of the `google.protobuf.Duration` type, inclusive. If the field's value is greater than the specified value,
         /// an error message will be generated.
@@ -2835,7 +2835,7 @@ pub mod duration_rules {
         /// }
         /// ```
         #[prost(message, tag = "4")]
-        Lte(::prost_types::Duration),
+        Lte(super::super::super::google::protobuf::Duration),
     }
     #[derive(Clone, Copy, PartialEq, ::prost::Oneof)]
     pub enum GreaterThan {
@@ -2858,7 +2858,7 @@ pub mod duration_rules {
         /// }
         /// ```
         #[prost(message, tag = "5")]
-        Gt(::prost_types::Duration),
+        Gt(super::super::super::google::protobuf::Duration),
         /// `gte` requires the duration field value to be greater than or equal to the
         /// specified value (exclusive). If the value of `gte` is larger than a
         /// specified `lt` or `lte`, the range is reversed, and the field value must
@@ -2878,7 +2878,7 @@ pub mod duration_rules {
         /// }
         /// ```
         #[prost(message, tag = "6")]
-        Gte(::prost_types::Duration),
+        Gte(super::super::super::google::protobuf::Duration),
     }
 }
 /// TimestampRules describe the rules applied exclusively to the `google.protobuf.Timestamp` well-known type.
@@ -2893,7 +2893,7 @@ pub struct TimestampRules {
     /// }
     /// ```
     #[prost(message, optional, tag = "2")]
-    pub r#const: ::core::option::Option<::prost_types::Timestamp>,
+    pub r#const: ::core::option::Option<super::super::google::protobuf::Timestamp>,
     /// `within` specifies that this field, of the `google.protobuf.Timestamp` type, must be within the specified duration of the current time. If the field value isn't within the duration, an error message is generated.
     ///
     /// ```proto
@@ -2903,9 +2903,9 @@ pub struct TimestampRules {
     /// }
     /// ```
     #[prost(message, optional, tag = "9")]
-    pub within: ::core::option::Option<::prost_types::Duration>,
+    pub within: ::core::option::Option<super::super::google::protobuf::Duration>,
     #[prost(message, repeated, tag = "10")]
-    pub example: ::prost::alloc::vec::Vec<::prost_types::Timestamp>,
+    pub example: ::prost::alloc::vec::Vec<super::super::google::protobuf::Timestamp>,
     #[prost(oneof = "timestamp_rules::LessThan", tags = "3, 4, 7")]
     pub less_than: ::core::option::Option<timestamp_rules::LessThan>,
     #[prost(oneof = "timestamp_rules::GreaterThan", tags = "5, 6, 8")]
@@ -2924,7 +2924,7 @@ pub mod timestamp_rules {
         /// }
         /// ```
         #[prost(message, tag = "3")]
-        Lt(::prost_types::Timestamp),
+        Lt(super::super::super::google::protobuf::Timestamp),
         /// requires the timestamp field value to be less than or equal to the specified value (field <= value). If the field value doesn't meet the required conditions, an error message is generated.
         ///
         /// ```proto
@@ -2934,7 +2934,7 @@ pub mod timestamp_rules {
         /// }
         /// ```
         #[prost(message, tag = "4")]
-        Lte(::prost_types::Timestamp),
+        Lte(super::super::super::google::protobuf::Timestamp),
         /// `lt_now` specifies that this field, of the `google.protobuf.Timestamp` type, must be less than the current time. `lt_now` can only be used with the `within` rule.
         ///
         /// ```proto
@@ -2967,7 +2967,7 @@ pub mod timestamp_rules {
         /// }
         /// ```
         #[prost(message, tag = "5")]
-        Gt(::prost_types::Timestamp),
+        Gt(super::super::super::google::protobuf::Timestamp),
         /// `gte` requires the timestamp field value to be greater than or equal to the
         /// specified value (exclusive). If the value of `gte` is larger than a
         /// specified `lt` or `lte`, the range is reversed, and the field value
@@ -2987,7 +2987,7 @@ pub mod timestamp_rules {
         /// }
         /// ```
         #[prost(message, tag = "6")]
-        Gte(::prost_types::Timestamp),
+        Gte(super::super::super::google::protobuf::Timestamp),
         /// `gt_now` specifies that this field, of the `google.protobuf.Timestamp` type, must be greater than the current time. `gt_now` can only be used with the `within` rule.
         ///
         /// ```proto
@@ -3121,7 +3121,7 @@ pub struct FieldPathElement {
     /// N.B.: Although groups are deprecated, the corresponding delimited encoding scheme is not, and
     /// can be explicitly used in Protocol Buffers 2023 Edition.
     #[prost(
-        enumeration = "::prost_types::field_descriptor_proto::Type",
+        enumeration = "super::super::google::protobuf::field_descriptor_proto::Type",
         optional,
         tag = "3"
     )]
@@ -3130,7 +3130,7 @@ pub struct FieldPathElement {
     /// unknown fields through wire data: specifically, it allows handling the differences between
     /// different integer encodings.
     #[prost(
-        enumeration = "::prost_types::field_descriptor_proto::Type",
+        enumeration = "super::super::google::protobuf::field_descriptor_proto::Type",
         optional,
         tag = "4"
     )]
@@ -3138,7 +3138,7 @@ pub struct FieldPathElement {
     /// `value_type` specifies map value type of this field. This is useful if you want to display a
     /// value inside unknown fields through wire data.
     #[prost(
-        enumeration = "::prost_types::field_descriptor_proto::Type",
+        enumeration = "super::super::google::protobuf::field_descriptor_proto::Type",
         optional,
         tag = "5"
     )]

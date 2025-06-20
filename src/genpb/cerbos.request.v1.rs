@@ -54,7 +54,7 @@ pub struct AttributesMap {
     #[prost(map = "string, message", tag = "1")]
     pub attr: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::google::protobuf::Value,
     >,
 }
 /// Deprecated. See CheckResourcesRequest.
@@ -194,9 +194,13 @@ pub mod list_audit_log_entries_request {
     #[derive(Clone, Copy, PartialEq, ::prost::Message)]
     pub struct TimeRange {
         #[prost(message, optional, tag = "1")]
-        pub start: ::core::option::Option<::prost_types::Timestamp>,
+        pub start: ::core::option::Option<
+            super::super::super::super::google::protobuf::Timestamp,
+        >,
         #[prost(message, optional, tag = "2")]
-        pub end: ::core::option::Option<::prost_types::Timestamp>,
+        pub end: ::core::option::Option<
+            super::super::super::super::google::protobuf::Timestamp,
+        >,
     }
     #[derive(
         Clone,
@@ -244,7 +248,7 @@ pub mod list_audit_log_entries_request {
         #[prost(message, tag = "3")]
         Between(TimeRange),
         #[prost(message, tag = "4")]
-        Since(::prost_types::Duration),
+        Since(super::super::super::super::google::protobuf::Duration),
         #[prost(string, tag = "5")]
         Lookup(::prost::alloc::string::String),
     }

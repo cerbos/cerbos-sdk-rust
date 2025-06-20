@@ -1,4 +1,4 @@
-// Copyright 2021-2022 Zenauth Ltd.
+// Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 use cerbos::sdk::{
@@ -41,7 +41,7 @@ async fn async_tls_client(
     let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
     let container = CerbosContainer::default()
         .with_image_tag("0.44.0")
-        .with_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
+        .with_extra_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
         .with_tls_config(&config)
         .start()
         .await?;

@@ -85,11 +85,15 @@ pub mod change_details {
         #[prost(string, tag = "5")]
         pub committer: ::prost::alloc::string::String,
         #[prost(message, optional, tag = "6")]
-        pub commit_date: ::core::option::Option<::prost_types::Timestamp>,
+        pub commit_date: ::core::option::Option<
+            super::super::super::super::super::google::protobuf::Timestamp,
+        >,
         #[prost(string, tag = "7")]
         pub author: ::prost::alloc::string::String,
         #[prost(message, optional, tag = "8")]
-        pub author_date: ::core::option::Option<::prost_types::Timestamp>,
+        pub author_date: ::core::option::Option<
+            super::super::super::super::super::google::protobuf::Timestamp,
+        >,
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Internal {
@@ -98,7 +102,7 @@ pub mod change_details {
         #[prost(map = "string, message", tag = "2")]
         pub metadata: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::super::google::protobuf::Value,
         >,
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -108,7 +112,7 @@ pub mod change_details {
         #[prost(map = "string, message", tag = "2")]
         pub metadata: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::super::google::protobuf::Value,
         >,
     }
     #[derive(Clone, PartialEq, ::prost::Oneof)]
@@ -226,10 +230,10 @@ pub struct ReplaceFilesRequest {
     pub store_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub condition: ::core::option::Option<replace_files_request::Condition>,
-    #[prost(bytes = "vec", tag = "3")]
-    pub zipped_contents: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "4")]
     pub change_details: ::core::option::Option<ChangeDetails>,
+    #[prost(oneof = "replace_files_request::Contents", tags = "3, 5")]
+    pub contents: ::core::option::Option<replace_files_request::Contents>,
 }
 /// Nested message and enum types in `ReplaceFilesRequest`.
 pub mod replace_files_request {
@@ -237,6 +241,18 @@ pub mod replace_files_request {
     pub struct Condition {
         #[prost(int64, tag = "1")]
         pub store_version_must_equal: i64,
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Files {
+        #[prost(message, repeated, tag = "1")]
+        pub files: ::prost::alloc::vec::Vec<super::File>,
+    }
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Contents {
+        #[prost(bytes, tag = "3")]
+        ZippedContents(::prost::alloc::vec::Vec<u8>),
+        #[prost(message, tag = "5")]
+        Files(Files),
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]

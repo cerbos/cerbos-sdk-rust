@@ -4,7 +4,9 @@ pub struct AccessLogEntry {
     #[prost(string, tag = "1")]
     pub call_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    pub timestamp: ::core::option::Option<
+        super::super::super::google::protobuf::Timestamp,
+    >,
     #[prost(message, optional, tag = "3")]
     pub peer: ::core::option::Option<Peer>,
     #[prost(map = "string, message", tag = "4")]
@@ -24,7 +26,9 @@ pub struct DecisionLogEntry {
     #[prost(string, tag = "1")]
     pub call_id: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    pub timestamp: ::core::option::Option<
+        super::super::super::google::protobuf::Timestamp,
+    >,
     #[prost(message, optional, tag = "3")]
     pub peer: ::core::option::Option<Peer>,
     /// Deprecated. Use method.check_resources.inputs instead.

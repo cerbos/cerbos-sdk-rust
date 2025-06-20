@@ -10,7 +10,7 @@ repository = "https://github.com/cerbos/cerbos-sdk-rust"
 homepage = "https://cerbos.dev"
 
 [features]
-admin = ["dep:base64"]
+admin = ["dep:base64", "dep:serde", "dep:serde_yml"]
 hub = []
 testcontainers = ["dep:testcontainers", "dep:rcgen", "dep:tempfile", "dep:time"]
 
@@ -27,6 +27,8 @@ tower = { version =  "0.5.0", features = ["util"] }
 uuid = { version = "1.10.0", features = ["v4"] }
 rcgen = { version = "0.13", optional = true }
 zip = { version = "4.0.0", default-features = false }
+serde = { version = "1.0", optional = true, features = ["derive"] }
+serde_yml = { version = "0.0.12", optional = true }
 walkdir = "2"
 http = "1"
 http-body = "1"

@@ -26,7 +26,7 @@ pub mod plan_resources_input {
         #[prost(map = "string, message", tag = "2")]
         pub attr: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::google::protobuf::Value,
         >,
         #[prost(string, tag = "3")]
         pub policy_version: ::prost::alloc::string::String,
@@ -139,7 +139,7 @@ pub mod plan_resources_filter {
             #[derive(Clone, PartialEq, ::prost::Oneof)]
             pub enum Node {
                 #[prost(message, tag = "1")]
-                Value(::prost_types::Value),
+                Value(super::super::super::super::super::super::google::protobuf::Value),
                 #[prost(message, tag = "2")]
                 Expression(super::super::Expression),
                 #[prost(string, tag = "3")]
@@ -271,7 +271,7 @@ pub struct OutputEntry {
     #[prost(string, tag = "1")]
     pub src: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
-    pub val: ::core::option::Option<::prost_types::Value>,
+    pub val: ::core::option::Option<super::super::super::google::protobuf::Value>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Resource {
@@ -284,7 +284,7 @@ pub struct Resource {
     #[prost(map = "string, message", tag = "4")]
     pub attr: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::google::protobuf::Value,
     >,
     #[prost(string, tag = "5")]
     pub scope: ::prost::alloc::string::String,
@@ -300,7 +300,7 @@ pub struct Principal {
     #[prost(map = "string, message", tag = "4")]
     pub attr: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::google::protobuf::Value,
     >,
     #[prost(string, tag = "5")]
     pub scope: ::prost::alloc::string::String,
@@ -310,7 +310,7 @@ pub struct AuxData {
     #[prost(map = "string, message", tag = "1")]
     pub jwt: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::google::protobuf::Value,
     >,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -461,7 +461,9 @@ pub mod trace {
         #[prost(string, tag = "4")]
         pub message: ::prost::alloc::string::String,
         #[prost(message, optional, tag = "5")]
-        pub result: ::core::option::Option<::prost_types::Value>,
+        pub result: ::core::option::Option<
+            super::super::super::super::google::protobuf::Value,
+        >,
     }
     /// Nested message and enum types in `Event`.
     pub mod event {
@@ -527,7 +529,7 @@ pub mod request {
         #[prost(map = "string, message", tag = "3")]
         pub attr: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::google::protobuf::Value,
         >,
         #[prost(string, tag = "4")]
         pub policy_version: ::prost::alloc::string::String,
@@ -543,7 +545,7 @@ pub mod request {
         #[prost(map = "string, message", tag = "3")]
         pub attr: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::google::protobuf::Value,
         >,
         #[prost(string, tag = "4")]
         pub policy_version: ::prost::alloc::string::String,

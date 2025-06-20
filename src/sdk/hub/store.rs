@@ -8,7 +8,7 @@ use crate::genpb::cerbos::cloud::store::v1::{
     change_details::{Git, Internal, Origin, Uploader},
     file_op::Op,
     modify_files_request::Condition as ModifyCondition,
-    replace_files_request::Condition as ReplaceCondition,
+    replace_files_request::{Condition as ReplaceCondition, Contents},
     string_match::{InList, Match},
     ChangeDetails, File, FileFilter, FileOp, GetFilesRequest, GetFilesResponse, ListFilesRequest,
     ListFilesResponse, ModifyFilesRequest, ModifyFilesResponse, ReplaceFilesRequest,
@@ -67,14 +67,26 @@ where
         if request.store_id.is_empty() {
             return Err(Self::validation_error("store_id is required"));
         }
-        let len = request.zipped_contents.len();
-        const MIN_SIZE: usize = 22;
-        const MAX_SIZE: usize = 15728640;
-        if len < MIN_SIZE || len > MAX_SIZE {
-            return Err(RPCError::ClientSideValidationError {
-                message: format!("zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"),
-            });
-        }
+        match request.contents {
+            Some(Contents::ZippedContents(ref zipped_contents)) => {
+                const MIN_SIZE: usize = 22;
+                const MAX_SIZE: usize = 15728640;
+                let len = zipped_contents.len();
+                if len < MIN_SIZE || len > MAX_SIZE {
+                    return Err(RPCError::ClientSideValidationError {
+                        message: format!(
+                            "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"
+                        ),
+                    });
+                }
+            }
+            None => {
+                return Err(RPCError::ClientSideValidationError {
+                    message: "content not provided".to_string(),
+                })
+            }
+            Some(Contents::Files(_)) => {}
+        };
         let response = self.client.replace_files(request).await?;
 
         Ok(response.into_inner())
@@ -227,7 +239,7 @@ impl ReplaceFilesRequestBuilder {
         ReplaceFilesRequest {
             store_id: self.store_id,
             condition: self.condition,
-            zipped_contents: self.zipped_contents,
+            contents: Some(Contents::ZippedContents(self.zipped_contents)),
             change_details: self.change_details,
         }
     }

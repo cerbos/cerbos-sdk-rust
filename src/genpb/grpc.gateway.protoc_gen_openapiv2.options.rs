@@ -94,7 +94,7 @@ pub struct Swagger {
     #[prost(map = "string, message", tag = "15")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// `Operation` is a representation of OpenAPI v2 specification's Operation object.
@@ -181,7 +181,7 @@ pub struct Operation {
     #[prost(map = "string, message", tag = "13")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
     /// Custom parameters such as HTTP request headers.
     /// See: <https://swagger.io/docs/specification/2-0/describing-parameters/>
@@ -328,7 +328,7 @@ pub struct Response {
     #[prost(map = "string, message", tag = "5")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// `Info` is a representation of OpenAPI v2 specification's Info object.
@@ -383,7 +383,7 @@ pub struct Info {
     #[prost(map = "string, message", tag = "7")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// `Contact` is a representation of OpenAPI v2 specification's Contact object.
@@ -551,7 +551,7 @@ pub struct EnumSchema {
     #[prost(map = "string, message", tag = "9")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// `JSONSchema` represents properties from JSON Schema taken, and as used, in
@@ -659,7 +659,7 @@ pub struct JsonSchema {
     #[prost(map = "string, message", tag = "48")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// Nested message and enum types in `JSONSchema`.
@@ -754,7 +754,7 @@ pub struct Tag {
     #[prost(map = "string, message", tag = "4")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// `SecurityDefinitions` is a representation of OpenAPI v2 specification's
@@ -827,7 +827,7 @@ pub struct SecurityScheme {
     #[prost(map = "string, message", tag = "9")]
     pub extensions: ::std::collections::HashMap<
         ::prost::alloc::string::String,
-        ::prost_types::Value,
+        super::super::super::super::google::protobuf::Value,
     >,
 }
 /// Nested message and enum types in `SecurityScheme`.

@@ -249,11 +249,10 @@ impl BasicAuth {
 #[derive(Clone)]
 struct BasicAuthInterceptor {
     auth_header: Option<MetadataValue<tonic::metadata::Ascii>>,
-    headers: HashMap<String, String>,
 }
 
 impl BasicAuthInterceptor {
-    fn new(credentials: Option<&BasicAuth>, headers: HashMap<String, String>) -> Result<Self> {
+    fn new(credentials: &BasicAuth>, headers: HashMap<String, String>) -> Result<Self> {
         let auth_header = if let Some(creds) = credentials {
             let auth_string = format!("{}:{}", creds.username, creds.password);
             let encoded = base64::encode(auth_string);
@@ -318,14 +317,12 @@ impl CerbosAdminClient {
             .user_agent(options.user_agent)
             .with_context(|| "Failed to set user agent")?;
 
-        // Connect
         let channel = endpoint_builder
             .connect()
             .await
             .with_context(|| format!("Failed to connect to {}", endpoint))?;
 
-        // Create interceptor
-        let interceptor = BasicAuthInterceptor::new(credentials.as_ref(), options.headers.clone())?;
+        let interceptor = BasicAuthInterceptor::new(credentials.as_ref()?;
 
         // Create client with interceptor
         let client = CerbosAdminServiceClient::with_interceptor(channel, interceptor);
