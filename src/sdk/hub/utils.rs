@@ -17,7 +17,7 @@ pub fn zip_directory(dir_path: &std::path::Path) -> anyhow::Result<Vec<u8>> {
 
     let cursor = Cursor::new(&mut buffer);
     let mut zip = zip::ZipWriter::new(cursor);
-    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::STORE);
+    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::DEFLATE);
 
     let prefix = Path::new(dir_path);
     let mut file_buffer = Vec::new();

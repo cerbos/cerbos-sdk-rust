@@ -14,6 +14,7 @@ use cerbos::sdk::hub::HubClientBuilder;
 use std::path::PathBuf;
 use std::{env, str};
 use tokio;
+use tonic;
 
 // Expected files list from the Go test
 const WANT_FILES_LIST: &[&str] = &[
@@ -156,9 +157,19 @@ async fn test_auth_error() -> Result<(), Box<dyn std::error::Error>> {
     let files = vec!["wibble.yaml".to_string()];
     let request = GetFilesRequest { store_id, files };
     let result = store_client.get_files(request.clone()).await;
+    if let Err(RPCError::Unknown {
+        message: _,
+        underlying: ref e,
+    }) = result
+    {
+        if e.code() == tonic::Code::ResourceExhausted {
+            eprintln!("\x1b[91mSkipping test due to too many requests response\x1b[0m");
+            return Ok(());
+        }
+    }
     assert!(
         matches!(
-            result,
+            &result,
             Err(RPCError::AuthenticationFailed {
                 message: _,
                 underlying: _
