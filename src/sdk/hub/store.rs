@@ -8,7 +8,7 @@ use crate::genpb::cerbos::cloud::store::v1::{
     change_details::{Git, Internal, Origin, Uploader},
     file_op::Op,
     modify_files_request::Condition as ModifyCondition,
-    replace_files_request::Condition as ReplaceCondition,
+    replace_files_request::{Condition as ReplaceCondition, Contents},
     string_match::{InList, Match},
     ChangeDetails, File, FileFilter, FileOp, GetFilesRequest, GetFilesResponse, ListFilesRequest,
     ListFilesResponse, ModifyFilesRequest, ModifyFilesResponse, ReplaceFilesRequest,
@@ -67,7 +67,15 @@ where
         if request.store_id.is_empty() {
             return Err(Self::validation_error("store_id is required"));
         }
-        let len = request.zipped_contents.len();
+        let len = match request.contents {
+            Some(Contents::ZippedContents(ref zc)) => zc.len(),
+            Some(Contents::Files(ref f)) => f.files.iter().map(|x| x.contents.len()).sum(),
+            None => {
+                return Err(RPCError::ClientSideValidationError {
+                    message: "contents must be provided".to_string(),
+                });
+            }
+        };
         const MIN_SIZE: usize = 22;
         const MAX_SIZE: usize = 15728640;
         if len < MIN_SIZE || len > MAX_SIZE {
@@ -227,7 +235,7 @@ impl ReplaceFilesRequestBuilder {
         ReplaceFilesRequest {
             store_id: self.store_id,
             condition: self.condition,
-            zipped_contents: self.zipped_contents,
+            contents: Some(Contents::ZippedContents(self.zipped_contents)),
             change_details: self.change_details,
         }
     }
