@@ -67,22 +67,49 @@ where
         if request.store_id.is_empty() {
             return Err(Self::validation_error("store_id is required"));
         }
-        let len = match request.contents {
-            Some(Contents::ZippedContents(ref zc)) => zc.len(),
-            Some(Contents::Files(ref f)) => f.files.iter().map(|x| x.contents.len()).sum(),
+        match request.contents {
+            Some(Contents::ZippedContents(ref zc)) => {
+                const MIN_SIZE: usize = 22;
+                const MAX_SIZE: usize = 15728640;
+                let len = zc.len();
+                if !(MIN_SIZE..=MAX_SIZE).contains(&len) {
+                    return Err(RPCError::ClientSideValidationError {
+                        message: format!(
+                            "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"
+                        ),
+                    });
+                }
+            }
+            Some(Contents::Files(ref cf)) => {
+                let mut total: usize = 0;
+                const MAX_SIZE: usize = 5 * 1024 * 1024;
+
+                for f in cf.files.iter() {
+                    if f.contents.is_empty() {
+                        return Err(RPCError::ClientSideValidationError {
+                            message: format!("{} is empty", f.path),
+                        });
+                    }
+                    let len = f.contents.len();
+                    if len > MAX_SIZE {
+                        return Err(RPCError::ClientSideValidationError {
+                            message: format!("{} size {} exceeds 5 MiB", f.path, len),
+                        });
+                    }
+                    total += len;
+                }
+                if total > 10 * MAX_SIZE {
+                    return Err(RPCError::ClientSideValidationError {
+                        message: format!("Total {} exceeds 50 MiB", total),
+                    });
+                }
+            }
             None => {
                 return Err(RPCError::ClientSideValidationError {
                     message: "contents must be provided".to_string(),
                 });
             }
         };
-        const MIN_SIZE: usize = 22;
-        const MAX_SIZE: usize = 15728640;
-        if len < MIN_SIZE || len > MAX_SIZE {
-            return Err(RPCError::ClientSideValidationError {
-                message: format!("zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"),
-            });
-        }
         let response = self.client.replace_files(request).await?;
 
         Ok(response.into_inner())
