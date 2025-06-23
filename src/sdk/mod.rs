@@ -34,8 +34,8 @@ pub mod container;
 #[cfg(feature = "hub")]
 pub mod hub;
 
-// #[cfg(feature = "admin")]
-// pub mod admin;
+#[cfg(feature = "admin")]
+pub mod admin;
 
 pub mod model;
 

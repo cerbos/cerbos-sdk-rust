@@ -43,12 +43,19 @@ fn main() -> Result<(), std::io::Error> {
             "Condition.condition",
             "SourceAttributes",
         ];
+        let mut prefix = "cerbos.policy.v1.";
         for t in types {
+            builder =
+                builder.type_attribute(format!("{}{}", prefix, t), "#[derive(serde::Deserialize)]");
             builder = builder.type_attribute(
-                format!("cerbos.policy.v1.{}", t),
-                "#[derive(serde::Deserialize)]",
+                format!("{}{}", prefix, t),
+                "#[serde(rename_all = \"camelCase\")]",
             );
+            if !is_enum(t) {
+                builder = builder.type_attribute(format!("{}{}", prefix, t), "#[serde(default)]");
+            }
         }
+        prefix = "google.protobuf.";
         for t in [
             "Value",
             "Value.kind",
@@ -57,10 +64,15 @@ fn main() -> Result<(), std::io::Error> {
             "Timestamp",
             "UInt64Value",
         ] {
+            builder =
+                builder.type_attribute(format!("{}{}", prefix, t), "#[derive(serde::Deserialize)]");
             builder = builder.type_attribute(
-                format!("google.protobuf.{}", t),
-                "#[derive(serde::Deserialize)]",
+                format!("{}{}", prefix, t),
+                "#[serde(rename_all = \"camelCase\")]",
             );
+            if !is_enum(t) {
+                builder = builder.type_attribute(format!("{}{}", prefix, t), "#[serde(default)]");
+            }
         }
     }
 
@@ -76,4 +88,8 @@ fn main() -> Result<(), std::io::Error> {
         ],
         &["proto/defs/"],
     )
+}
+
+fn is_enum(s: &str) -> bool {
+    s.contains(".")
 }

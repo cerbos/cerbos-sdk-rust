@@ -30,7 +30,6 @@ const ADD_SCHEMA_BATCH_SIZE: usize = 10;
 /// Admin client for the Cerbos Admin API
 pub struct CerbosAdminClient {
     client: CerbosAdminServiceClient<InterceptedService<Channel, BasicAuthInterceptor>>,
-    headers: HashMap<String, String>,
 }
 
 /// Policy set container for managing multiple policies
@@ -252,7 +251,7 @@ struct BasicAuthInterceptor {
 }
 
 impl BasicAuthInterceptor {
-    fn new(credentials: &BasicAuth>, headers: HashMap<String, String>) -> Result<Self> {
+    fn new(credentials: Option<&BasicAuth>) -> Result<Self> {
         let auth_header = if let Some(creds) = credentials {
             let auth_string = format!("{}:{}", creds.username, creds.password);
             let encoded = base64::encode(auth_string);
@@ -262,10 +261,7 @@ impl BasicAuthInterceptor {
             None
         };
 
-        Ok(Self {
-            auth_header,
-            headers,
-        })
+        Ok(Self { auth_header })
     }
 }
 
@@ -278,66 +274,45 @@ impl Interceptor for BasicAuthInterceptor {
             metadata.insert("authorization", auth_header.clone());
         }
 
-        // Add custom headers
-        for (key, value) in &self.headers {
-            if let (Ok(key), Ok(value)) = (
-                MetadataKey::from_bytes(key.as_bytes()),
-                MetadataValue::try_from(value.as_str()),
-            ) {
-                metadata.insert(key, value);
-            }
-        }
-
         Ok(request)
     }
 }
 
 impl CerbosAdminClient {
-    /// Create a new admin client with explicit credentials
-    pub async fn new_with_credentials<S: Into<String> + Send>(
-        endpoint: String,
-        username: String,
-        password: String,
-        options: CerbosClientOptions<S>,
-    ) -> Result<Self> {
-        let credentials = Some(BasicAuth::new(username, password));
+    // pub async fn new_with_credentials<S: Into<String> + Send>(
+    //     username: String,
+    //     password: String,
+    //     options: CerbosClientOptions<S>,
+    // ) -> Result<Self> {
+    //     let credentials = Some(BasicAuth::new(username, password));
 
-        let mut endpoint_builder = Endpoint::from_shared(endpoint.clone())
-            .with_context(|| format!("Failed to create endpoint for {}", endpoint))?;
+    //     let mut endpoint_builder =
+    //         .with_context(|| format!("Failed to create endpoint for {}", endpoint))?;
 
-        if let Some(tls_config) = options.tls_config {
-            endpoint_builder = endpoint_builder
-                .tls_config(tls_config)
-                .with_context(|| "Failed to apply TLS configuration")?;
-        }
+    //     if let Some(tls_config) = options.tls_config {
+    //         endpoint_builder = endpoint_builder
+    //             .tls_config(tls_config)
+    //             .with_context(|| "Failed to apply TLS configuration")?;
+    //     }
 
-        endpoint_builder = endpoint_builder.timeout(options.timeout);
+    //     endpoint_builder = endpoint_builder.timeout(options.timeout);
 
-        endpoint_builder = endpoint_builder
-            .user_agent(options.user_agent)
-            .with_context(|| "Failed to set user agent")?;
+    //     endpoint_builder = endpoint_builder
+    //         .user_agent(options.user_agent)
+    //         .with_context(|| "Failed to set user agent")?;
 
-        let channel = endpoint_builder
-            .connect()
-            .await
-            .with_context(|| format!("Failed to connect to {}", endpoint))?;
+    //     let channel = endpoint_builder
+    //         .connect()
+    //         .await
+    //         .with_context(|| format!("Failed to connect to {}", endpoint))?;
 
-        let interceptor = BasicAuthInterceptor::new(credentials.as_ref()?;
+    //     let interceptor = BasicAuthInterceptor::new(credentials.as_ref())?;
 
-        // Create client with interceptor
-        let client = CerbosAdminServiceClient::with_interceptor(channel, interceptor);
+    //     // Create client with interceptor
+    //     let client = CerbosAdminServiceClient::with_interceptor(channel, interceptor);
 
-        Ok(Self {
-            client,
-            headers: options.headers,
-        })
-    }
-
-    /// Add custom headers to the client
-    pub fn with_headers(mut self, headers: HashMap<String, String>) -> Self {
-        self.headers.extend(headers);
-        self
-    }
+    //     Ok(Self { client })
+    // }
 
     /// Add or update policies
     pub async fn add_or_update_policy(&mut self, policies: &PolicySet) -> Result<()> {
@@ -514,6 +489,7 @@ impl CerbosAdminClient {
         Ok(())
     }
 
+    /*
     /// Get audit logs (streaming)
     pub async fn audit_logs(
         &mut self,
@@ -554,4 +530,5 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner())
     }
+    */
 }

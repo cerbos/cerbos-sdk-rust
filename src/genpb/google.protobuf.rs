@@ -2078,6 +2078,8 @@ pub struct Duration {
 /// ) to obtain a formatter capable of generating timestamps in this format.
 ///
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct Timestamp {
     /// Represents seconds of UTC time since Unix epoch
@@ -2101,6 +2103,8 @@ pub struct Timestamp {
 ///
 /// The JSON representation for `Struct` is JSON object.
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Struct {
     /// Unordered map of dynamically typed values.
@@ -2114,6 +2118,8 @@ pub struct Struct {
 ///
 /// The JSON representation for `Value` is JSON value.
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Value {
     /// The kind of value.
@@ -2124,6 +2130,7 @@ pub struct Value {
 pub mod value {
     /// The kind of value.
     #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
         /// Represents a null value.
@@ -2150,6 +2157,8 @@ pub mod value {
 ///
 /// The JSON representation for `ListValue` is JSON array.
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListValue {
     /// Repeated field of dynamically typed values.
@@ -2237,6 +2246,8 @@ pub struct Int64Value {
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(default)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct UInt64Value {
     /// The uint64 value.

@@ -1,11 +1,10 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use cerbos::sdk::{
-    attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result,
+use cerbos::{
+    genpb::google::protobuf::{value, ListValue, Struct, Value},
+    sdk::{attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result},
 };
-use prost_types::value::Kind;
-use prost_types::{ListValue, Struct, Value};
 
 #[cfg(not(feature = "testcontainers"))]
 async fn async_plaintext_client() -> Result<CerbosAsyncClient> {
@@ -86,31 +85,31 @@ async fn check_resources_plaintext_with_output() -> Result<()> {
 
 fn string_value(s: impl Into<String>) -> Value {
     Value {
-        kind: Some(Kind::StringValue(s.into())),
+        kind: Some(value::Kind::StringValue(s.into())),
     }
 }
 
 fn bool_value(b: bool) -> Value {
     Value {
-        kind: Some(Kind::BoolValue(b)),
+        kind: Some(value::Kind::BoolValue(b)),
     }
 }
 
 fn number_value(f: f64) -> Value {
     Value {
-        kind: Some(Kind::NumberValue(f)),
+        kind: Some(value::Kind::NumberValue(f)),
     }
 }
 
 fn list_value(values: Vec<Value>) -> Value {
     Value {
-        kind: Some(Kind::ListValue(ListValue { values })),
+        kind: Some(value::Kind::ListValue(ListValue { values })),
     }
 }
 
 fn struct_value(fields: Vec<(String, Value)>) -> Value {
     Value {
-        kind: Some(Kind::StructValue(Struct {
+        kind: Some(value::Kind::StructValue(Struct {
             fields: fields.into_iter().collect(),
         })),
     }
@@ -173,7 +172,7 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     let xx125 = xx125_or_none.unwrap();
 
     let resource_output = Some(Value {
-        kind: Some(Kind::StructValue(Struct {
+        kind: Some(value::Kind::StructValue(Struct {
             fields: [
                 (
                     "formatted_string".to_string(),
