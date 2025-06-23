@@ -67,11 +67,19 @@ fn get_test_data_path(subpath: &[&str]) -> PathBuf {
 // }
 #[tokio::test]
 pub async fn test_reading_policy() -> Result<()> {
+    use cerbos::genpb::cerbos::policy::v1::policy::PolicyType;
+
     let policy_path = get_test_data_path(&["resource_policies", "policy_01.yaml"]);
     let mut file = std::fs::File::open(policy_path)?;
     let mut buf = vec![];
     _ = file.read_to_end(&mut buf)?;
     let p: genpb::cerbos::policy::v1::Policy = serde_yml::from_slice(&buf)?;
     println!("Policy vars: {:?}", p.variables);
+    // if let p.po
+    if let Some(PolicyType::ResourcePolicy(ref rp)) = p.policy_type {
+        println!("{} {}", rp.resource, rp.version);
+    } else {
+        println!("{:?}", p.policy_type)
+    }
     Ok(())
 }
