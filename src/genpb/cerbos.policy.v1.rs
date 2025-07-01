@@ -4,7 +4,7 @@
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Policy {
     #[prost(string, tag = "1")]
@@ -53,7 +53,7 @@ pub mod policy {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SourceAttributes {
     #[prost(map = "string, message", tag = "1")]
@@ -67,7 +67,7 @@ pub struct SourceAttributes {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Metadata {
     #[prost(string, tag = "1")]
@@ -92,7 +92,7 @@ pub struct Metadata {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ResourcePolicy {
     #[prost(string, tag = "1")]
@@ -119,7 +119,7 @@ pub struct ResourcePolicy {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ResourceRule {
     #[prost(string, repeated, tag = "1")]
@@ -131,6 +131,10 @@ pub struct ResourceRule {
     #[prost(message, optional, tag = "4")]
     pub condition: ::core::option::Option<Condition>,
     #[prost(enumeration = "super::super::effect::v1::Effect", tag = "5")]
+    #[cfg_attr(
+        feature = "serde",
+        serde(deserialize_with = "crate::sdk::deser::deserialize_effect")
+    )]
     pub effect: i32,
     #[prost(string, tag = "6")]
     pub name: ::prost::alloc::string::String,
@@ -142,7 +146,7 @@ pub struct ResourceRule {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RolePolicy {
     #[prost(string, repeated, tag = "5")]
@@ -176,7 +180,7 @@ pub mod role_policy {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RoleRule {
     #[prost(string, tag = "1")]
@@ -191,7 +195,7 @@ pub struct RoleRule {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PrincipalPolicy {
     #[prost(string, tag = "1")]
@@ -214,7 +218,7 @@ pub struct PrincipalPolicy {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PrincipalRule {
     #[prost(string, tag = "1")]
@@ -236,6 +240,10 @@ pub mod principal_rule {
         #[prost(message, optional, tag = "2")]
         pub condition: ::core::option::Option<super::Condition>,
         #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "3")]
+        #[cfg_attr(
+            feature = "serde",
+            serde(deserialize_with = "crate::sdk::deser::deserialize_effect")
+        )]
         pub effect: i32,
         #[prost(string, tag = "4")]
         pub name: ::prost::alloc::string::String,
@@ -248,7 +256,7 @@ pub mod principal_rule {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DerivedRoles {
     #[prost(string, tag = "1")]
@@ -265,7 +273,7 @@ pub struct DerivedRoles {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RoleDef {
     #[prost(string, tag = "1")]
@@ -280,7 +288,7 @@ pub struct RoleDef {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExportConstants {
     #[prost(string, tag = "1")]
@@ -296,7 +304,7 @@ pub struct ExportConstants {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Constants {
     #[prost(string, repeated, tag = "1")]
@@ -312,7 +320,7 @@ pub struct Constants {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ExportVariables {
     #[prost(string, tag = "1")]
@@ -328,7 +336,7 @@ pub struct ExportVariables {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Variables {
     #[prost(string, repeated, tag = "1")]
@@ -344,7 +352,7 @@ pub struct Variables {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Condition {
     #[prost(oneof = "condition::Condition", tags = "1, 2")]
@@ -370,7 +378,7 @@ pub mod condition {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Match {
     #[prost(oneof = "r#match::Op", tags = "1, 2, 3, 4")]
@@ -410,7 +418,7 @@ pub mod r#match {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Output {
     #[deprecated]
@@ -439,7 +447,7 @@ pub mod output {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Schemas {
     #[prost(message, optional, tag = "1")]

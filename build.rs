@@ -55,6 +55,10 @@ fn main() -> Result<(), std::io::Error> {
     ] {
         builder = add_serde_annotations(builder, "google.protobuf.", t);
     }
+    let deser_effect_attr = "#[cfg_attr(feature = \"serde\", serde(deserialize_with = \"crate::sdk::deser::deserialize_effect\"))]";
+    builder = builder
+        .field_attribute("ResourceRule.effect", deser_effect_attr)
+        .field_attribute("PrincipalRule.Action.effect", deser_effect_attr);
 
     builder.compile_well_known_types(true).compile_protos(
         &[
@@ -80,7 +84,10 @@ fn add_serde_annotations(
             "#[cfg_attr(feature = \"serde\", derive(serde::Deserialize), serde(rename_all = \"camelCase\"))]",
         );
     if !is_enum(t) {
-        b = b.type_attribute(format!("{}{}", prefix, t), "#[serde(default)]");
+        b = b.type_attribute(
+            format!("{}{}", prefix, t),
+            "#[cfg_attr(feature = \"serde\", serde(default))]",
+        );
     }
     b
 }

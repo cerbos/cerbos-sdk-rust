@@ -25,16 +25,6 @@ use tonic::{Request, Status};
 const ADD_POLICY_BATCH_SIZE: usize = 10;
 const ADD_SCHEMA_BATCH_SIZE: usize = 10;
 
-pub(crate) fn deserialize_effect<'de, D>(deserializer: D) -> Result<i32, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    Effect::from_str_name(&s)
-        .map(|e| e as i32)
-        .ok_or_else(|| serde::de::Error::custom(format!("Unknown effect: {}", s)))
-}
-
 /// Admin client for the Cerbos Admin API
 pub struct CerbosAdminClient {
     client: CerbosAdminServiceClient<InterceptedService<Channel, BasicAuthInterceptor>>,

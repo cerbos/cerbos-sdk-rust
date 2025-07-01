@@ -2188,7 +2188,7 @@ pub struct Duration {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct Timestamp {
     /// Represents seconds of UTC time since Unix epoch
@@ -2216,7 +2216,7 @@ pub struct Timestamp {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Struct {
     /// Unordered map of dynamically typed values.
@@ -2234,7 +2234,7 @@ pub struct Struct {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Value {
     /// The kind of value.
@@ -2279,7 +2279,7 @@ pub mod value {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListValue {
     /// Repeated field of dynamically typed values.
@@ -2371,7 +2371,7 @@ pub struct Int64Value {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[serde(default)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct UInt64Value {
     /// The uint64 value.
