@@ -37,6 +37,9 @@ pub mod hub;
 #[cfg(feature = "admin")]
 pub mod admin;
 
+#[cfg(feature = "serde")]
+pub mod deser;
+
 pub mod model;
 
 pub type Result<T> = anyhow::Result<T>;

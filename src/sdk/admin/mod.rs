@@ -1,31 +1,39 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::genpb::cerbos::effect::v1::Effect;
 use crate::genpb::cerbos::svc::v1::cerbos_admin_service_client::CerbosAdminServiceClient;
 use crate::genpb::cerbos::{
     policy::v1::Policy,
     request::v1::{
         AddOrUpdatePolicyRequest, AddOrUpdateSchemaRequest, DeleteSchemaRequest,
         DisablePolicyRequest, EnablePolicyRequest, GetPolicyRequest, GetSchemaRequest,
-        InspectPoliciesRequest, ListAuditLogEntriesRequest, ListPoliciesRequest,
-        ListSchemasRequest, ReloadStoreRequest,
+        InspectPoliciesRequest, ListPoliciesRequest, ListSchemasRequest, ReloadStoreRequest,
     },
     response::v1::{InspectPoliciesResponse, ListAuditLogEntriesResponse},
     schema::v1::Schema,
 };
 use anyhow::{Context, Result};
-use std::collections::HashMap;
+use serde::{Deserialize, Deserializer};
 use std::time::SystemTime;
-use tonic::metadata::{MetadataKey, MetadataValue};
+use tonic::metadata::MetadataValue;
 use tonic::service::interceptor::InterceptedService;
 use tonic::service::Interceptor;
-use tonic::transport::{Channel, Endpoint};
+use tonic::transport::Channel;
 use tonic::{Request, Status};
-
-use super::CerbosClientOptions;
 
 const ADD_POLICY_BATCH_SIZE: usize = 10;
 const ADD_SCHEMA_BATCH_SIZE: usize = 10;
+
+pub(crate) fn deserialize_effect<'de, D>(deserializer: D) -> Result<i32, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    Effect::from_str_name(&s)
+        .map(|e| e as i32)
+        .ok_or_else(|| serde::de::Error::custom(format!("Unknown effect: {}", s)))
+}
 
 /// Admin client for the Cerbos Admin API
 pub struct CerbosAdminClient {

@@ -3,77 +3,57 @@ fn main() -> Result<(), std::io::Error> {
         .out_dir("src/genpb")
         .build_server(false);
 
-    if cfg!(feature = "admin") {
-        let types = [
-            "Condition",
-            "ExportVariables",
-            "Variables",
-            "ExportConstants",
-            "Constants",
-            "DerivedRoles",
-            "RoleDef",
-            "RolePolicy",
-            "RoleRule",
-            "PrincipalPolicy",
-            "PrincipalRule",
-            "PrincipalRule.Action",
-            "ResourcePolicy",
-            "ResourceRule",
-            "ResourceRule.Action",
-            "Policy",
-            "Metadata",
-            "Match",
-            "Match.ExprList",
-            "Output",
-            "Output.When",
-            "Schemas",
-            "Schemas.Schema",
-            "Schemas.IgnoreWhen",
-            // "TestFixture",
-            // "TestFixture.Principals",
-            // "TestFixture.Resources",
-            // "TestFixture.AuxData",
-            // "TestFixtureGroup",
-            // "TestFixtureGroup.Principals",
-            // "TestFixtureGroup.Resources",
-            // "TestOptions",
-            "Policy.policy_type",
-            "RolePolicy.policy_type",
-            "Match.op",
-            "Condition.condition",
-            "SourceAttributes",
-        ];
-        let mut prefix = "cerbos.policy.v1.";
-        for t in types {
-            builder =
-                builder.type_attribute(format!("{}{}", prefix, t), "#[derive(serde::Deserialize)]");
-            builder = builder.type_attribute(
-                format!("{}{}", prefix, t),
-                "#[serde(rename_all = \"camelCase\")]",
-            );
-            if !is_enum(t) {
-                builder = builder.type_attribute(format!("{}{}", prefix, t), "#[serde(default)]");
-            }
-        }
-        prefix = "google.protobuf.";
-        for t in [
-            "Value",
-            "Value.kind",
-            "ListValue",
-            "Struct",
-            "Timestamp",
-            "UInt64Value",
-        ] {
-            builder =
-                builder.type_attribute(format!("{}{}", prefix, t), "#[derive(serde::Deserialize)]");
-            builder = builder.type_attribute(
-                format!("{}{}", prefix, t),
-                "#[serde(rename_all = \"camelCase\")]",
-            );
-            if !is_enum(t) {
-                builder = builder.type_attribute(format!("{}{}", prefix, t), "#[serde(default)]");
-            }
-        }
+    let types = [
+        "Condition",
+        "ExportVariables",
+        "Variables",
+        "ExportConstants",
+        "Constants",
+        "DerivedRoles",
+        "RoleDef",
+        "RolePolicy",
+        "RoleRule",
+        "PrincipalPolicy",
+        "PrincipalRule",
+        "PrincipalRule.Action",
+        "ResourcePolicy",
+        "ResourceRule",
+        "ResourceRule.Action",
+        "Policy",
+        "Metadata",
+        "Match",
+        "Match.ExprList",
+        "Output",
+        "Output.When",
+        "Schemas",
+        "Schemas.Schema",
+        "Schemas.IgnoreWhen",
+        // "TestFixture",
+        // "TestFixture.Principals",
+        // "TestFixture.Resources",
+        // "TestFixture.AuxData",
+        // "TestFixtureGroup",
+        // "TestFixtureGroup.Principals",
+        // "TestFixtureGroup.Resources",
+        // "TestOptions",
+        "Policy.policy_type",
+        "RolePolicy.policy_type",
+        "Match.op",
+        "Condition.condition",
+        "SourceAttributes",
+    ];
+    for t in types {
+        builder = add_serde_annotations(builder, "cerbos.policy.v1.", t);
+    }
+    for t in [
+        "Value",
+        "Value.kind",
+        "ListValue",
+        "Struct",
+        "Timestamp",
+        "UInt64Value",
+    ] {
+        builder = add_serde_annotations(builder, "google.protobuf.", t);
     }
 
     builder.compile_well_known_types(true).compile_protos(
@@ -88,6 +68,21 @@ fn main() -> Result<(), std::io::Error> {
         ],
         &["proto/defs/"],
     )
+}
+
+fn add_serde_annotations(
+    builder: tonic_build::Builder,
+    prefix: &'static str,
+    t: &'static str,
+) -> tonic_build::Builder {
+    let mut b = builder.type_attribute(
+            format!("{}{}", prefix, t),
+            "#[cfg_attr(feature = \"serde\", derive(serde::Deserialize), serde(rename_all = \"camelCase\"))]",
+        );
+    if !is_enum(t) {
+        b = b.type_attribute(format!("{}{}", prefix, t), "#[serde(default)]");
+    }
+    b
 }
 
 fn is_enum(s: &str) -> bool {
