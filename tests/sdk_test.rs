@@ -168,7 +168,7 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
         .await?;
 
     let xx125_or_none = resp.find("XX125");
-    assert!(!xx125_or_none.is_none());
+    assert!(xx125_or_none.is_some());
 
     let xx125 = xx125_or_none.unwrap();
 
