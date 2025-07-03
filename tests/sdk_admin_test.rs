@@ -57,22 +57,22 @@ fn get_test_data_path(subpath: &[&str]) -> PathBuf {
 // }
 #[tokio::test]
 pub async fn test_reading_policy() -> Result<()> {
-    use cerbos::genpb::cerbos::policy::v1::{policy::PolicyType, Policy, ResourcePolicy};
-    use serde_yml::Value as YamlValue;
-
-    // Convert YAML Value to your type
+    use cerbos::{genpb::cerbos::policy::v1::policy::PolicyType, sdk::deser::read_policy};
 
     let policy_path = get_test_data_path(&["resource_policies", "policy_01.yaml"]);
-    let mut file = std::fs::File::open(policy_path)?;
-    let mut buf = vec![];
-    _ = file.read_to_end(&mut buf)?;
-    let yaml_value: YamlValue = serde_yml::from_slice(&buf)?;
-    let resource_policy_value = yaml_value.get("resourcePolicy").unwrap().clone();
-    let policy: Policy = serde_yml::from_value(yaml_value)?;
-    let rp: ResourcePolicy = serde_yml::from_value(resource_policy_value)?;
+    let file = std::fs::File::open(policy_path)?;
+    let policy = read_policy(file)?;
+    // let mut buf = vec![];
+    // _ = file.read_to_end(&mut buf)?;
+    // let yaml_value: YamlValue = serde_yml::from_slice(&buf)?;
+    // let resource_policy_value = yaml_value.get("resourcePolicy").unwrap().clone();
+    // let policy: Policy = serde_yml::from_value(yaml_value)?;
+    // let rp: ResourcePolicy = serde_yml::from_value(resource_policy_value)?;
     // let p: Policy = serde_yml::from_slice(&buf)?;
     println!("Policy vars: {:?}", policy.variables);
-    println!("{}", rp.resource);
+    if let Some(PolicyType::ResourcePolicy(rp)) = policy.policy_type {
+        println!("{}", rp.resource);
+    }
     // if let p.po
     // if let Some(PolicyType::ResourcePolicy(ref rp)) = p.policy_type {
     //     println!("{} {}", rp.resource, rp.version);
