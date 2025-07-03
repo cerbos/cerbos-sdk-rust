@@ -25,41 +25,24 @@ where
 
 const BUF_SIZE: usize = 1024 * 4; // 4KiB
 const MAX_FILE_SIZE: usize = 1024 * 1024 * 4; // 4MiB
-const NEWLINE: u8 = b'\n';
-
 static JSON_START: &str = "{";
 
-// trait Index {
-//     fn get(self: &Self, n: &str) -> Option<&Self>;
-// }
-
-// impl Index for serde_json::Value {
-//     fn get(self: &Self, n: &str) -> Option<&Self> {
-//         self.get(n)
-//     }
-// }
-// impl Index for serde_yml::Value {
-//     fn get(self: &Self, n: &str) -> Option<&Self> {
-//         self.get(n)
-//     }
-// }
-
-trait Serde {
+trait PolicyDeser {
     type Value: Clone;
     fn from_value<T: serde::de::DeserializeOwned>(&self, value: Self::Value) -> anyhow::Result<T>;
     fn from_self<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T>;
     fn get(&self, name: &str) -> Option<&Self::Value>;
 }
 
-struct JsonSerde(serde_json::Value);
-impl JsonSerde {
+struct JsonPolicyDeser(serde_json::Value);
+impl JsonPolicyDeser {
     fn new(buf: Vec<u8>) -> anyhow::Result<Self> {
         Ok(Self(
             serde_json::from_slice(&buf).with_context(|| "fail to deser from slice")?,
         ))
     }
 }
-impl Serde for JsonSerde {
+impl PolicyDeser for JsonPolicyDeser {
     type Value = serde_json::Value;
     fn from_value<T: serde::de::DeserializeOwned>(&self, value: Self::Value) -> anyhow::Result<T> {
         serde_json::from_value(value).with_context(|| "fail to deserialize")
@@ -74,15 +57,15 @@ impl Serde for JsonSerde {
     }
 }
 
-struct YamlSerde(serde_yml::Value);
-impl YamlSerde {
+struct YamlPolicyDeser(serde_yml::Value);
+impl YamlPolicyDeser {
     fn new(buf: Vec<u8>) -> anyhow::Result<Self> {
         Ok(Self(
             serde_yml::from_slice(&buf).with_context(|| "fail to deser from slice")?,
         ))
     }
 }
-impl Serde for YamlSerde {
+impl PolicyDeser for YamlPolicyDeser {
     type Value = serde_yml::Value;
 
     fn from_value<T: serde::de::DeserializeOwned>(&self, value: Self::Value) -> anyhow::Result<T> {
@@ -97,7 +80,7 @@ impl Serde for YamlSerde {
         serde_yml::from_value(self.0).with_context(|| "fail to deserialize")
     }
 }
-fn make_policy(s: impl Serde) -> anyhow::Result<Policy> {
+fn make_policy(s: impl PolicyDeser) -> anyhow::Result<Policy> {
     let pt = if let Some(v) = s.get("resourcePolicy") {
         let p: ResourcePolicy = s.from_value(v.clone())?;
         Some(PolicyType::ResourcePolicy(p))
@@ -133,12 +116,12 @@ pub fn read_policy(src: impl Read) -> anyhow::Result<Policy> {
         let mut h = buf.take(MAX_FILE_SIZE as u64);
         let mut data = Vec::new();
         h.read(&mut data)?;
-        let ser = JsonSerde::new(data)?;
+        let ser = JsonPolicyDeser::new(data)?;
         make_policy(ser)
     } else {
         let h = buf.take(MAX_FILE_SIZE as u64);
         let data: Vec<u8> = parse_yaml(h)?;
-        let ser = YamlSerde::new(data)?;
+        let ser = YamlPolicyDeser::new(data)?;
         make_policy(ser)
     }
 }
