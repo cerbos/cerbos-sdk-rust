@@ -10,6 +10,7 @@ use crate::genpb::cerbos::{
         policy::PolicyType, DerivedRoles, ExportConstants, ExportVariables, Policy,
         PrincipalPolicy, ResourcePolicy, RolePolicy,
     },
+    schema::v1::Schema,
 };
 use std::io::{self, BufRead, BufReader, Read};
 
@@ -80,6 +81,28 @@ impl PolicyDeser for YamlPolicyDeser {
         serde_yml::from_value(self.0).with_context(|| "fail to deserialize")
     }
 }
+enum Decoder {
+    Json(JsonPolicyDeser),
+    Yaml(YamlPolicyDeser),
+}
+fn make_decoder(src: impl Read) -> anyhow::Result<Decoder> {
+    let mut buf = BufReader::with_capacity(BUF_SIZE, src);
+
+    // Peek at the buffer to determine format
+    let prelude = buf.fill_buf().map(String::from_utf8_lossy)?;
+    let trimmed = prelude.trim_start();
+    let result = if trimmed.starts_with(JSON_START) {
+        let mut h = buf.take(MAX_FILE_SIZE as u64);
+        let mut data = Vec::new();
+        h.read(&mut data)?;
+        Decoder::Json(JsonPolicyDeser::new(data)?)
+    } else {
+        let h = buf.take(MAX_FILE_SIZE as u64);
+        let data: Vec<u8> = parse_yaml(h)?;
+        Decoder::Yaml(YamlPolicyDeser::new(data)?)
+    };
+    Ok(result)
+}
 fn make_policy(s: impl PolicyDeser) -> anyhow::Result<Policy> {
     let pt = if let Some(v) = s.get("resourcePolicy") {
         let p: ResourcePolicy = s.from_value(v.clone())?;
@@ -106,26 +129,19 @@ fn make_policy(s: impl PolicyDeser) -> anyhow::Result<Policy> {
     policy.policy_type = pt;
     Ok(policy)
 }
-pub fn read_policy(src: impl Read) -> anyhow::Result<Policy> {
-    let mut buf = BufReader::with_capacity(BUF_SIZE, src);
 
-    // Peek at the buffer to determine format
-    let prelude = buf.fill_buf().map(String::from_utf8_lossy)?;
-    let trimmed = prelude.trim_start();
-    if trimmed.starts_with(JSON_START) {
-        let mut h = buf.take(MAX_FILE_SIZE as u64);
-        let mut data = Vec::new();
-        h.read(&mut data)?;
-        let ser = JsonPolicyDeser::new(data)?;
-        make_policy(ser)
-    } else {
-        let h = buf.take(MAX_FILE_SIZE as u64);
-        let data: Vec<u8> = parse_yaml(h)?;
-        let ser = YamlPolicyDeser::new(data)?;
-        make_policy(ser)
+pub fn read_policy(src: impl Read) -> anyhow::Result<Policy> {
+    match make_decoder(src)? {
+        Decoder::Json(j) => make_policy(j),
+        Decoder::Yaml(y) => make_policy(y),
     }
 }
-
+pub fn read_schema(src: impl Read) -> anyhow::Result<Schema> {
+    match make_decoder(src)? {
+        Decoder::Json(j) => j.from_self(),
+        Decoder::Yaml(y) => y.from_self(),
+    }
+}
 fn parse_yaml(reader: impl BufRead) -> anyhow::Result<Vec<u8>> {
     const YAML_SEP: &str = "---";
     const YAML_COMMENT: &'static str = "#";
