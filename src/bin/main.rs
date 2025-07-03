@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
         .is_allowed("view:public", principal, resource, None)
         .await?;
 
-    println!("Allowed={:?}", resp);
+    println!("Allowed={resp:?}");
 
     Ok(())
 }

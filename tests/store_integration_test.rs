@@ -425,7 +425,7 @@ async fn test_list_files_with_filter_match(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let request = ListFilesRequestBuilder::new(&setup.store_id)
-        .with_file_filter(FileFilterBuilder::path_like("export_"))
+        .with_file_filter(FileFilterBuilder::path_contains("export_"))
         .build();
 
     let response = setup.store_client.list_files(request).await?;
@@ -448,7 +448,7 @@ async fn test_list_files_with_no_filter_match(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let request = ListFilesRequestBuilder::new(&setup.store_id)
-        .with_file_filter(FileFilterBuilder::path_like("wibble"))
+        .with_file_filter(FileFilterBuilder::path_contains("wibble"))
         .build();
 
     let response = setup.store_client.list_files(request).await?;

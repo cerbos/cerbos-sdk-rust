@@ -16,7 +16,7 @@ pub mod string_match {
         #[prost(string, tag = "1")]
         Equals(::prost::alloc::string::String),
         #[prost(string, tag = "2")]
-        Like(::prost::alloc::string::String),
+        Contains(::prost::alloc::string::String),
         #[prost(message, tag = "3")]
         In(InList),
     }
@@ -266,10 +266,12 @@ pub struct ErrDetailConditionUnsatisfied {
     #[prost(int64, tag = "1")]
     pub current_store_version: i64,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ErrDetailOperationDiscarded {
     #[prost(int64, tag = "1")]
     pub current_store_version: i64,
+    #[prost(string, repeated, tag = "2")]
+    pub ignored_files: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ErrDetailCannotModifyGitConnectedStore {}

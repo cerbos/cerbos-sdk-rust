@@ -130,7 +130,7 @@ where
                 let protocol = self.tls_config.as_ref().map_or_else(|| "http", |_| "https");
                 let endpoint_addr = format!("{}://{}:{}", protocol, host.into(), port);
                 let mut endpoint = Channel::from_shared(endpoint_addr.clone())
-                    .with_context(|| format!("Failed to create channel for {}", endpoint_addr))?
+                    .with_context(|| format!("Failed to create channel for {endpoint_addr}"))?
                     .connect_timeout(self.timeout)
                     .timeout(self.timeout)
                     .user_agent(self.user_agent.clone())

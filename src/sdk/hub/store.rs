@@ -423,10 +423,10 @@ impl FileFilterBuilder {
         }
     }
 
-    pub fn path_like(path: impl Into<String>) -> FileFilter {
+    pub fn path_contains(path: impl Into<String>) -> FileFilter {
         FileFilter {
             path: Some(StringMatch {
-                r#match: Some(Match::Like(path.into())),
+                r#match: Some(Match::Contains(path.into())),
             }),
         }
     }
