@@ -114,14 +114,11 @@ impl CerbosContainer {
     }
     pub fn with_config_path(mut self, config: &Path) -> Self {
         Self::prepend_cmd_with_server(&mut self.cmd);
-        if self.cmd.len() == 0 {
-            self.cmd.push("server".to_string());
-        }
         let filename = config.file_name().unwrap();
         self.cmd
             .push("--config=".to_string() + Self::CONFIG_PATH + filename.to_str().unwrap());
         self.volume_mounts.push(Mount::bind_mount(
-            config.to_str().unwrap(),
+            config.parent().unwrap().to_string_lossy(),
             Self::CONFIG_PATH,
         ));
         self

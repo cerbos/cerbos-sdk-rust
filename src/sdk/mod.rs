@@ -136,8 +136,14 @@ where
         self
     }
     #[cfg(feature = "admin")]
-    pub fn with_admin_credentials(mut self, admin_creds: admin::BasicAuth) -> Self {
-        self.admin_creds = Some(admin_creds);
+    pub fn with_admin_credentials(
+        mut self,
+        username: impl Into<String>,
+        password: impl Into<String>,
+    ) -> Self {
+        use admin::BasicAuth;
+
+        self.admin_creds = Some(BasicAuth::new(username.into(), password.into()));
         self
     }
     pub(crate) fn build_channel(self) -> Result<Channel> {
