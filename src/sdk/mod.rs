@@ -406,10 +406,9 @@ struct CerbosInterceptor {
 
 impl Interceptor for CerbosInterceptor {
     fn call(&mut self, mut request: Request<()>) -> std::result::Result<Request<()>, Status> {
+        let metadata = request.metadata_mut();
         if let Some(ref playground_md) = self.playground_instance {
-            request
-                .metadata_mut()
-                .insert("playground-instance", playground_md.clone());
+            metadata.insert("playground-instance", playground_md.clone());
         }
 
         request.set_timeout(self.request_timeout);
