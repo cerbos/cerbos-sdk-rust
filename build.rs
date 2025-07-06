@@ -56,9 +56,12 @@ fn main() -> Result<(), std::io::Error> {
         builder = add_serde_annotations(builder, "google.protobuf.", t);
     }
     let deser_effect_attr = "#[cfg_attr(feature = \"serde\", serde(deserialize_with = \"crate::sdk::deser::deserialize_effect\"))]";
+    let flatten_attr = "#[cfg_attr(feature = \"serde\", serde(flatten))]";
     builder = builder
         .field_attribute("ResourceRule.effect", deser_effect_attr)
-        .field_attribute("PrincipalRule.Action.effect", deser_effect_attr);
+        .field_attribute("PrincipalRule.Action.effect", deser_effect_attr)
+        .field_attribute("Match.op", flatten_attr)
+        .field_attribute("Condition.condition", flatten_attr);
 
     builder = add_serde_annotations(builder, "cerbos.schema.v1.", "Schema");
 

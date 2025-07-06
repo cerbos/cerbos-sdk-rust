@@ -356,6 +356,7 @@ pub struct Variables {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Condition {
     #[prost(oneof = "condition::Condition", tags = "1, 2")]
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub condition: ::core::option::Option<condition::Condition>,
 }
 /// Nested message and enum types in `Condition`.
@@ -382,6 +383,7 @@ pub mod condition {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Match {
     #[prost(oneof = "r#match::Op", tags = "1, 2, 3, 4")]
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub op: ::core::option::Option<r#match::Op>,
 }
 /// Nested message and enum types in `Match`.

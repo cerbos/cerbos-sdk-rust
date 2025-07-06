@@ -61,12 +61,19 @@ async fn async_tls_client(
 #[cfg(all(feature = "testcontainers", feature = "admin"))]
 #[tokio::test]
 pub async fn test_save_read_policy() -> Result<()> {
-    use cerbos::sdk::{admin::model::PolicySet, deser::read_policy};
+    use cerbos::{
+        genpb::cerbos::policy::v1::policy::PolicyType,
+        sdk::{admin::model::PolicySet, deser::read_policy},
+    };
 
     let policy_path = get_test_data_path(&["resource_policies", "policy_01.yaml"]);
     let file = std::fs::File::open(policy_path)?;
     let policy = read_policy(file)?;
-
+    if let Some(PolicyType::ResourcePolicy(ref rp)) = policy.policy_type {
+        println!("{:?}", rp.rules[0]);
+    } else {
+        panic!("WTF");
+    }
     let temp_dir = tempfile::TempDir::new()?;
     let (mut client, container) = async_tls_client(&temp_dir).await?;
     let mut policies = PolicySet::new();
@@ -75,7 +82,7 @@ pub async fn test_save_read_policy() -> Result<()> {
     let p = client
         .get_policy(vec!["resource.leave_request.v20210210".into()])
         .await?;
-    println!("{:?}", p);
+    println!("{:#?}", p);
     container.stop().await
 }
 #[tokio::test]
