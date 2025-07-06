@@ -47,25 +47,19 @@ impl CerbosContainer {
         }
     }
     const CERT_PATH: &str = "/certs/";
-    pub fn with_tls_config(self, config: &CerbosTestTlsConfig) -> Self {
-        let mut mounts = vec![Mount::bind_mount(
+    pub fn with_tls_config(mut self, config: &CerbosTestTlsConfig) -> Self {
+        self.volume_mounts.push(Mount::bind_mount(
             config.get_temp_dir().path().to_string_lossy(),
             Self::CERT_PATH,
-        )];
-        self.volume_mounts.into_iter().for_each(|x| mounts.push(x));
-        Self {
-            volume_mounts: mounts,
-            cmd: vec![
-                "server".to_string(),
-                "--set=server.tls.cert=".to_string()
-                    + Self::CERT_PATH
-                    + CerbosTestTlsConfig::CERT_NAME,
-                "--set=server.tls.key=".to_string()
-                    + Self::CERT_PATH
-                    + CerbosTestTlsConfig::CERT_KEY,
-            ],
-            ..self
-        }
+        ));
+        Self::prepend_cmd_with_server(&mut self.cmd);
+        self.cmd.push(
+            "--set=server.tls.cert=".to_string() + Self::CERT_PATH + CerbosTestTlsConfig::CERT_NAME,
+        );
+        self.cmd.push(
+            "--set=server.tls.key=".to_string() + Self::CERT_PATH + CerbosTestTlsConfig::CERT_KEY,
+        );
+        self
     }
     pub fn with_image_tag<S>(self, image_tag: S) -> Self
     where
@@ -77,18 +71,16 @@ impl CerbosContainer {
         }
     }
 
-    pub fn with_extra_volume_mounts<S, I>(self, mounts: I) -> Self
+    pub fn with_extra_volume_mounts<S, I>(mut self, mounts: I) -> Self
     where
         S: Into<String>,
         I: IntoIterator<Item = (S, S)>,
     {
-        Self {
-            volume_mounts: mounts
-                .into_iter()
-                .map(|(k, v)| Mount::bind_mount(k.into(), v.into()))
-                .collect(),
-            ..self
-        }
+        mounts.into_iter().for_each(|(k, v)| {
+            self.volume_mounts
+                .push(Mount::bind_mount(k.into(), v.into()))
+        });
+        self
     }
 
     pub fn with_environment_vars<S, I>(self, vars: I) -> Self
@@ -129,6 +121,11 @@ impl CerbosContainer {
         self.cmd.push("--set=storage.driver=sqlite3".to_string());
         self.cmd
             .push("--set=storage.sqlite3.dsn=:memory:".to_string());
+        self
+    }
+
+    pub fn debug(self) -> Self {
+        println!("{:?}, {:?}", self.cmd, self.volume_mounts);
         self
     }
 }
