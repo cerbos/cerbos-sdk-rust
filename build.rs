@@ -60,6 +60,8 @@ fn main() -> Result<(), std::io::Error> {
         .field_attribute("ResourceRule.effect", deser_effect_attr)
         .field_attribute("PrincipalRule.Action.effect", deser_effect_attr);
 
+    builder = add_serde_annotations(builder, "cerbos.schema.v1.", "Schema");
+
     builder.compile_well_known_types(true).compile_protos(
         &[
             "proto/defs/cerbos/policy/v1/policy.proto",

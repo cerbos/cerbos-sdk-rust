@@ -57,7 +57,7 @@ fn get_test_data_path(subpath: &[&str]) -> PathBuf {
 // }
 #[tokio::test]
 pub async fn test_reading_policy() -> Result<()> {
-    use cerbos::{genpb::cerbos::policy::v1::policy::PolicyType, sdk::deser::read_policy};
+    use cerbos::{genpb::cerbos::policy::v1::policy::PolicyType, sdk::deser::{read_policy, read_schema}};
 
     let policy_path = get_test_data_path(&["resource_policies", "policy_01.yaml"]);
     let file = std::fs::File::open(policy_path)?;
@@ -72,6 +72,11 @@ pub async fn test_reading_policy() -> Result<()> {
     println!("Policy vars: {:?}", policy.variables);
     if let Some(PolicyType::ResourcePolicy(rp)) = policy.policy_type {
         println!("{}", rp.resource);
+
+        let rs = rp.schemas.unwrap().resource_schema.unwrap().r#ref;
+        let schema_file = std::fs::File::open(get_test_data_path(&["_schemas", &rs]))?;
+        // let schema = read_schema(schema_file)?;
+        // println!("{}", schema.definition); 
     }
     // if let p.po
     // if let Some(PolicyType::ResourcePolicy(ref rp)) = p.policy_type {

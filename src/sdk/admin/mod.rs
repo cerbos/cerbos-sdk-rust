@@ -1,7 +1,6 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::genpb::cerbos::effect::v1::Effect;
 use crate::genpb::cerbos::svc::v1::cerbos_admin_service_client::CerbosAdminServiceClient;
 use crate::genpb::cerbos::{
     policy::v1::Policy,
@@ -14,13 +13,15 @@ use crate::genpb::cerbos::{
     schema::v1::Schema,
 };
 use anyhow::{Context, Result};
-use serde::{Deserialize, Deserializer};
+use base64::prelude::{Engine as _, BASE64_STANDARD};
 use std::time::SystemTime;
 use tonic::metadata::MetadataValue;
 use tonic::service::interceptor::InterceptedService;
 use tonic::service::Interceptor;
 use tonic::transport::Channel;
 use tonic::{Request, Status};
+
+use super::CerbosClientOptions;
 
 const ADD_POLICY_BATCH_SIZE: usize = 10;
 const ADD_SCHEMA_BATCH_SIZE: usize = 10;
@@ -249,17 +250,13 @@ struct BasicAuthInterceptor {
 }
 
 impl BasicAuthInterceptor {
-    fn new(credentials: Option<&BasicAuth>) -> Result<Self> {
-        let auth_header = if let Some(creds) = credentials {
-            let auth_string = format!("{}:{}", creds.username, creds.password);
-            let encoded = base64::encode(auth_string);
-            let header_value = format!("Basic {}", encoded);
-            Some(MetadataValue::try_from(header_value)?)
-        } else {
-            None
-        };
+    fn new(creds: BasicAuth) -> Result<Self> {
+        let auth_string = format!("{}:{}", creds.username, creds.password);
+        let encoded = BASE64_STANDARD.encode(auth_string);
+        let header_value = format!("Basic {}", encoded);
+        let auth_header = MetadataValue::try_from(header_value)?;
 
-        Ok(Self { auth_header })
+        Ok(Self { auth_header: Some(auth_header) })
     }
 }
 
@@ -267,7 +264,6 @@ impl Interceptor for BasicAuthInterceptor {
     fn call(&mut self, mut request: Request<()>) -> std::result::Result<Request<()>, Status> {
         let metadata = request.metadata_mut();
 
-        // Add basic auth header if present
         if let Some(ref auth_header) = self.auth_header {
             metadata.insert("authorization", auth_header.clone());
         }
@@ -277,40 +273,40 @@ impl Interceptor for BasicAuthInterceptor {
 }
 
 impl CerbosAdminClient {
-    // pub async fn new_with_credentials<S: Into<String> + Send>(
-    //     username: String,
-    //     password: String,
-    //     options: CerbosClientOptions<S>,
-    // ) -> Result<Self> {
-    //     let credentials = Some(BasicAuth::new(username, password));
+    pub async fn new_with_credentials<S: Into<String> + Send>(
+        username: String,
+        password: String,
+        options: CerbosClientOptions<S>,
+    ) -> Result<Self> {
+        let credentials = BasicAuth::new(username, password);
 
-    //     let mut endpoint_builder =
-    //         .with_context(|| format!("Failed to create endpoint for {}", endpoint))?;
+        let mut endpoint_builder =
+            .with_context(|| format!("Failed to create endpoint for {}", endpoint))?;
 
-    //     if let Some(tls_config) = options.tls_config {
-    //         endpoint_builder = endpoint_builder
-    //             .tls_config(tls_config)
-    //             .with_context(|| "Failed to apply TLS configuration")?;
-    //     }
+        if let Some(tls_config) = options.tls_config {
+            endpoint_builder = endpoint_builder
+                .tls_config(tls_config)
+                .with_context(|| "Failed to apply TLS configuration")?;
+        }
 
-    //     endpoint_builder = endpoint_builder.timeout(options.timeout);
+        endpoint_builder = endpoint_builder.timeout(options.timeout);
 
-    //     endpoint_builder = endpoint_builder
-    //         .user_agent(options.user_agent)
-    //         .with_context(|| "Failed to set user agent")?;
+        endpoint_builder = endpoint_builder
+            .user_agent(options.user_agent)
+            .with_context(|| "Failed to set user agent")?;
 
-    //     let channel = endpoint_builder
-    //         .connect()
-    //         .await
-    //         .with_context(|| format!("Failed to connect to {}", endpoint))?;
+        let channel = endpoint_builder
+            .connect()
+            .await
+            .with_context(|| format!("Failed to connect to {}", endpoint))?;
 
-    //     let interceptor = BasicAuthInterceptor::new(credentials.as_ref())?;
+        let interceptor = BasicAuthInterceptor::new(credentials)?;
 
-    //     // Create client with interceptor
-    //     let client = CerbosAdminServiceClient::with_interceptor(channel, interceptor);
+        // Create client with interceptor
+        let client = CerbosAdminServiceClient::with_interceptor(channel, interceptor);
 
-    //     Ok(Self { client })
-    // }
+        Ok(Self { client })
+    }
 
     /// Add or update policies
     pub async fn add_or_update_policy(&mut self, policies: &PolicySet) -> Result<()> {

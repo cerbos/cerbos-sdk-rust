@@ -65,6 +65,8 @@ where
     request_id_gen: fn() -> String,
     playground_instance: Option<String>,
     user_agent: String,
+    #[cfg(feature = "admin")]
+    admin_creds: Option<admin::BasicAuth>,
 }
 
 impl<S> CerbosClientOptions<S>
@@ -79,6 +81,8 @@ where
             request_id_gen: gen_uuid,
             playground_instance: None,
             user_agent: "cerbos-rs".to_string(),
+            #[cfg(feature = "admin")]
+            admin_creds: None,
         }
     }
 
@@ -131,7 +135,11 @@ where
         self.user_agent = ua.into();
         self
     }
-
+    #[cfg(feature = "admin")]
+    pub fn with_admin_credentials(mut self, admin_creds: admin::BasicAuth) -> Self {
+        self.admin_creds = Some(admin_creds);
+        self
+    }
     pub(crate) fn build_channel(self) -> Result<Channel> {
         match self.endpoint {
             CerbosEndpoint::HostPort(host, port) => {
