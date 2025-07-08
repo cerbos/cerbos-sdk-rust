@@ -1,12 +1,21 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use std::time::SystemTime;
-
-use crate::genpb::cerbos::{
-    policy::v1::Policy, response::v1::ListAuditLogEntriesResponse, schema::v1::Schema,
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+    time::SystemTime,
 };
-use anyhow::Result;
+
+use crate::{
+    genpb::cerbos::{
+        policy::{self, v1::Policy},
+        response::v1::ListAuditLogEntriesResponse,
+        schema::v1::Schema,
+    },
+    sdk::deser::read_policy,
+};
+use anyhow::{Context, Result};
 
 /// Policy set container for managing multiple policies
 #[derive(Debug, Clone, Default)]
@@ -88,6 +97,21 @@ impl PolicySet {
         }
         Ok(())
     }
+
+    pub fn add_policy_from_file(&mut self, policy_path: std::path::PathBuf) -> Result<()> {
+        let file = File::open(&policy_path)
+            .with_context(|| format!("filed to open {}", policy_path.display()))?;
+        let policy = read_policy(BufReader::new(file))
+            .with_context(|| format!("failed to read policy from {}", policy_path.display()))?;
+        self.add_policy(policy);
+        Ok(())
+    }
+
+    pub fn add_policy_from_reader(&mut self, reader: impl Read) -> Result<()> {
+        let policy = read_policy(reader)?;
+        self.add_policy(policy);
+        Ok(())
+    }
 }
 
 impl SchemaSet {
@@ -138,20 +162,20 @@ impl FilterOptions {
     }
 
     /// Set name regexp filter
-    pub fn with_name_regexp(mut self, regexp: String) -> Self {
-        self.name_regexp = Some(regexp);
+    pub fn with_name_regexp(mut self, regexp: impl Into<String>) -> Self {
+        self.name_regexp = Some(regexp.into());
         self
     }
 
     /// Set scope regexp filter
-    pub fn with_scope_regexp(mut self, regexp: String) -> Self {
-        self.scope_regexp = Some(regexp);
+    pub fn with_scope_regexp(mut self, regexp: impl Into<String>) -> Self {
+        self.scope_regexp = Some(regexp.into());
         self
     }
 
     /// Set version regexp filter
-    pub fn with_version_regexp(mut self, regexp: String) -> Self {
-        self.version_regexp = Some(regexp);
+    pub fn with_version_regexp(mut self, regexp: impl Into<String>) -> Self {
+        self.version_regexp = Some(regexp.into());
         self
     }
 }

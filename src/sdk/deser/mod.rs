@@ -12,7 +12,9 @@ use crate::genpb::cerbos::{
     },
     schema::v1::Schema,
 };
-use std::io::{self, BufRead, BufReader, Read};
+use std::io::{BufRead, BufReader, Read};
+
+pub mod value;
 
 pub(crate) fn deserialize_effect<'de, D>(deserializer: D) -> Result<i32, D::Error>
 where

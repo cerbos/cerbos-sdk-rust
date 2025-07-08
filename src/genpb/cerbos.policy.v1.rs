@@ -233,6 +233,7 @@ pub mod principal_rule {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
+    #[cfg_attr(feature = "serde", serde(default))]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Action {
         #[prost(string, tag = "1")]
@@ -393,6 +394,7 @@ pub mod r#match {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
+    #[cfg_attr(feature = "serde", serde(default))]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct ExprList {
         #[prost(message, repeated, tag = "1")]
@@ -436,6 +438,7 @@ pub mod output {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
+    #[cfg_attr(feature = "serde", serde(default))]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct When {
         #[prost(string, tag = "1")]
@@ -464,6 +467,7 @@ pub mod schemas {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
+    #[cfg_attr(feature = "serde", serde(default))]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct IgnoreWhen {
         #[prost(string, repeated, tag = "1")]
@@ -474,6 +478,7 @@ pub mod schemas {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
+    #[cfg_attr(feature = "serde", serde(default))]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Schema {
         #[prost(string, tag = "1")]

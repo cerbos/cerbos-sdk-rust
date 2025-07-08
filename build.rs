@@ -45,14 +45,7 @@ fn main() -> Result<(), std::io::Error> {
     for t in types {
         builder = add_serde_annotations(builder, "cerbos.policy.v1.", t);
     }
-    for t in [
-        "Value",
-        "Value.kind",
-        "ListValue",
-        "Struct",
-        "Timestamp",
-        "UInt64Value",
-    ] {
+    for t in ["Timestamp", "UInt64Value"] {
         builder = add_serde_annotations(builder, "google.protobuf.", t);
     }
     let deser_effect_attr = "#[cfg_attr(feature = \"serde\", serde(deserialize_with = \"crate::sdk::deser::deserialize_effect\"))]";
@@ -62,7 +55,6 @@ fn main() -> Result<(), std::io::Error> {
         .field_attribute("PrincipalRule.Action.effect", deser_effect_attr)
         .field_attribute("Match.op", flatten_attr)
         .field_attribute("Condition.condition", flatten_attr);
-
     builder = add_serde_annotations(builder, "cerbos.schema.v1.", "Schema");
 
     builder.compile_well_known_types(true).compile_protos(
@@ -98,5 +90,8 @@ fn add_serde_annotations(
 }
 
 fn is_enum(s: &str) -> bool {
-    s.contains(".")
+    s.ends_with(".policy_type")
+        || s.ends_with(".op")
+        || s == "Condition.condition"
+        || s == "Value.kind"
 }
