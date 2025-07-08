@@ -9,9 +9,7 @@ use std::{
 
 use crate::{
     genpb::cerbos::{
-        policy::{self, v1::Policy},
-        response::v1::ListAuditLogEntriesResponse,
-        schema::v1::Schema,
+        policy::v1::Policy, response::v1::ListAuditLogEntriesResponse, schema::v1::Schema,
     },
     sdk::deser::read_policy,
 };

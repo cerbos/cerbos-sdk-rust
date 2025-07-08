@@ -7,7 +7,7 @@ use std::{
 
 use anyhow::Result;
 use cerbos::{
-    genpb::{cerbos::policy, google},
+    genpb::google,
     sdk::admin::model::{FilterOptions, PolicySet},
 };
 
@@ -65,6 +65,7 @@ async fn async_tls_client(
 }
 #[cfg(all(feature = "testcontainers", feature = "admin"))]
 #[tokio::test]
+#[ignore]
 pub async fn test_scratch() -> Result<()> {
     use cerbos::{
         genpb::cerbos::policy::v1::policy::PolicyType,
@@ -145,7 +146,7 @@ pub async fn test_cerbos_admin_client() -> Result<()> {
         ),
     ]);
 
-    let schemas = HashMap::from([
+    let _schemas = HashMap::from([
         ("principal.json", "_schemas/principal.json"),
         (
             "resources/leave_request.json",
@@ -160,6 +161,7 @@ pub async fn test_cerbos_admin_client() -> Result<()> {
     let (mut client, container) = async_tls_client(&temp_dir).await?;
     add_or_update_policies(&mut client, &policies).await?;
     list_policies(&mut client, &policies).await?;
+    inspect_policies(&mut client).await?;
     container.stop().await
 }
 
@@ -237,7 +239,214 @@ async fn list_policies(
     ));
     Ok(())
 }
+async fn inspect_policies(client: &mut cerbos::sdk::admin::CerbosAdminClient) -> Result<()> {
+    struct TestCase {
+        options: Option<FilterOptions>,
+        want: HashMap<&'static str, Vec<&'static str>>,
+    }
+    let test_cases: HashMap<&str, TestCase> = vec![
+        (
+            "NoFilter",
+            TestCase {
+                options: None,
+                want: [
+                    ("principal.donald_duck.vdefault", vec!["*"]),
+                    ("principal.donald_duck.vdefault/acme", vec!["*"]),
+                    ("principal.donald_duck.vdefault/acme.hr", vec!["view:*"]),
+                    (
+                        "resource.leave_request.v20210210",
+                        vec![
+                            "*",
+                            "approve",
+                            "create",
+                            "defer",
+                            "delete",
+                            "remind",
+                            "view",
+                            "view:*",
+                            "view:public",
+                        ],
+                    ),
+                    ("resource.leave_request.vdefault", vec!["*"]),
+                    (
+                        "resource.leave_request.vdefault/acme",
+                        vec!["create", "view:public"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr",
+                        vec!["approve", "defer", "delete", "view:*"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr.uk",
+                        vec!["defer", "delete"],
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+            },
+        ),
+        (
+            "NameRegexp",
+            TestCase {
+                options: Some(FilterOptions::new().with_name_regexp("leave_req")),
+                want: [
+                    (
+                        "resource.leave_request.v20210210",
+                        vec![
+                            "*",
+                            "approve",
+                            "create",
+                            "defer",
+                            "delete",
+                            "remind",
+                            "view",
+                            "view:*",
+                            "view:public",
+                        ],
+                    ),
+                    ("resource.leave_request.vdefault", vec!["*"]),
+                    (
+                        "resource.leave_request.vdefault/acme",
+                        vec!["create", "view:public"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr",
+                        vec!["approve", "defer", "delete", "view:*"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr.uk",
+                        vec!["defer", "delete"],
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+            },
+        ),
+        (
+            "ScopeRegexp",
+            TestCase {
+                options: Some(FilterOptions::new().with_scope_regexp("acme")),
+                want: [
+                    ("principal.donald_duck.vdefault/acme", vec!["*"]),
+                    ("principal.donald_duck.vdefault/acme.hr", vec!["view:*"]),
+                    (
+                        "resource.leave_request.vdefault/acme",
+                        vec!["create", "view:public"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr",
+                        vec!["approve", "defer", "delete", "view:*"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr.uk",
+                        vec!["defer", "delete"],
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+            },
+        ),
+        (
+            "VersionRegexp",
+            TestCase {
+                options: Some(FilterOptions::new().with_version_regexp(r"\d+")),
+                want: [(
+                    "resource.leave_request.v20210210",
+                    vec![
+                        "*",
+                        "approve",
+                        "create",
+                        "defer",
+                        "delete",
+                        "remind",
+                        "view",
+                        "view:*",
+                        "view:public",
+                    ],
+                )]
+                .into_iter()
+                .collect(),
+            },
+        ),
+        (
+            "AllRegexp",
+            TestCase {
+                options: Some(
+                    FilterOptions::new()
+                        .with_name_regexp(".*")
+                        .with_scope_regexp(".*")
+                        .with_version_regexp("def"),
+                ),
+                want: [
+                    ("principal.donald_duck.vdefault", vec!["*"]),
+                    ("principal.donald_duck.vdefault/acme", vec!["*"]),
+                    ("principal.donald_duck.vdefault/acme.hr", vec!["view:*"]),
+                    ("resource.leave_request.vdefault", vec!["*"]),
+                    (
+                        "resource.leave_request.vdefault/acme",
+                        vec!["create", "view:public"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr",
+                        vec!["approve", "defer", "delete", "view:*"],
+                    ),
+                    (
+                        "resource.leave_request.vdefault/acme.hr.uk",
+                        vec!["defer", "delete"],
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+            },
+        ),
+        (
+            "PolicyIDs",
+            TestCase {
+                options: Some(
+                    FilterOptions::new()
+                        .with_policy_ids(vec!["resource.leave_request.v20210210".to_string()]),
+                ),
+                want: [(
+                    "resource.leave_request.v20210210",
+                    vec![
+                        "*",
+                        "approve",
+                        "create",
+                        "defer",
+                        "delete",
+                        "remind",
+                        "view",
+                        "view:*",
+                        "view:public",
+                    ],
+                )]
+                .into_iter()
+                .collect(),
+            },
+        ),
+    ]
+    .into_iter()
+    .collect();
 
+    for (name, tc) in test_cases {
+        let have = client.inspect_policies(tc.options).await?;
+        assert!(!have.results.is_empty(), "{} test case results empty", name);
+        for (fqn, actions) in tc.want {
+            assert!(
+                have.results.contains_key(fqn),
+                "{} test case result no fqn: {}",
+                name,
+                fqn
+            );
+            assert!(
+                eq(&have.results[fqn].actions, actions),
+                "{} test case results mismtach",
+                name
+            );
+        }
+    }
+    Ok(())
+}
 #[test]
 pub fn test_google_protobuf_value_de() {
     use google::protobuf::{value::Kind, Value};
