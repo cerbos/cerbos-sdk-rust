@@ -138,12 +138,6 @@ pub fn read_policy(src: impl Read) -> anyhow::Result<Policy> {
         Decoder::Yaml(y) => make_policy(y),
     }
 }
-pub fn read_schema(src: impl Read) -> anyhow::Result<Schema> {
-    match make_decoder(src)? {
-        Decoder::Json(j) => j.from_self(),
-        Decoder::Yaml(y) => y.from_self(),
-    }
-}
 fn parse_yaml(reader: impl BufRead) -> anyhow::Result<Vec<u8>> {
     const YAML_SEP: &str = "---";
     const YAML_COMMENT: &'static str = "#";

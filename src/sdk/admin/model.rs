@@ -61,34 +61,28 @@ pub struct AuditLogEntry {
     error: Option<String>,
 }
 impl PolicySet {
-    /// Create a new empty policy set
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Add policies to the set
-    pub fn add_policies(&mut self, policies: Vec<Policy>) -> &mut Self {
+    pub fn add_policies(&mut self, policies: impl IntoIterator<Item = Policy>) -> &mut Self {
         self.policies.extend(policies);
         self
     }
 
-    /// Add a single policy to the set
     pub fn add_policy(&mut self, policy: Policy) -> &mut Self {
         self.policies.push(policy);
         self
     }
 
-    /// Get all policies in the set
     pub fn get_policies(&self) -> &[Policy] {
         &self.policies
     }
 
-    /// Get the size of the policy set
     pub fn size(&self) -> usize {
         self.policies.len()
     }
 
-    /// Validate the policy set
     pub fn validate(&self) -> Result<()> {
         if self.policies.is_empty() {
             anyhow::bail!("empty policy set");
@@ -113,65 +107,70 @@ impl PolicySet {
 }
 
 impl SchemaSet {
-    /// Create a new empty schema set
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Add schemas to the set
-    pub fn add_schemas(&mut self, schemas: Vec<Schema>) -> &mut Self {
+    pub fn add_schemas(&mut self, schemas: impl IntoIterator<Item = Schema>) -> &mut Self {
         self.schemas.extend(schemas);
         self
     }
 
-    /// Add a single schema to the set
     pub fn add_schema(&mut self, schema: Schema) -> &mut Self {
         self.schemas.push(schema);
         self
     }
 
-    /// Get all schemas in the set
     pub fn get_schemas(&self) -> &[Schema] {
         &self.schemas
     }
 
-    /// Get the size of the schema set
+    pub fn add_schema_from_file(
+        &mut self,
+        schema_path: std::path::PathBuf,
+        id: impl Into<String>,
+    ) -> Result<()> {
+        let mut file = File::open(&schema_path)
+            .with_context(|| format!("filed to open {}", schema_path.display()))?;
+        let mut buf = vec![];
+        file.read_to_end(&mut buf)?;
+        self.add_schema(Schema {
+            id: id.into(),
+            definition: buf,
+        });
+        Ok(())
+    }
+
     pub fn size(&self) -> usize {
         self.schemas.len()
     }
 }
 
 impl FilterOptions {
-    /// Create new filter options
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Set policy IDs filter
     pub fn with_policy_ids(mut self, ids: Vec<String>) -> Self {
         self.policy_ids = ids;
         self
     }
 
-    /// Include disabled policies/schemas
     pub fn with_include_disabled(mut self, include: bool) -> Self {
         self.include_disabled = include;
         self
     }
 
-    /// Set name regexp filter
     pub fn with_name_regexp(mut self, regexp: impl Into<String>) -> Self {
         self.name_regexp = Some(regexp.into());
         self
     }
 
-    /// Set scope regexp filter
     pub fn with_scope_regexp(mut self, regexp: impl Into<String>) -> Self {
         self.scope_regexp = Some(regexp.into());
         self
     }
 
-    /// Set version regexp filter
     pub fn with_version_regexp(mut self, regexp: impl Into<String>) -> Self {
         self.version_regexp = Some(regexp.into());
         self

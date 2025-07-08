@@ -96,7 +96,7 @@ pub async fn test_scratch() -> Result<()> {
 }
 #[cfg(all(feature = "testcontainers", feature = "admin"))]
 #[tokio::test]
-pub async fn test_cerbos_admin_client() -> Result<()> {
+pub async fn test_admin_client_policies() -> Result<()> {
     let policies = HashMap::from([
         (
             "derived_roles.apatr_common_roles",
@@ -146,7 +146,19 @@ pub async fn test_cerbos_admin_client() -> Result<()> {
         ),
     ]);
 
-    let _schemas = HashMap::from([
+    let temp_dir = tempfile::TempDir::new()?;
+    let (mut client, container) = async_tls_client(&temp_dir).await?;
+    add_or_update_policies(&mut client, &policies).await?;
+    list_policies(&mut client, &policies).await?;
+    inspect_policies(&mut client).await?;
+    container.stop().await
+}
+#[cfg(all(feature = "testcontainers", feature = "admin"))]
+#[tokio::test]
+async fn test_admin_client_schemas() -> Result<()> {
+    use cerbos::sdk::admin::model::SchemaSet;
+
+    let schemas = HashMap::from([
         ("principal.json", "_schemas/principal.json"),
         (
             "resources/leave_request.json",
@@ -159,12 +171,17 @@ pub async fn test_cerbos_admin_client() -> Result<()> {
     ]);
     let temp_dir = tempfile::TempDir::new()?;
     let (mut client, container) = async_tls_client(&temp_dir).await?;
-    add_or_update_policies(&mut client, &policies).await?;
-    list_policies(&mut client, &policies).await?;
-    inspect_policies(&mut client).await?;
+
+    let mut ss = SchemaSet::new();
+    for (id, s) in schemas.iter() {
+        let schema_path = get_test_data_path(&["policies", s]);
+        ss.add_schema_from_file(schema_path, *id)?;
+    }
+    client.add_or_update_schema(&ss).await?;
+    let result = client.list_schemas().await?;
+    assert!(eq(result, schemas.into_keys()));
     container.stop().await
 }
-
 async fn add_or_update_policies(
     client: &mut cerbos::sdk::admin::CerbosAdminClient,
     policies: &HashMap<&'static str, &'static str>,
