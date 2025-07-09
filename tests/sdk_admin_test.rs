@@ -157,6 +157,28 @@ pub async fn test_admin_client_policies() -> Result<()> {
 }
 #[cfg(all(feature = "testcontainers", feature = "admin"))]
 #[tokio::test]
+async fn test_audit_log() -> Result<()> {
+    use cerbos::genpb::cerbos::request::v1::{
+        list_audit_log_entries_request::Kind, ListAuditLogEntriesRequest,
+    };
+    let temp_dir = tempfile::TempDir::new()?;
+    let (mut client, container) = async_tls_client(&temp_dir).await?;
+    let request = ListAuditLogEntriesRequest::new()
+        .with_log_entries_kind(Kind::Access)
+        .with_tail(10_000);
+    let response = client.audit_logs(request).await;
+    assert!(response.is_err());
+    let request = ListAuditLogEntriesRequest {
+        kind: 100,
+        filter: None,
+    }
+    .with_tail(100);
+    let response = client.audit_logs(request).await;
+    assert!(response.is_err());
+    container.stop().await
+}
+#[cfg(all(feature = "testcontainers", feature = "admin"))]
+#[tokio::test]
 async fn test_admin_client_schemas() -> Result<()> {
     use cerbos::sdk::admin::model::SchemaSet;
 
