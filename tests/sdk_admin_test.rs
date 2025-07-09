@@ -65,37 +65,7 @@ async fn async_tls_client(
         .with_tls_ca_cert_pem(tls_config.get_ca_cert());
     Ok((CerbosAdminClient::new(client_conf).await?, container))
 }
-#[cfg(all(feature = "testcontainers", feature = "admin"))]
-#[tokio::test]
-#[ignore]
-pub async fn test_scratch() -> Result<()> {
-    use cerbos::{
-        genpb::cerbos::policy::v1::policy::PolicyType,
-        sdk::{admin::model::PolicySet, deser::read_policy},
-    };
 
-    let policy_path = get_test_data_path(&["policies", "resource_policies", "policy_01.yaml"]);
-    let file = std::fs::File::open(policy_path)?;
-    let policy = read_policy(file)?;
-    const RULE_ID: usize = 4;
-    if let Some(PolicyType::ResourcePolicy(ref rp)) = policy.policy_type {
-        println!("{:?}", rp.rules[RULE_ID]);
-    } else {
-        panic!("WTF");
-    }
-    let temp_dir = tempfile::TempDir::new()?;
-    let (mut client, container) = async_tls_client(&temp_dir).await?;
-    let mut policies = PolicySet::new();
-    policies.add_policy(policy);
-    client.add_or_update_policy(&policies).await?;
-    let p = client
-        .get_policy(vec!["resource.leave_request.v20210210".into()])
-        .await?;
-    if let Some(PolicyType::ResourcePolicy(ref rp)) = p[0].policy_type {
-        println!("{:?}", rp.rules[RULE_ID]);
-    }
-    container.stop().await
-}
 #[cfg(all(feature = "testcontainers", feature = "admin"))]
 #[tokio::test]
 pub async fn test_admin_client_policies() -> Result<()> {
