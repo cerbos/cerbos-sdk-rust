@@ -11,20 +11,6 @@ server:
     cert: /certs/tls.crt
     key: /certs/tls.key
 
-# auxData:
-#   jwt:
-#     keySets:
-#       - id: default
-#         local:
-#           file: /certs/verify_key.jwk
-
-# audit:
-#   enabled: true
-#   backend: "file"
-#   includeMetadataKeys: ["wibble"]
-#   file:
-#     path: stdout
-
 storage:
   driver: "disk"
   disk:
