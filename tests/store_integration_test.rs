@@ -14,8 +14,6 @@ use cerbos::sdk::hub::utils::zip_directory;
 use cerbos::sdk::hub::HubClientBuilder;
 use std::path::PathBuf;
 use std::{env, str};
-use tokio;
-use tonic;
 
 // Expected files list from the Go test
 const WANT_FILES_LIST: &[&str] = &[

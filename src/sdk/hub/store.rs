@@ -100,7 +100,7 @@ where
                 }
                 if total > 10 * MAX_SIZE {
                     return Err(RPCError::ClientSideValidationError {
-                        message: format!("Total {} exceeds 50 MiB", total),
+                        message: format!("Total {total} exceeds 50 MiB"),
                     });
                 }
             }
