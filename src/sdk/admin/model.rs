@@ -14,7 +14,6 @@ use crate::{
                 list_audit_log_entries_request::{Filter, Kind, TimeRange},
                 ListAuditLogEntriesRequest,
             },
-            response::v1::ListAuditLogEntriesResponse,
             schema::v1::Schema,
         },
         google::protobuf::Timestamp,
