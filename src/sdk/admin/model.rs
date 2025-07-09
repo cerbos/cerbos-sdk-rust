@@ -117,7 +117,7 @@ impl SchemaSet {
         let mut file = File::open(&schema_path)
             .with_context(|| format!("filed to open {}", schema_path.display()))?;
         let mut buf = vec![];
-        file.read_to_end(&mut buf)?;
+        let _ = file.read_to_end(&mut buf)?;
         self.add_schema(Schema {
             id: id.into(),
             definition: buf,

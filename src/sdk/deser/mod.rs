@@ -95,7 +95,7 @@ fn make_decoder(src: impl Read) -> anyhow::Result<Decoder> {
     let result = if trimmed.starts_with(JSON_START) {
         let mut h = buf.take(MAX_FILE_SIZE as u64);
         let mut data = Vec::new();
-        h.read(&mut data)?;
+        let _ = h.read(&mut data)?;
         Decoder::Json(JsonPolicyDeser::new(data)?)
     } else {
         let h = buf.take(MAX_FILE_SIZE as u64);
