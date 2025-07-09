@@ -10,7 +10,7 @@ repository = "https://github.com/cerbos/cerbos-sdk-rust"
 homepage = "https://cerbos.dev"
 
 [features]
-admin = ["dep:base64", "dep:serde", "dep:serde_yml"]
+admin = ["dep:base64"]
 hub = []
 testcontainers = ["dep:testcontainers", "dep:rcgen", "dep:tempfile", "dep:time"]
 serde = ["dep:serde", "dep:serde_json", "dep:serde_yml"]
