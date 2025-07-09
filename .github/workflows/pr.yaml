@@ -33,7 +33,7 @@ jobs:
         run: cargo check
 
       - name: Run cargo clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-features -- -D warnings
 
       - name: Install Cerbos
         uses: cerbos/cerbos-setup-action@v1
