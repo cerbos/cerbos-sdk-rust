@@ -49,6 +49,14 @@ jobs:
       - name: Run tests in testcontainers
         run: |
           cargo test --features testcontainers --test sdk_test
+        env:
+          CERBOS_NO_TELEMETRY: "1"
+
+      - name: Run admin tests in testcontainers
+        run: |
+          cargo test --features admin,serde,testcontainers --test sdk_admin_test
+        env:
+          CERBOS_NO_TELEMETRY: "1"
 
       - name: Run Hub Store tests
         env:
