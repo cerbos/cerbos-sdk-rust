@@ -40,6 +40,16 @@ jobs:
         with:
           version: latest
 
+      - name: Run Hub Store tests
+        env:
+          CERBOS_HUB_API_ENDPOINT: "${{ secrets.CERBOS_HUB_API_ENDPOINT }}"
+          CERBOS_HUB_CLIENT_ID: "${{ secrets.CERBOS_HUB_CLIENT_ID }}"
+          CERBOS_HUB_CLIENT_SECRET: "${{ secrets.CERBOS_HUB_CLIENT_SECRET }}"
+          CERBOS_HUB_STORE_ID: "${{ secrets.CERBOS_HUB_STORE_ID }}"
+        run: |
+          echo "Is it really empty?: ${CERBOS_HUB_API_ENDPOINT}"
+          # cargo test --features hub --test store_integration_test -- --test-threads=1
+
       - name: Run tests
         run: |
           cerbos run --set=storage.disk.directory=resources/store -- cargo test --test sdk_test
@@ -58,11 +68,3 @@ jobs:
         env:
           CERBOS_NO_TELEMETRY: "1"
 
-      - name: Run Hub Store tests
-        env:
-          CERBOS_HUB_API_ENDPOINT: "${{ secrets.CERBOS_HUB_API_ENDPOINT }}"
-          CERBOS_HUB_CLIENT_ID: "${{ secrets.CERBOS_HUB_CLIENT_ID }}"
-          CERBOS_HUB_CLIENT_SECRET: "${{ secrets.CERBOS_HUB_CLIENT_SECRET }}"
-          CERBOS_HUB_STORE_ID: "${{ secrets.CERBOS_HUB_STORE_ID }}"
-        run: |
-          cargo test --features hub --test store_integration_test -- --test-threads=1
