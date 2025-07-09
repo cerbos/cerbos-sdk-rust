@@ -90,7 +90,7 @@ impl CerbosAdminClient {
     ) -> anyhow::Result<MetadataValue<tonic::metadata::Ascii>> {
         let auth_string = format!("{}:{}", auth_creds.username, auth_creds.password);
         let encoded = BASE64_STANDARD.encode(auth_string);
-        let header_value = format!("Basic {}", encoded);
+        let header_value = format!("Basic {encoded}");
         MetadataValue::try_from(header_value).with_context(|| "fail to parse metadata value")
     }
     /// Add or update policies

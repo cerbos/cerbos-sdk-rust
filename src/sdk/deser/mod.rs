@@ -10,7 +10,6 @@ use crate::genpb::cerbos::{
         policy::PolicyType, DerivedRoles, ExportConstants, ExportVariables, Policy,
         PrincipalPolicy, ResourcePolicy, RolePolicy,
     },
-    schema::v1::Schema,
 };
 use std::io::{BufRead, BufReader, Read};
 
@@ -23,7 +22,7 @@ where
     let s = String::deserialize(deserializer)?;
     Effect::from_str_name(&s)
         .map(|e| e as i32)
-        .ok_or_else(|| serde::de::Error::custom(format!("Unknown effect: {}", s)))
+        .ok_or_else(|| serde::de::Error::custom(format!("Unknown effect: {s}")))
 }
 
 const BUF_SIZE: usize = 1024 * 4; // 4KiB
@@ -140,7 +139,7 @@ pub fn read_policy(src: impl Read) -> anyhow::Result<Policy> {
 }
 fn parse_yaml(reader: impl BufRead) -> anyhow::Result<Vec<u8>> {
     const YAML_SEP: &str = "---";
-    const YAML_COMMENT: &'static str = "#";
+    const YAML_COMMENT: &str = "#";
     const NEWLINE: u8 = b'\n';
 
     let mut buf = Vec::new();
@@ -148,7 +147,7 @@ fn parse_yaml(reader: impl BufRead) -> anyhow::Result<Vec<u8>> {
     let mut seen_content = false;
 
     for line_result in reader.lines() {
-        let line = line_result.with_context(|| format!("failed to read from source"))?;
+        let line = line_result.with_context(|| "failed to read from source".to_string())?;
         let trimmed_line = line.trim_start();
 
         if trimmed_line.starts_with(YAML_COMMENT) {

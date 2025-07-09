@@ -72,7 +72,7 @@ where
                 const MIN_SIZE: usize = 22;
                 const MAX_SIZE: usize = 15728640;
                 let len = zipped_contents.len();
-                if len < MIN_SIZE || len > MAX_SIZE {
+                if !(MIN_SIZE..=MAX_SIZE).contains(&len) {
                     return Err(RPCError::ClientSideValidationError {
                         message: format!(
                             "zipped_contents must be between {MIN_SIZE} and {MAX_SIZE} bytes"

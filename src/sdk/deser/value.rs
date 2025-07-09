@@ -86,7 +86,7 @@ impl<'de> Visitor<'de> for ValueVisitor {
         E: de::Error,
     {
         Ok(Value {
-            kind: Some(Kind::NullValue(0 as i32)),
+            kind: Some(Kind::NullValue(0_i32)),
         })
     }
 
@@ -95,7 +95,7 @@ impl<'de> Visitor<'de> for ValueVisitor {
         E: de::Error,
     {
         Ok(Value {
-            kind: Some(Kind::NullValue(0 as i32)),
+            kind: Some(Kind::NullValue(0_i32)),
         })
     }
 
@@ -214,7 +214,7 @@ pub fn from_yaml_str(yaml_str: &str) -> Result<Value, serde_yml::Error> {
 pub fn from_json_value(json_value: JsonValue) -> Value {
     match json_value {
         JsonValue::Null => Value {
-            kind: Some(Kind::NullValue(0 as i32)),
+            kind: Some(Kind::NullValue(0_i32)),
         },
         JsonValue::Bool(b) => Value {
             kind: Some(Kind::BoolValue(b)),
@@ -247,7 +247,7 @@ pub fn from_json_value(json_value: JsonValue) -> Value {
 pub fn from_yaml_value(yaml_value: YamlValue) -> Value {
     match yaml_value {
         YamlValue::Null => Value {
-            kind: Some(Kind::NullValue(0 as i32)),
+            kind: Some(Kind::NullValue(0_i32)),
         },
         YamlValue::Bool(b) => Value {
             kind: Some(Kind::BoolValue(b)),

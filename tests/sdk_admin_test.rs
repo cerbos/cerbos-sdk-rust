@@ -13,8 +13,8 @@ use cerbos::{
     sdk::admin::model::{FilterOptions, PolicySet},
 };
 
-const ADMIN_USERNAME: &'static str = "cerbos";
-const ADMIN_PASSWORD: &'static str = "cerbosAdmin";
+const ADMIN_USERNAME: &str = "cerbos";
+const ADMIN_PASSWORD: &str = "cerbosAdmin";
 
 #[cfg(feature = "testcontainers")]
 trait Stoppable {
@@ -449,18 +449,15 @@ async fn inspect_policies(client: &mut cerbos::sdk::admin::CerbosAdminClient) ->
 
     for (name, tc) in test_cases {
         let have = client.inspect_policies(tc.options).await?;
-        assert!(!have.results.is_empty(), "{} test case results empty", name);
+        assert!(!have.results.is_empty(), "{name} test case results empty");
         for (fqn, actions) in tc.want {
             assert!(
                 have.results.contains_key(fqn),
-                "{} test case result no fqn: {}",
-                name,
-                fqn
+                "{name} test case result no fqn: {fqn}"
             );
             assert!(
                 eq(&have.results[fqn].actions, actions),
-                "{} test case results mismtach",
-                name
+                "{name} test case results mismtach"
             );
         }
     }

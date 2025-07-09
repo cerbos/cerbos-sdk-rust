@@ -58,6 +58,12 @@ pub struct HubClientBuilder {
     request_timeout: Duration,
 }
 
+impl Default for HubClientBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HubClientBuilder {
     pub fn new() -> Self {
         Self {

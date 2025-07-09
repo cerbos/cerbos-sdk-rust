@@ -100,7 +100,7 @@ impl CerbosContainer {
     const CONFIG_PATH: &str = "/config/";
 
     fn prepend_cmd_with_server(cmd: &mut Vec<String>) {
-        if cmd.len() == 0 {
+        if cmd.is_empty() {
             cmd.push("server".to_string());
         }
     }
