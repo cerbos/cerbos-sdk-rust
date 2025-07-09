@@ -77,12 +77,12 @@ fn add_serde_annotations(
     t: &'static str,
 ) -> tonic_build::Builder {
     let mut b = builder.type_attribute(
-            format!("{}{}", prefix, t),
+            format!("{prefix}{t}"),
             "#[cfg_attr(feature = \"serde\", derive(serde::Deserialize), serde(rename_all = \"camelCase\"))]",
         );
     if !is_enum(t) {
         b = b.type_attribute(
-            format!("{}{}", prefix, t),
+            format!("{prefix}{t}"),
             "#[cfg_attr(feature = \"serde\", serde(default))]",
         );
     }
