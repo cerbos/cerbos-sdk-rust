@@ -14,6 +14,8 @@ use cerbos::sdk::hub::utils::zip_directory;
 use cerbos::sdk::hub::HubClientBuilder;
 use std::path::PathBuf;
 use std::{env, str};
+use tokio;
+use tonic;
 
 // Expected files list from the Go test
 const WANT_FILES_LIST: &[&str] = &[
@@ -156,9 +158,19 @@ async fn test_auth_error() -> Result<(), Box<dyn std::error::Error>> {
     let files = vec!["wibble.yaml".to_string()];
     let request = GetFilesRequest { store_id, files };
     let result = store_client.get_files(request.clone()).await;
+    if let Err(RPCError::Unknown {
+        message: _,
+        underlying: ref e,
+    }) = result
+    {
+        if e.code() == tonic::Code::ResourceExhausted {
+            eprintln!("\x1b[91mSkipping test due to too many requests response\x1b[0m");
+            return Ok(());
+        }
+    }
     assert!(
         matches!(
-            result,
+            &result,
             Err(RPCError::AuthenticationFailed {
                 message: _,
                 underlying: _
@@ -412,7 +424,7 @@ async fn test_list_files_with_filter_match(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let request = ListFilesRequestBuilder::new(&setup.store_id)
-        .with_file_filter(FileFilterBuilder::path_like("export_"))
+        .with_file_filter(FileFilterBuilder::path_contains("export_"))
         .build();
 
     let response = setup.store_client.list_files(request).await?;
@@ -435,7 +447,7 @@ async fn test_list_files_with_no_filter_match(
     setup: &mut TestSetup,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let request = ListFilesRequestBuilder::new(&setup.store_id)
-        .with_file_filter(FileFilterBuilder::path_like("wibble"))
+        .with_file_filter(FileFilterBuilder::path_contains("wibble"))
         .build();
 
     let response = setup.store_client.list_files(request).await?;

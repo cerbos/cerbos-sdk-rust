@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 use std::time::Duration;
 
-use tokio::{
-    net::UnixStream,
-    runtime::{Builder, Runtime},
-};
+use tokio::runtime::{Builder, Runtime};
 use tonic::{
     codegen::InterceptedService,
     metadata::Ascii,
@@ -51,6 +48,7 @@ where
     S: Into<String> + Send,
 {
     HostPort(S, u16),
+    #[cfg(unix)]
     UnixDomainSocket(S),
 }
 
@@ -167,6 +165,7 @@ where
 
                 Ok(endpoint.connect_lazy())
             }
+            #[cfg(unix)]
             CerbosEndpoint::UnixDomainSocket(path) => {
                 let mut endpoint = Channel::from_static("https://127.0.0.1:3593")
                     .connect_timeout(self.timeout)
@@ -183,7 +182,9 @@ where
 
                 let uds: &'static str = Box::leak(path.into().into_boxed_str());
                 let connect = move |_: Uri| async {
-                    UnixStream::connect(uds.to_string()).await.map(TokioIo::new)
+                    tokio::net::UnixStream::connect(uds.to_string())
+                        .await
+                        .map(TokioIo::new)
                 };
                 Ok(endpoint.connect_with_connector_lazy(service_fn(connect)))
             }
