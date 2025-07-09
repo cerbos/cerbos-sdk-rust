@@ -31,8 +31,8 @@ static JSON_START: &str = "{";
 
 trait PolicyDeser {
     type Value: Clone;
-    fn from_value<T: serde::de::DeserializeOwned>(&self, value: Self::Value) -> anyhow::Result<T>;
-    fn from_self<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T>;
+    fn from_value<T: serde::de::DeserializeOwned>(value: Self::Value) -> anyhow::Result<T>;
+    fn into<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T>;
     fn get(&self, name: &str) -> Option<&Self::Value>;
 }
 
@@ -46,7 +46,7 @@ impl JsonPolicyDeser {
 }
 impl PolicyDeser for JsonPolicyDeser {
     type Value = serde_json::Value;
-    fn from_value<T: serde::de::DeserializeOwned>(&self, value: Self::Value) -> anyhow::Result<T> {
+    fn from_value<T: serde::de::DeserializeOwned>(value: Self::Value) -> anyhow::Result<T> {
         serde_json::from_value(value).with_context(|| "fail to deserialize")
     }
 
@@ -54,7 +54,7 @@ impl PolicyDeser for JsonPolicyDeser {
         self.0.get(name)
     }
 
-    fn from_self<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T> {
+    fn into<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T> {
         serde_json::from_value(self.0).with_context(|| "fail to deserialize")
     }
 }
@@ -70,7 +70,7 @@ impl YamlPolicyDeser {
 impl PolicyDeser for YamlPolicyDeser {
     type Value = serde_yml::Value;
 
-    fn from_value<T: serde::de::DeserializeOwned>(&self, value: Self::Value) -> anyhow::Result<T> {
+    fn from_value<T: serde::de::DeserializeOwned>(value: Self::Value) -> anyhow::Result<T> {
         serde_yml::from_value(value).with_context(|| "fail to deserialize")
     }
 
@@ -78,7 +78,7 @@ impl PolicyDeser for YamlPolicyDeser {
         self.0.get(name)
     }
 
-    fn from_self<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T> {
+    fn into<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T> {
         serde_yml::from_value(self.0).with_context(|| "fail to deserialize")
     }
 }
@@ -104,29 +104,29 @@ fn make_decoder(src: impl Read) -> anyhow::Result<Decoder> {
     };
     Ok(result)
 }
-fn make_policy(s: impl PolicyDeser) -> anyhow::Result<Policy> {
+fn make_policy<T: PolicyDeser>(s: T) -> anyhow::Result<Policy> {
     let pt = if let Some(v) = s.get("resourcePolicy") {
-        let p: ResourcePolicy = s.from_value(v.clone())?;
+        let p: ResourcePolicy = T::from_value(v.clone())?;
         Some(PolicyType::ResourcePolicy(p))
     } else if let Some(v) = s.get("principalPolicy") {
-        let p: PrincipalPolicy = s.from_value(v.clone())?;
+        let p: PrincipalPolicy = T::from_value(v.clone())?;
         Some(PolicyType::PrincipalPolicy(p))
     } else if let Some(v) = s.get("derivedRoles") {
-        let p: DerivedRoles = s.from_value(v.clone())?;
+        let p: DerivedRoles = T::from_value(v.clone())?;
         Some(PolicyType::DerivedRoles(p))
     } else if let Some(v) = s.get("exportVariables") {
-        let p: ExportVariables = s.from_value(v.clone())?;
+        let p: ExportVariables = T::from_value(v.clone())?;
         Some(PolicyType::ExportVariables(p))
     } else if let Some(v) = s.get("exportConstants") {
-        let p: ExportConstants = s.from_value(v.clone())?;
+        let p: ExportConstants = T::from_value(v.clone())?;
         Some(PolicyType::ExportConstants(p))
     } else if let Some(v) = s.get("rolePolicy") {
-        let p: RolePolicy = s.from_value(v.clone())?;
+        let p: RolePolicy = T::from_value(v.clone())?;
         Some(PolicyType::RolePolicy(p))
     } else {
         None
     };
-    let mut policy: Policy = s.from_self()?;
+    let mut policy: Policy = s.into()?;
     policy.policy_type = pt;
     Ok(policy)
 }
