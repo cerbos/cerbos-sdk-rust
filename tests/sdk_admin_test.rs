@@ -198,8 +198,8 @@ fn eq<A: Into<String>, B: Into<String>>(
     a: impl IntoIterator<Item = A>,
     b: impl IntoIterator<Item = B>,
 ) -> bool {
-    let a: HashSet<_> = a.into_iter().map(|x| x.into()).collect();
-    let b: HashSet<_> = b.into_iter().map(|x| x.into()).collect();
+    let a: HashSet<_> = a.into_iter().map(Into::into).collect();
+    let b: HashSet<_> = b.into_iter().map(Into::into).collect();
     a == b
 }
 async fn list_policies(
