@@ -31,7 +31,6 @@ const ADD_SCHEMA_BATCH_SIZE: usize = 10;
 
 pub mod model;
 
-/// Basic authentication credentials
 #[derive(Debug, Clone)]
 pub struct BasicAuth {
     username: String,
@@ -39,7 +38,6 @@ pub struct BasicAuth {
 }
 
 impl BasicAuth {
-    /// Create new basic auth credentials
     pub fn new(username: String, password: String) -> Self {
         Self { username, password }
     }
@@ -63,7 +61,6 @@ pub struct CerbosAdminClient {
     client: CerbosAdminServiceClient<InterceptedService<Channel, CerbosBasicAuthInterceptor>>,
 }
 impl CerbosAdminClient {
-    /// Create a new Cerbos client using client options
     pub async fn new<S>(conf: CerbosClientOptions<S>) -> Result<Self>
     where
         S: Into<String> + Send,
@@ -93,7 +90,6 @@ impl CerbosAdminClient {
         let header_value = format!("Basic {encoded}");
         MetadataValue::try_from(header_value).with_context(|| "fail to parse metadata value")
     }
-    /// Add or update policies
     pub async fn add_or_update_policy(&mut self, policies: &PolicySet) -> Result<()> {
         policies.validate()?;
 
@@ -113,8 +109,6 @@ impl CerbosAdminClient {
 
         Ok(())
     }
-
-    /// List policies with optional filtering
     pub async fn list_policies(&mut self, options: Option<FilterOptions>) -> Result<Vec<String>> {
         let options = options.unwrap_or_default();
 
@@ -134,8 +128,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().policy_ids)
     }
-
-    /// Inspect policies with optional filtering
     pub async fn inspect_policies(
         &mut self,
         options: Option<FilterOptions>,
@@ -158,8 +150,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner())
     }
-
-    /// Get policies by IDs
     pub async fn get_policy(&mut self, ids: Vec<String>) -> Result<Vec<Policy>> {
         let request = GetPolicyRequest { id: ids };
 
@@ -171,8 +161,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().policies)
     }
-
-    /// Disable policies by IDs
     pub async fn disable_policy(&mut self, ids: Vec<String>) -> Result<u32> {
         let request = DisablePolicyRequest { id: ids };
 
@@ -184,8 +172,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().disabled_policies)
     }
-
-    /// Enable policies by IDs
     pub async fn enable_policy(&mut self, ids: Vec<String>) -> Result<u32> {
         let request = EnablePolicyRequest { id: ids };
 
@@ -197,8 +183,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().enabled_policies)
     }
-
-    /// Add or update schemas
     pub async fn add_or_update_schema(&mut self, schemas: &SchemaSet) -> Result<()> {
         let all_schemas = schemas.get_schemas();
 
@@ -216,8 +200,6 @@ impl CerbosAdminClient {
 
         Ok(())
     }
-
-    /// Delete schemas by IDs
     pub async fn delete_schema(&mut self, ids: Vec<String>) -> Result<u32> {
         let request = DeleteSchemaRequest { id: ids };
 
@@ -229,8 +211,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().deleted_schemas)
     }
-
-    /// List all schemas
     pub async fn list_schemas(&mut self) -> Result<Vec<String>> {
         let request = ListSchemasRequest {};
 
@@ -242,8 +222,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().schema_ids)
     }
-
-    /// Get schemas by IDs
     pub async fn get_schema(&mut self, ids: Vec<String>) -> Result<Vec<Schema>> {
         let request = GetSchemaRequest { id: ids };
 
@@ -255,8 +233,6 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner().schemas)
     }
-
-    /// Reload the policy store
     pub async fn reload_store(&mut self, wait: bool) -> Result<()> {
         let request = ReloadStoreRequest { wait };
 
@@ -267,8 +243,6 @@ impl CerbosAdminClient {
 
         Ok(())
     }
-
-    /// Get audit logs (streaming)
     pub async fn audit_logs(
         &mut self,
         request: ListAuditLogEntriesRequest,
