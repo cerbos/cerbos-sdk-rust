@@ -4,12 +4,20 @@
 use std::{
     fs::File,
     io::{BufReader, Read},
-    time::SystemTime,
 };
 
 use crate::{
-    genpb::cerbos::{
-        policy::v1::Policy, response::v1::ListAuditLogEntriesResponse, schema::v1::Schema,
+    genpb::{
+        cerbos::{
+            policy::v1::Policy,
+            request::v1::{
+                list_audit_log_entries_request::{Filter, Kind, TimeRange},
+                ListAuditLogEntriesRequest,
+            },
+            response::v1::ListAuditLogEntriesResponse,
+            schema::v1::Schema,
+        },
+        google::protobuf::Timestamp,
     },
     sdk::deser::read_policy,
 };
@@ -37,29 +45,6 @@ pub struct FilterOptions {
     pub version_regexp: Option<String>,
 }
 
-/// Audit log types
-#[derive(Debug, Clone, Copy)]
-pub enum AuditLogType {
-    Access,
-    Decision,
-}
-
-/// Options for audit log retrieval
-#[derive(Debug, Clone)]
-pub struct AuditLogOptions {
-    pub start_time: Option<SystemTime>,
-    pub end_time: Option<SystemTime>,
-    pub lookup: Option<String>,
-    pub tail: Option<u32>,
-    pub log_type: AuditLogType,
-}
-
-/// Audit log entry wrapper
-#[derive(Debug, Clone)]
-pub struct AuditLogEntry {
-    response: ListAuditLogEntriesResponse,
-    error: Option<String>,
-}
 impl PolicySet {
     pub fn new() -> Self {
         Self::default()
@@ -177,51 +162,30 @@ impl FilterOptions {
     }
 }
 
-impl AuditLogOptions {
-    /// Create new audit log options
-    pub fn new(log_type: AuditLogType) -> Self {
+impl ListAuditLogEntriesRequest {
+    pub fn new() -> Self {
         Self {
-            start_time: None,
-            end_time: None,
-            lookup: None,
-            tail: None,
-            log_type,
+            kind: Kind::Unspecified as i32,
+            filter: None,
         }
     }
-
-    /// Set time range for audit logs
-    pub fn with_time_range(mut self, start: SystemTime, end: SystemTime) -> Self {
-        self.start_time = Some(start);
-        self.end_time = Some(end);
+    pub fn with_log_entries_kind(mut self, kind: Kind) -> Self {
+        self.kind = kind as i32;
         self
     }
-
-    /// Set lookup string for audit logs
+    pub fn with_time_range(mut self, start: Timestamp, end: Timestamp) -> Self {
+        self.filter = Some(Filter::Between(TimeRange {
+            start: Some(start),
+            end: Some(end),
+        }));
+        self
+    }
     pub fn with_lookup(mut self, lookup: String) -> Self {
-        self.lookup = Some(lookup);
+        self.filter = Some(Filter::Lookup(lookup));
         self
     }
-
-    /// Set tail number for audit logs
     pub fn with_tail(mut self, tail: u32) -> Self {
-        self.tail = Some(tail);
+        self.filter = Some(Filter::Tail(tail));
         self
-    }
-}
-
-impl AuditLogEntry {
-    /// Create a new audit log entry
-    pub fn new(response: ListAuditLogEntriesResponse, error: Option<String>) -> Self {
-        Self { response, error }
-    }
-
-    /// Check if there's an error
-    pub fn has_error(&self) -> bool {
-        self.error.is_some()
-    }
-
-    /// Get error message if present
-    pub fn error(&self) -> Option<&str> {
-        self.error.as_deref()
     }
 }

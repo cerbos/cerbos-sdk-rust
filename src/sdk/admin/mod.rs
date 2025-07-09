@@ -1,26 +1,28 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::genpb::cerbos::svc::v1::cerbos_admin_service_client::CerbosAdminServiceClient;
 use crate::genpb::cerbos::{
     policy::v1::Policy,
     request::v1::{
         AddOrUpdatePolicyRequest, AddOrUpdateSchemaRequest, DeleteSchemaRequest,
         DisablePolicyRequest, EnablePolicyRequest, GetPolicyRequest, GetSchemaRequest,
-        InspectPoliciesRequest, ListPoliciesRequest, ListSchemasRequest, ReloadStoreRequest,
+        InspectPoliciesRequest, ListAuditLogEntriesRequest, ListPoliciesRequest,
+        ListSchemasRequest, ReloadStoreRequest,
     },
-    response::v1::InspectPoliciesResponse,
+    response::v1::{InspectPoliciesResponse, ListAuditLogEntriesResponse},
     schema::v1::Schema,
+    svc::v1::cerbos_admin_service_client::CerbosAdminServiceClient,
 };
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use base64::prelude::{Engine as _, BASE64_STANDARD};
 use model::{FilterOptions, PolicySet, SchemaSet};
 use std::time::Duration;
-use tonic::metadata::MetadataValue;
-use tonic::service::interceptor::InterceptedService;
-use tonic::service::Interceptor;
-use tonic::transport::Channel;
-use tonic::{Request, Status};
+use tonic::{
+    metadata::MetadataValue,
+    service::{interceptor::InterceptedService, Interceptor},
+    transport::Channel,
+    Request, Status,
+};
 
 use super::CerbosClientOptions;
 
@@ -266,37 +268,22 @@ impl CerbosAdminClient {
         Ok(())
     }
 
-    /*
     /// Get audit logs (streaming)
     pub async fn audit_logs(
         &mut self,
-        opts: AuditLogOptions,
+        request: ListAuditLogEntriesRequest,
     ) -> Result<tonic::Streaming<ListAuditLogEntriesResponse>> {
-        use crate::genpb::cerbos::request::v1::list_audit_log_entries_request::{
-            Filter, Kind, TimeRange,
-        };
-
-        let kind = match opts.log_type {
-            AuditLogType::Access => Kind::Access,
-            AuditLogType::Decision => Kind::Decision,
-        };
-
-        let filter = if let Some(tail) = opts.tail {
-            Some(Filter::Tail(tail))
-        } else if let (Some(start), Some(end)) = (opts.start_time, opts.end_time) {
-            Some(Filter::Between(TimeRange {
-                start: Some(start.into()),
-                end: Some(end.into()),
-            }))
-        } else if let Some(lookup) = opts.lookup {
-            Some(Filter::Lookup(lookup))
-        } else {
-            None
-        };
-
-        let request = ListAuditLogEntriesRequest {
-            kind: kind.into(),
-            filter,
+        use crate::genpb::cerbos::request::v1::list_audit_log_entries_request::{Filter, Kind};
+        if request.kind() != Kind::Access && request.kind() != Kind::Decision {
+            bail!("incorrect audit log kind");
+        }
+        const MAX_TAIL: u32 = 1000;
+        match request.filter {
+            Some(Filter::Tail(tail)) if tail > MAX_TAIL => {
+                bail!("tail must not exceed {}", MAX_TAIL)
+            }
+            None => bail!("filter is not specified"),
+            _ => {}
         };
 
         let response = self
@@ -307,5 +294,4 @@ impl CerbosAdminClient {
 
         Ok(response.into_inner())
     }
-    */
 }
