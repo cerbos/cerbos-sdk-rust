@@ -1,5 +1,6 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
+#![cfg(feature = "hub")]
 
 use anyhow::{Context, Result};
 use cerbos::genpb::cerbos::cloud::store::v1::GetFilesRequest;
