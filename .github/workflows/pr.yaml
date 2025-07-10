@@ -26,9 +26,6 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      - name: Cache artefacts
-        uses: Swatinem/rust-cache@v2
-
       - name: Run cargo check
         run: cargo check
 
