@@ -232,7 +232,7 @@ pub mod playground_validate_response {
         #[prost(message, tag = "2")]
         Failure(super::PlaygroundFailure),
         #[prost(message, tag = "3")]
-        Success(()),
+        Success(super::super::super::super::google::protobuf::Empty),
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -338,7 +338,7 @@ pub mod playground_proxy_response {
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct AddOrUpdatePolicyResponse {
     #[prost(message, optional, tag = "1")]
-    pub success: ::core::option::Option<()>,
+    pub success: ::core::option::Option<super::super::super::google::protobuf::Empty>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListAuditLogEntriesResponse {
@@ -502,7 +502,9 @@ pub mod inspect_policies_response {
         #[prost(string, tag = "1")]
         pub name: ::prost::alloc::string::String,
         #[prost(message, optional, tag = "2")]
-        pub value: ::core::option::Option<::prost_types::Value>,
+        pub value: ::core::option::Option<
+            super::super::super::super::google::protobuf::Value,
+        >,
         #[prost(enumeration = "constant::Kind", tag = "3")]
         pub kind: i32,
         #[prost(string, tag = "4")]

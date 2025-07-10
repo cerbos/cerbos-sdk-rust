@@ -14,4 +14,5 @@ rm -rf "$PROTO_DIR"
     buf export "$CERBOS_MODULE" --output="${PROTO_DIR}"
     buf export "$CERBOS_CLOUD_API" --output="${PROTO_DIR}" --path cerbos/cloud/store/v1 --path cerbos/cloud/apikey/v1
     buf export buf.build/googleapis/googleapis --output="${PROTO_DIR}" --path google/rpc/status.proto
-)
+    buf export buf.build/protocolbuffers/wellknowntypes --output="${PROTO_DIR}" --path google/protobuf/struct.proto --path google/protobuf/timestamp.proto --path google/protobuf/wrappers.proto
+ )

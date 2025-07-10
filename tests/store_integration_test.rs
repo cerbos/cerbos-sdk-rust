@@ -1,5 +1,6 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
+#![cfg(feature = "hub")]
 
 use anyhow::{Context, Result};
 use cerbos::genpb::cerbos::cloud::store::v1::GetFilesRequest;
@@ -13,8 +14,6 @@ use cerbos::sdk::hub::utils::zip_directory;
 use cerbos::sdk::hub::HubClientBuilder;
 use std::path::PathBuf;
 use std::{env, str};
-use tokio;
-use tonic;
 
 // Expected files list from the Go test
 const WANT_FILES_LIST: &[&str] = &[
@@ -175,8 +174,7 @@ async fn test_auth_error() -> Result<(), Box<dyn std::error::Error>> {
                 underlying: _
             })
         ),
-        "{:?}",
-        result
+        "{result:?}"
     );
     let result = store_client.get_files(request).await;
     assert!(matches!(
@@ -335,7 +333,7 @@ async fn test_modify_files_success(
         .contents;
 
     assert_eq!(
-        std::str::from_utf8(&retrieved_content)?.trim(),
+        std::str::from_utf8(retrieved_content)?.trim(),
         example_content.trim()
     );
 
@@ -401,8 +399,7 @@ async fn test_modify_files_unsuccessful_condition(
                 underlying: _
             },)
         ),
-        "Expected ConditionUnsatisfied, got: {:?}",
-        result
+        "Expected ConditionUnsatisfied, got: {result:?}"
     );
     Ok(())
 }

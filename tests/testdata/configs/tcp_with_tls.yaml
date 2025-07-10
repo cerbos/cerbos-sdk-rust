@@ -1,0 +1,20 @@
+---
+server:
+  httpListenAddr: ":3592"
+  grpcListenAddr: ":3593"
+  adminAPI:
+    enabled: true
+    adminCredentials:
+      username: cerbos
+      passwordHash: JDJ5JDEwJC5BYjQyY2RJNG5QR2NWMmJPdnNtQU93c09RYVA0eFFGdHBrbmFEeXh1NnlIVTE1cHJNY05PCgo=
+  tls:
+    cert: /certs/tls.crt
+    key: /certs/tls.key
+
+storage:
+  driver: "disk"
+  disk:
+    directory: /policies
+
+schema:
+  enforcement: reject

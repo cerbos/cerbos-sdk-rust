@@ -125,6 +125,8 @@ pub mod genpb {
                 pub mod v1alpha1;
             }
         }
+        #[path = "google.protobuf.rs"]
+        pub mod protobuf;
         #[path = "google.rpc.rs"]
         pub mod rpc;
     }

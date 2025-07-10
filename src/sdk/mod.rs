@@ -31,6 +31,12 @@ pub mod container;
 #[cfg(feature = "hub")]
 pub mod hub;
 
+#[cfg(feature = "admin")]
+pub mod admin;
+
+#[cfg(feature = "serde")]
+pub mod deser;
+
 pub mod model;
 
 pub type Result<T> = anyhow::Result<T>;
@@ -57,6 +63,8 @@ where
     request_id_gen: fn() -> String,
     playground_instance: Option<String>,
     user_agent: String,
+    #[cfg(feature = "admin")]
+    admin_creds: Option<admin::BasicAuth>,
 }
 
 impl<S> CerbosClientOptions<S>
@@ -71,6 +79,8 @@ where
             request_id_gen: gen_uuid,
             playground_instance: None,
             user_agent: "cerbos-rs".to_string(),
+            #[cfg(feature = "admin")]
+            admin_creds: None,
         }
     }
 
@@ -123,7 +133,17 @@ where
         self.user_agent = ua.into();
         self
     }
+    #[cfg(feature = "admin")]
+    pub fn with_admin_credentials(
+        mut self,
+        username: impl Into<String>,
+        password: impl Into<String>,
+    ) -> Self {
+        use admin::BasicAuth;
 
+        self.admin_creds = Some(BasicAuth::new(username.into(), password.into()));
+        self
+    }
     pub(crate) fn build_channel(self) -> Result<Channel> {
         match self.endpoint {
             CerbosEndpoint::HostPort(host, port) => {
@@ -393,10 +413,9 @@ struct CerbosInterceptor {
 
 impl Interceptor for CerbosInterceptor {
     fn call(&mut self, mut request: Request<()>) -> std::result::Result<Request<()>, Status> {
+        let metadata = request.metadata_mut();
         if let Some(ref playground_md) = self.playground_instance {
-            request
-                .metadata_mut()
-                .insert("playground-instance", playground_md.clone());
+            metadata.insert("playground-instance", playground_md.clone());
         }
 
         request.set_timeout(self.request_timeout);

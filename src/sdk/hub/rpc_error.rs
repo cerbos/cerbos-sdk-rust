@@ -4,14 +4,13 @@
 use thiserror::Error;
 
 use prost::Message;
-use prost_types::Any;
 use tonic::Status;
 
 use crate::genpb::{
     cerbos::cloud::store::v1::{
         ErrDetailNoUsableFiles, ErrDetailOperationDiscarded, ErrDetailValidationFailure, FileError,
     },
-    google::rpc::Status as GoogleStatus,
+    google::{protobuf::Any, rpc::Status as GoogleStatus},
 };
 
 #[derive(Error, Debug, Clone)]

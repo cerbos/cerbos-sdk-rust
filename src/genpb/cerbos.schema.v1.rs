@@ -50,6 +50,12 @@ pub mod validation_error {
         }
     }
 }
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "serde", serde(default))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Schema {
     #[prost(string, tag = "1")]

@@ -1,7 +1,7 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
-use prost_types::{value::Kind, Value};
-use prost_types::{ListValue, Struct};
+
+use crate::genpb::google::protobuf::{value::Kind, ListValue, Struct, Value};
 
 pub trait AttrVal: Sized {
     fn to_value(self) -> Value;

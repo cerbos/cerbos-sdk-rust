@@ -15,8 +15,8 @@ use crate::genpb::cerbos::response::v1::{
     CheckResourcesResponse as CheckResourcesResponsePB,
     PlanResourcesResponse as PlanResourcesResponsePB,
 };
+use crate::genpb::google::protobuf::Value;
 use prost::Message;
-use prost_types::Value;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::slice::Iter;

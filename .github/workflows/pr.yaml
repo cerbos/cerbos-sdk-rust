@@ -33,7 +33,7 @@ jobs:
         run: cargo check
 
       - name: Run cargo clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-features -- -D warnings
 
       - name: Install Cerbos
         uses: cerbos/cerbos-setup-action@v1
@@ -49,8 +49,17 @@ jobs:
       - name: Run tests in testcontainers
         run: |
           cargo test --features testcontainers --test sdk_test
+        env:
+          CERBOS_NO_TELEMETRY: "1"
+
+      - name: Run admin tests in testcontainers
+        run: |
+          cargo test --features admin,serde,testcontainers --test sdk_admin_test
+        env:
+          CERBOS_NO_TELEMETRY: "1"
 
       - name: Run Hub Store tests
+        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           CERBOS_HUB_API_ENDPOINT: "${{ secrets.CERBOS_HUB_API_ENDPOINT }}"
           CERBOS_HUB_CLIENT_ID: "${{ secrets.CERBOS_HUB_CLIENT_ID }}"

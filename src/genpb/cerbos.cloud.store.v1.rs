@@ -85,11 +85,15 @@ pub mod change_details {
         #[prost(string, tag = "5")]
         pub committer: ::prost::alloc::string::String,
         #[prost(message, optional, tag = "6")]
-        pub commit_date: ::core::option::Option<::prost_types::Timestamp>,
+        pub commit_date: ::core::option::Option<
+            super::super::super::super::super::google::protobuf::Timestamp,
+        >,
         #[prost(string, tag = "7")]
         pub author: ::prost::alloc::string::String,
         #[prost(message, optional, tag = "8")]
-        pub author_date: ::core::option::Option<::prost_types::Timestamp>,
+        pub author_date: ::core::option::Option<
+            super::super::super::super::super::google::protobuf::Timestamp,
+        >,
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Internal {
@@ -98,7 +102,7 @@ pub mod change_details {
         #[prost(map = "string, message", tag = "2")]
         pub metadata: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::super::google::protobuf::Value,
         >,
     }
     #[derive(Clone, PartialEq, ::prost::Message)]
@@ -108,7 +112,7 @@ pub mod change_details {
         #[prost(map = "string, message", tag = "2")]
         pub metadata: ::std::collections::HashMap<
             ::prost::alloc::string::String,
-            ::prost_types::Value,
+            super::super::super::super::super::google::protobuf::Value,
         >,
     }
     #[derive(Clone, PartialEq, ::prost::Oneof)]
