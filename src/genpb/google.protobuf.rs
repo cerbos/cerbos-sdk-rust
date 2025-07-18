@@ -2183,12 +2183,7 @@ pub struct Duration {
 /// <http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime(>)
 /// ) to obtain a formatter capable of generating timestamps in this format.
 ///
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[cfg_attr(feature = "serde", serde(default))]
+#[if_struct_macro::serde_default]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct Timestamp {
     /// Represents seconds of UTC time since Unix epoch
@@ -2343,12 +2338,7 @@ pub struct Int64Value {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[cfg_attr(feature = "serde", serde(default))]
+#[if_struct_macro::serde_default]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct UInt64Value {
     /// The uint64 value.
