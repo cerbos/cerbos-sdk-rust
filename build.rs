@@ -37,7 +37,7 @@ fn main() -> Result<(), std::io::Error> {
     for t in types {
         builder = add_serde_annotations(builder, "cerbos.policy.v1.", t);
     }
-    for t in ["Timestamp", "UInt64Value"] {
+    for t in ["UInt64Value"] {
         builder = add_serde_annotations(builder, "google.protobuf.", t);
     }
     let deser_effect_attr = "#[cfg_attr(feature = \"serde\", serde(deserialize_with = \"crate::sdk::deser::deserialize_effect\"))]";
