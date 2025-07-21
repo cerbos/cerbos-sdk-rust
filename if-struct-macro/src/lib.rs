@@ -67,7 +67,7 @@ mod tests {
         };
 
         let result = serde_default_impl(input).unwrap();
-        let result_str = result.to_string();
+        let result_str = result.to_string().replace(" ", "");
 
         // Should not contain default for enums
         assert!(!result_str.contains("serde(default)"));
