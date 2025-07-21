@@ -371,10 +371,12 @@ pub mod schemas {
         pub ignore_when: ::core::option::Option<IgnoreWhen>,
     }
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct TestFixture {}
 /// Nested message and enum types in `TestFixture`.
 pub mod test_fixture {
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Principals {
         #[prost(map = "string, message", tag = "1")]
@@ -390,6 +392,7 @@ pub mod test_fixture {
             super::test_fixture_group::Principals,
         >,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Resources {
         #[prost(map = "string, message", tag = "1")]
@@ -405,6 +408,7 @@ pub mod test_fixture {
             super::test_fixture_group::Resources,
         >,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct AuxData {
         #[prost(map = "string, message", tag = "1")]
@@ -416,21 +420,25 @@ pub mod test_fixture {
         pub json_schema: ::prost::alloc::string::String,
     }
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct TestFixtureGroup {}
 /// Nested message and enum types in `TestFixtureGroup`.
 pub mod test_fixture_group {
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Principals {
         #[prost(string, repeated, tag = "1")]
         pub principals: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Resources {
         #[prost(string, repeated, tag = "1")]
         pub resources: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TestOptions {
     #[prost(message, optional, tag = "1")]
@@ -445,6 +453,7 @@ pub struct TestOptions {
     #[prost(string, tag = "4")]
     pub default_policy_version: ::prost::alloc::string::String,
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TestSuite {
     #[prost(string, tag = "1")]
@@ -487,6 +496,7 @@ pub struct TestSuite {
         test_fixture_group::Resources,
     >,
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TestTable {
     #[prost(string, tag = "1")]
@@ -506,6 +516,7 @@ pub struct TestTable {
 }
 /// Nested message and enum types in `TestTable`.
 pub mod test_table {
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Input {
         #[prost(string, repeated, tag = "1")]
@@ -521,6 +532,7 @@ pub mod test_table {
         #[prost(string, repeated, tag = "6")]
         pub resource_groups: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct OutputExpectations {
         #[prost(string, tag = "1")]
@@ -530,6 +542,7 @@ pub mod test_table {
             super::super::super::engine::v1::OutputEntry,
         >,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Expectation {
         #[prost(string, tag = "1")]
@@ -553,6 +566,7 @@ pub mod test_table {
         pub resource_groups: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Test {
     #[prost(message, optional, tag = "1")]
@@ -577,6 +591,7 @@ pub struct Test {
 }
 /// Nested message and enum types in `Test`.
 pub mod test {
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct TestName {
         #[prost(string, tag = "1")]
@@ -586,6 +601,7 @@ pub mod test {
         #[prost(string, tag = "3")]
         pub resource_key: ::prost::alloc::string::String,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct OutputEntries {
         #[prost(map = "string, message", tag = "1")]
@@ -595,6 +611,7 @@ pub mod test {
         >,
     }
 }
+#[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TestResults {
     #[prost(message, repeated, tag = "1")]
@@ -604,6 +621,7 @@ pub struct TestResults {
 }
 /// Nested message and enum types in `TestResults`.
 pub mod test_results {
+    #[if_struct_macro::serde_default]
     #[derive(Clone, Copy, PartialEq, ::prost::Message)]
     pub struct Tally {
         #[prost(enumeration = "Result", tag = "1")]
@@ -611,6 +629,7 @@ pub mod test_results {
         #[prost(uint32, tag = "2")]
         pub count: u32,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Summary {
         #[prost(enumeration = "Result", tag = "1")]
@@ -620,6 +639,7 @@ pub mod test_results {
         #[prost(message, repeated, tag = "3")]
         pub result_counts: ::prost::alloc::vec::Vec<Tally>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Suite {
         #[prost(string, tag = "1")]
@@ -640,6 +660,7 @@ pub mod test_results {
         #[prost(string, tag = "8")]
         pub skip_reason: ::prost::alloc::string::String,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct TestCase {
         #[prost(string, tag = "1")]
@@ -647,6 +668,7 @@ pub mod test_results {
         #[prost(message, repeated, tag = "2")]
         pub principals: ::prost::alloc::vec::Vec<Principal>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Principal {
         #[prost(string, tag = "1")]
@@ -654,6 +676,7 @@ pub mod test_results {
         #[prost(message, repeated, tag = "2")]
         pub resources: ::prost::alloc::vec::Vec<Resource>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Resource {
         #[prost(string, tag = "1")]
@@ -661,6 +684,7 @@ pub mod test_results {
         #[prost(message, repeated, tag = "2")]
         pub actions: ::prost::alloc::vec::Vec<Action>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Action {
         #[prost(string, tag = "1")]
@@ -668,6 +692,7 @@ pub mod test_results {
         #[prost(message, optional, tag = "2")]
         pub details: ::core::option::Option<Details>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Details {
         #[prost(enumeration = "Result", tag = "1")]
@@ -681,6 +706,12 @@ pub mod test_results {
     }
     /// Nested message and enum types in `Details`.
     pub mod details {
+        #[if_struct_macro::serde_default]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Deserialize),
+            serde(rename_all = "camelCase")
+        )]
         #[derive(Clone, PartialEq, ::prost::Oneof)]
         pub enum Outcome {
             #[prost(message, tag = "2")]
@@ -693,6 +724,7 @@ pub mod test_results {
             SkipReason(::prost::alloc::string::String),
         }
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct OutputFailure {
         #[prost(string, tag = "1")]
@@ -702,6 +734,7 @@ pub mod test_results {
     }
     /// Nested message and enum types in `OutputFailure`.
     pub mod output_failure {
+        #[if_struct_macro::serde_default]
         #[derive(Clone, PartialEq, ::prost::Message)]
         pub struct MismatchedValue {
             #[prost(message, optional, tag = "1")]
@@ -713,6 +746,7 @@ pub mod test_results {
                 super::super::super::super::super::google::protobuf::Value,
             >,
         }
+        #[if_struct_macro::serde_default]
         #[derive(Clone, PartialEq, ::prost::Message)]
         pub struct MissingValue {
             #[prost(message, optional, tag = "1")]
@@ -720,6 +754,12 @@ pub mod test_results {
                 super::super::super::super::super::google::protobuf::Value,
             >,
         }
+        #[if_struct_macro::serde_default]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Deserialize),
+            serde(rename_all = "camelCase")
+        )]
         #[derive(Clone, PartialEq, ::prost::Oneof)]
         pub enum Outcome {
             #[prost(message, tag = "2")]
@@ -728,6 +768,7 @@ pub mod test_results {
             Missing(MissingValue),
         }
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Failure {
         #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "1")]
@@ -737,6 +778,7 @@ pub mod test_results {
         #[prost(message, repeated, tag = "3")]
         pub outputs: ::prost::alloc::vec::Vec<OutputFailure>,
     }
+    #[if_struct_macro::serde_default]
     #[derive(Clone, PartialEq, ::prost::Message)]
     pub struct Success {
         #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "1")]
@@ -746,6 +788,12 @@ pub mod test_results {
             super::super::super::engine::v1::OutputEntry,
         >,
     }
+    #[if_struct_macro::serde_default]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     #[derive(
         Clone,
         Copy,
@@ -792,6 +840,12 @@ pub mod test_results {
         }
     }
 }
+#[if_struct_macro::serde_default]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum Kind {
@@ -833,6 +887,12 @@ impl Kind {
         }
     }
 }
+#[if_struct_macro::serde_default]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ScopePermissions {

@@ -2077,6 +2077,11 @@ impl SymbolVisibility {
 /// be expressed in JSON format as "3.000000001s", and 3 seconds and 1
 /// microsecond should be expressed in JSON format as "3.000001s".
 ///
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct Duration {
     /// Signed seconds of the span of time. Must be from -315,576,000,000
@@ -2183,6 +2188,11 @@ pub struct Duration {
 /// <http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime(>)
 /// ) to obtain a formatter capable of generating timestamps in this format.
 ///
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct Timestamp {
     /// Represents seconds of UTC time since Unix epoch
@@ -2293,6 +2303,11 @@ impl NullValue {
 ///        rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
 ///      }
 ///
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct Empty {}
 /// Wrapper message for `double`.
@@ -2337,7 +2352,11 @@ pub struct Int64Value {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[if_struct_macro::serde_default]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct UInt64Value {
     /// The uint64 value.
