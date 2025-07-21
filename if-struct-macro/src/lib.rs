@@ -5,17 +5,16 @@ use syn::{Attribute, Item};
 
 /// Conditionally applies `serde(default)` only to structs when the "serde" feature is enabled
 #[proc_macro_attribute]
-pub fn serde_default(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn serde_default(_args: TokenStream, input: TokenStream) -> TokenStream {
     let input2 = proc_macro2::TokenStream::from(input);
-    let args2 = proc_macro2::TokenStream::from(args);
 
-    match serde_default_impl(args2, input2) {
+    match serde_default_impl(input2) {
         Ok(output) => TokenStream::from(output),
         Err(error) => TokenStream::from(error.to_compile_error()),
     }
 }
 
-fn serde_default_impl(_args: TokenStream2, input: TokenStream2) -> syn::Result<TokenStream2> {
+fn serde_default_impl(input: TokenStream2) -> syn::Result<TokenStream2> {
     let item: Item = syn::parse2(input)?;
 
     match item {
