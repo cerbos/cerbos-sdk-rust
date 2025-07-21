@@ -17,25 +17,25 @@ pub fn serde_default(_args: TokenStream, input: TokenStream) -> TokenStream {
 fn serde_default_impl(input: TokenStream2) -> syn::Result<TokenStream2> {
     let item: Item = syn::parse2(input)?;
 
-    match item {
-        Item::Struct(mut item_struct) => {
-            // Only add serde(default) to structs when serde feature is enabled
-            add_serde_default(&mut item_struct.attrs);
-            Ok(item_struct.into_token_stream())
-        }
-        other => Ok(other.into_token_stream()),
+    if let Item::Struct(mut item_struct) = item {
+        item_struct.attrs.push(get_serde_de());
+        item_struct.attrs.push(get_serde_default());
+        Ok(item_struct.into_token_stream())
+    } else {
+        Ok(item.into_token_stream())
     }
 }
 
-fn add_serde_default(attrs: &mut Vec<Attribute>) {
-    let serde_de_attr: Attribute = syn::parse_quote! {
+fn get_serde_de() -> Attribute {
+    syn::parse_quote! {
         #[cfg_attr(feature = "serde", derive(serde::Deserialize), serde(rename_all = "camelCase"))]
-    };
-    attrs.push(serde_de_attr);
-    let serde_default: Attribute = syn::parse_quote! {
+    }
+}
+
+fn get_serde_default() -> Attribute {
+    syn::parse_quote! {
         #[cfg_attr(feature = "serde", serde(default))]
-    };
-    attrs.push(serde_default);
+    }
 }
 
 #[cfg(test)]
@@ -51,7 +51,7 @@ mod tests {
             }
         };
 
-        let result = serde_default_impl(quote! {}, input).unwrap();
+        let result = serde_default_impl(input).unwrap();
         let result_str = result.to_string().replace(" ", "");
 
         assert!(result_str.contains("serde(default)"));
@@ -66,7 +66,7 @@ mod tests {
             }
         };
 
-        let result = serde_default_impl(quote! {}, input).unwrap();
+        let result = serde_default_impl(input).unwrap();
         let result_str = result.to_string();
 
         // Should not contain default for enums
