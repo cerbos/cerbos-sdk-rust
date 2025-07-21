@@ -37,6 +37,7 @@ http-body = "1"
 thiserror = "2.0.12"
 tempfile = { version = "3", optional = true }
 time = { version = "0.3.41", optional = true }
+if-struct-macro = {path = "./if-struct-macro"}
 
 [build-dependencies]
 tonic-build = "0.13.0"

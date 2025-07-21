@@ -20,6 +20,8 @@ pub struct AccessLogEntry {
     pub status_code: u32,
     #[prost(bool, tag = "7")]
     pub oversized: bool,
+    #[prost(message, optional, tag = "8")]
+    pub policy_source: ::core::option::Option<PolicySource>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DecisionLogEntry {
@@ -52,6 +54,8 @@ pub struct DecisionLogEntry {
     pub audit_trail: ::core::option::Option<AuditTrail>,
     #[prost(bool, tag = "17")]
     pub oversized: bool,
+    #[prost(message, optional, tag = "18")]
+    pub policy_source: ::core::option::Option<PolicySource>,
     #[prost(oneof = "decision_log_entry::Method", tags = "7, 8")]
     pub method: ::core::option::Option<decision_log_entry::Method>,
 }
@@ -114,4 +118,133 @@ pub struct AuditTrail {
         ::prost::alloc::string::String,
         super::super::policy::v1::SourceAttributes,
     >,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PolicySource {
+    #[prost(oneof = "policy_source::Source", tags = "1, 2, 3, 4, 5, 6")]
+    pub source: ::core::option::Option<policy_source::Source>,
+}
+/// Nested message and enum types in `PolicySource`.
+pub mod policy_source {
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Blob {
+        #[prost(string, tag = "1")]
+        pub bucket_url: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub prefix: ::prost::alloc::string::String,
+    }
+    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    pub struct Database {
+        #[prost(enumeration = "database::Driver", tag = "1")]
+        pub driver: i32,
+    }
+    /// Nested message and enum types in `Database`.
+    pub mod database {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            PartialEq,
+            Eq,
+            Hash,
+            PartialOrd,
+            Ord,
+            ::prost::Enumeration
+        )]
+        #[repr(i32)]
+        pub enum Driver {
+            Unspecified = 0,
+            Mysql = 1,
+            Postgres = 2,
+            Sqlite3 = 3,
+        }
+        impl Driver {
+            /// String value of the enum field names used in the ProtoBuf definition.
+            ///
+            /// The values are not transformed in any way and thus are considered stable
+            /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+            pub fn as_str_name(&self) -> &'static str {
+                match self {
+                    Self::Unspecified => "DRIVER_UNSPECIFIED",
+                    Self::Mysql => "DRIVER_MYSQL",
+                    Self::Postgres => "DRIVER_POSTGRES",
+                    Self::Sqlite3 => "DRIVER_SQLITE3",
+                }
+            }
+            /// Creates an enum from field names used in the ProtoBuf definition.
+            pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+                match value {
+                    "DRIVER_UNSPECIFIED" => Some(Self::Unspecified),
+                    "DRIVER_MYSQL" => Some(Self::Mysql),
+                    "DRIVER_POSTGRES" => Some(Self::Postgres),
+                    "DRIVER_SQLITE3" => Some(Self::Sqlite3),
+                    _ => None,
+                }
+            }
+        }
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Disk {
+        #[prost(string, tag = "1")]
+        pub directory: ::prost::alloc::string::String,
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct EmbeddedPdp {
+        #[prost(string, tag = "1")]
+        pub url: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub commit_hash: ::prost::alloc::string::String,
+        #[prost(message, optional, tag = "3")]
+        pub built_at: ::core::option::Option<
+            super::super::super::super::google::protobuf::Timestamp,
+        >,
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Git {
+        #[prost(string, tag = "1")]
+        pub repository_url: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub branch: ::prost::alloc::string::String,
+        #[prost(string, tag = "3")]
+        pub subdirectory: ::prost::alloc::string::String,
+    }
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Hub {
+        #[prost(oneof = "hub::Source", tags = "1, 2, 3, 4")]
+        pub source: ::core::option::Option<hub::Source>,
+    }
+    /// Nested message and enum types in `Hub`.
+    pub mod hub {
+        #[derive(Clone, PartialEq, ::prost::Message)]
+        pub struct LocalBundle {
+            #[prost(string, tag = "1")]
+            pub path: ::prost::alloc::string::String,
+        }
+        #[derive(Clone, PartialEq, ::prost::Oneof)]
+        pub enum Source {
+            #[prost(string, tag = "1")]
+            Label(::prost::alloc::string::String),
+            #[prost(string, tag = "2")]
+            DeploymentId(::prost::alloc::string::String),
+            #[prost(string, tag = "3")]
+            PlaygroundId(::prost::alloc::string::String),
+            #[prost(message, tag = "4")]
+            LocalBundle(LocalBundle),
+        }
+    }
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Source {
+        #[prost(message, tag = "1")]
+        Blob(Blob),
+        #[prost(message, tag = "2")]
+        Database(Database),
+        #[prost(message, tag = "3")]
+        Disk(Disk),
+        #[prost(message, tag = "4")]
+        Git(Git),
+        #[prost(message, tag = "5")]
+        Hub(Hub),
+        #[prost(message, tag = "6")]
+        EmbeddedPdp(EmbeddedPdp),
+    }
 }
