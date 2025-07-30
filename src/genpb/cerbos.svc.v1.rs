@@ -107,7 +107,7 @@ pub mod cerbos_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/CheckResourceSet",
             );
@@ -137,7 +137,7 @@ pub mod cerbos_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/CheckResourceBatch",
             );
@@ -165,7 +165,7 @@ pub mod cerbos_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/CheckResources",
             );
@@ -193,7 +193,7 @@ pub mod cerbos_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/ServerInfo",
             );
@@ -219,7 +219,7 @@ pub mod cerbos_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosService/PlanResources",
             );
@@ -340,7 +340,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/AddOrUpdatePolicy",
             );
@@ -371,7 +371,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/InspectPolicies",
             );
@@ -402,7 +402,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ListPolicies",
             );
@@ -430,7 +430,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/GetPolicy",
             );
@@ -458,7 +458,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/DisablePolicy",
             );
@@ -486,7 +486,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/EnablePolicy",
             );
@@ -518,7 +518,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ListAuditLogEntries",
             );
@@ -551,7 +551,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/AddOrUpdateSchema",
             );
@@ -582,7 +582,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ListSchemas",
             );
@@ -610,7 +610,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/GetSchema",
             );
@@ -638,7 +638,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/DeleteSchema",
             );
@@ -666,7 +666,7 @@ pub mod cerbos_admin_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosAdminService/ReloadStore",
             );
@@ -791,7 +791,7 @@ pub mod cerbos_playground_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundValidate",
             );
@@ -822,7 +822,7 @@ pub mod cerbos_playground_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundTest",
             );
@@ -855,7 +855,7 @@ pub mod cerbos_playground_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundEvaluate",
             );
@@ -886,7 +886,7 @@ pub mod cerbos_playground_service_client {
                         format!("Service was not ready: {}", e.into()),
                     )
                 })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/cerbos.svc.v1.CerbosPlaygroundService/PlaygroundProxy",
             );

@@ -4,7 +4,7 @@
 use anyhow::{Context, Result};
 use rcgen::{
     BasicConstraints, Certificate, CertificateParams, DnType, ExtendedKeyUsagePurpose, IsCa,
-    KeyPair, KeyUsagePurpose,
+    Issuer, KeyPair, KeyUsagePurpose,
 };
 use std::fs;
 use tempfile::TempDir;
@@ -20,8 +20,8 @@ impl<'a> CerbosTestTlsConfig<'a> {
     pub const CERT_KEY: &'static str = "server.key";
 
     pub fn new(hostname: impl Into<String>, temp_dir: &'a TempDir) -> Result<Self> {
-        let (ca_cert, ca_key) = Self::new_ca()?;
-        let (cert, key) = Self::new_end_entity(hostname.into(), &ca_cert, &ca_key)?;
+        let (ca_cert, issuer) = Self::new_ca()?;
+        let (cert, key) = Self::new_end_entity(hostname.into(), &issuer)?;
 
         let cert_path = temp_dir.path().join(Self::CERT_NAME);
         fs::write(&cert_path, cert.pem()).context("Failed to write server certificate")?;
@@ -37,7 +37,7 @@ impl<'a> CerbosTestTlsConfig<'a> {
     pub fn get_ca_cert(&self) -> tonic::transport::Certificate {
         tonic::transport::Certificate::from_pem(self.ca_cert.pem())
     }
-    fn new_ca() -> anyhow::Result<(Certificate, KeyPair)> {
+    fn new_ca() -> anyhow::Result<(Certificate, Issuer<'static, KeyPair>)> {
         let mut params = CertificateParams::new([])?;
         let (yesterday, tomorrow) = Self::validity_period();
         params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
@@ -55,12 +55,11 @@ impl<'a> CerbosTestTlsConfig<'a> {
         let key_pair = KeyPair::generate()?;
         let cert = params.self_signed(&key_pair)?;
 
-        Ok((cert, key_pair))
+        Ok((cert, Issuer::new(params, key_pair)))
     }
     fn new_end_entity(
         name: String,
-        ca: &Certificate,
-        ca_key: &KeyPair,
+        issuer: &Issuer<'static, KeyPair>,
     ) -> anyhow::Result<(Certificate, KeyPair)> {
         let mut params = CertificateParams::new([name.clone()])?;
         let (yesterday, tomorrow) = Self::validity_period();
@@ -74,7 +73,7 @@ impl<'a> CerbosTestTlsConfig<'a> {
         params.not_after = tomorrow;
 
         let key_pair = KeyPair::generate()?;
-        Ok((params.signed_by(&key_pair, ca, ca_key)?, key_pair))
+        Ok((params.signed_by(&key_pair, issuer)?, key_pair))
     }
     fn validity_period() -> (OffsetDateTime, OffsetDateTime) {
         let day = Duration::days(1);

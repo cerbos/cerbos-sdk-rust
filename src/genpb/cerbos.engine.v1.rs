@@ -336,7 +336,7 @@ pub mod check_output {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct ActionEffect {
         #[prost(enumeration = "super::super::super::effect::v1::Effect", tag = "1")]
         pub effect: i32,
@@ -432,7 +432,7 @@ pub mod trace {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Component {
         #[prost(enumeration = "component::Kind", tag = "1")]
         pub kind: i32,
@@ -449,7 +449,7 @@ pub mod trace {
             derive(serde::Deserialize),
             serde(rename_all = "camelCase")
         )]
-        #[derive(Clone, PartialEq, ::prost::Message)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct Variable {
             #[prost(string, tag = "1")]
             pub name: ::prost::alloc::string::String,
@@ -547,7 +547,7 @@ pub mod trace {
             derive(serde::Deserialize),
             serde(rename_all = "camelCase")
         )]
-        #[derive(Clone, PartialEq, ::prost::Oneof)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
         pub enum Details {
             #[prost(string, tag = "2")]
             Action(::prost::alloc::string::String),
@@ -709,7 +709,7 @@ pub mod request {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Runtime {
     #[prost(string, repeated, tag = "1")]
     pub effective_derived_roles: ::prost::alloc::vec::Vec<

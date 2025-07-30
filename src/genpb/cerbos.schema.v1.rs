@@ -4,7 +4,7 @@
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ValidationError {
     #[prost(string, tag = "1")]
     pub path: ::prost::alloc::string::String,
@@ -65,7 +65,7 @@ pub mod validation_error {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Schema {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,

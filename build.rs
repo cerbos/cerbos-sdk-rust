@@ -1,5 +1,5 @@
 fn main() -> Result<(), std::io::Error> {
-    let mut builder = tonic_build::configure()
+    let mut builder = tonic_prost_build::configure()
         .out_dir("src/genpb")
         .build_server(false);
 
