@@ -107,7 +107,7 @@ pub mod descriptor_proto {
     /// Range of reserved tag numbers. Reserved tag numbers may not be used by
     /// fields or extension ranges in the same message. Reserved ranges may
     /// not overlap.
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct ReservedRange {
         /// Inclusive.
         #[prost(int32, optional, tag = "1")]
@@ -143,7 +143,7 @@ pub struct ExtensionRangeOptions {
 }
 /// Nested message and enum types in `ExtensionRangeOptions`.
 pub mod extension_range_options {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Declaration {
         /// The extension number declared within the extension range.
         #[prost(int32, optional, tag = "1")]
@@ -457,7 +457,7 @@ pub mod enum_descriptor_proto {
     /// Note that this is distinct from DescriptorProto.ReservedRange in that it
     /// is inclusive such that it can appropriately represent the entire int32
     /// domain.
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct EnumReservedRange {
         /// Inclusive.
         #[prost(int32, optional, tag = "1")]
@@ -555,9 +555,10 @@ pub struct FileOptions {
     pub optimize_for: ::core::option::Option<i32>,
     /// Sets the Go package where structs generated from this .proto will be
     /// placed. If omitted, the Go package will be derived from the following:
-    ///    - The basename of the package import path, if provided.
-    ///    - Otherwise, the package statement in the .proto file, if present.
-    ///    - Otherwise, the basename of the .proto file, without extension.
+    ///
+    /// * The basename of the package import path, if provided.
+    /// * Otherwise, the package statement in the .proto file, if present.
+    /// * Otherwise, the basename of the .proto file, without extension.
     #[prost(string, optional, tag = "11")]
     pub go_package: ::core::option::Option<::prost::alloc::string::String>,
     /// Should generic services be generated in each language?  "Generic" services
@@ -685,10 +686,10 @@ pub struct MessageOptions {
     /// efficient, has fewer features, and is more complicated.
     ///
     /// The message must be defined exactly as follows:
-    ///    message Foo {
-    ///      option message_set_wire_format = true;
-    ///      extensions 4 to max;
-    ///    }
+    /// message Foo {
+    /// option message_set_wire_format = true;
+    /// extensions 4 to max;
+    /// }
     /// Note that the message cannot have any defined fields; MessageSets only
     /// have extensions.
     ///
@@ -714,14 +715,14 @@ pub struct MessageOptions {
     /// maps field.
     ///
     /// For maps fields:
-    ///      map<KeyType, ValueType> map_field = 1;
+    /// map\<KeyType, ValueType> map_field = 1;
     /// The parsed descriptor looks like:
-    ///      message MapFieldEntry {
-    ///          option map_entry = true;
-    ///          optional KeyType key = 1;
-    ///          optional ValueType value = 2;
-    ///      }
-    ///      repeated MapFieldEntry map_field = 1;
+    /// message MapFieldEntry {
+    /// option map_entry = true;
+    /// optional KeyType key = 1;
+    /// optional ValueType value = 2;
+    /// }
+    /// repeated MapFieldEntry map_field = 1;
     ///
     /// Implementations may choose not to generate the map_entry=true message, but
     /// use a native map in the target language to hold the keys and values.
@@ -866,7 +867,7 @@ pub struct FieldOptions {
 }
 /// Nested message and enum types in `FieldOptions`.
 pub mod field_options {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct EditionDefault {
         #[prost(enumeration = "super::Edition", optional, tag = "3")]
         pub edition: ::core::option::Option<i32>,
@@ -875,7 +876,7 @@ pub mod field_options {
         pub value: ::core::option::Option<::prost::alloc::string::String>,
     }
     /// Information about the support window of a feature.
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct FeatureSupport {
         /// The edition that this feature was first available in.  In editions
         /// earlier than this one, the default assigned to EDITION_LEGACY will be
@@ -1279,7 +1280,7 @@ pub mod uninterpreted_option {
     /// extension (denoted with parentheses in options specs in .proto files).
     /// E.g.,{ \["foo", false\], \["bar.baz", true\], \["moo", false\] } represents
     /// "foo.(bar.baz).moo".
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct NamePart {
         #[prost(string, required, tag = "1")]
         pub name_part: ::prost::alloc::string::String,
@@ -1293,7 +1294,7 @@ pub mod uninterpreted_option {
 /// readability, but leave us very open to this scenario.  A future feature will
 /// be designed and implemented to handle this, hopefully before we ever hit a
 /// conflict here.
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FeatureSet {
     #[prost(enumeration = "feature_set::FieldPresence", optional, tag = "1")]
     pub field_presence: ::core::option::Option<i32>,
@@ -1318,7 +1319,7 @@ pub struct FeatureSet {
 }
 /// Nested message and enum types in `FeatureSet`.
 pub mod feature_set {
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct VisibilityFeature {}
     /// Nested message and enum types in `VisibilityFeature`.
     pub mod visibility_feature {
@@ -1676,7 +1677,7 @@ pub mod feature_set_defaults {
     /// defaults. Not all editions may be contained here.  For a given edition,
     /// the defaults at the closest matching edition ordered at or before it should
     /// be used.  This field must be in strict ascending order by edition.
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct FeatureSetEditionDefault {
         #[prost(enumeration = "super::Edition", optional, tag = "3")]
         pub edition: ::core::option::Option<i32>,
@@ -1698,49 +1699,50 @@ pub struct SourceCodeInfo {
     /// tools.
     ///
     /// For example, say we have a file like:
-    ///    message Foo {
-    ///      optional string foo = 1;
-    ///    }
+    /// message Foo {
+    /// optional string foo = 1;
+    /// }
     /// Let's look at just the field definition:
-    ///    optional string foo = 1;
-    ///    ^       ^^     ^^  ^  ^^^
-    ///    a       bc     de  f  ghi
+    /// optional string foo = 1;
+    /// ^       ^^     ^^  ^  ^^^
+    /// a       bc     de  f  ghi
     /// We have the following locations:
-    ///    span   path               represents
-    ///    \[a,i)  [ 4, 0, 2, 0 \]     The whole field definition.
-    ///    \[a,b)  [ 4, 0, 2, 0, 4 \]  The label (optional).
-    ///    \[c,d)  [ 4, 0, 2, 0, 5 \]  The type (string).
-    ///    \[e,f)  [ 4, 0, 2, 0, 1 \]  The name (foo).
-    ///    \[g,h)  [ 4, 0, 2, 0, 3 \]  The number (1).
+    /// span   path               represents
+    /// \[a,i)  \[ 4, 0, 2, 0 \]     The whole field definition.
+    /// \[a,b)  \[ 4, 0, 2, 0, 4 \]  The label (optional).
+    /// \[c,d)  \[ 4, 0, 2, 0, 5 \]  The type (string).
+    /// \[e,f)  \[ 4, 0, 2, 0, 1 \]  The name (foo).
+    /// \[g,h)  \[ 4, 0, 2, 0, 3 \]  The number (1).
     ///
     /// Notes:
-    /// - A location may refer to a repeated field itself (i.e. not to any
-    ///    particular index within it).  This is used whenever a set of elements are
-    ///    logically enclosed in a single code segment.  For example, an entire
-    ///    extend block (possibly containing multiple extension definitions) will
-    ///    have an outer location whose path refers to the "extensions" repeated
-    ///    field without an index.
-    /// - Multiple locations may have the same path.  This happens when a single
-    ///    logical declaration is spread out across multiple places.  The most
-    ///    obvious example is the "extend" block again -- there may be multiple
-    ///    extend blocks in the same scope, each of which will have the same path.
-    /// - A location's span is not always a subset of its parent's span.  For
-    ///    example, the "extendee" of an extension declaration appears at the
-    ///    beginning of the "extend" block and is shared by all extensions within
-    ///    the block.
-    /// - Just because a location's span is a subset of some other location's span
-    ///    does not mean that it is a descendant.  For example, a "group" defines
-    ///    both a type and a field in a single declaration.  Thus, the locations
-    ///    corresponding to the type and field and their components will overlap.
-    /// - Code which tries to interpret locations should probably be designed to
-    ///    ignore those that it doesn't understand, as more types of locations could
-    ///    be recorded in the future.
+    ///
+    /// * A location may refer to a repeated field itself (i.e. not to any
+    ///   particular index within it).  This is used whenever a set of elements are
+    ///   logically enclosed in a single code segment.  For example, an entire
+    ///   extend block (possibly containing multiple extension definitions) will
+    ///   have an outer location whose path refers to the "extensions" repeated
+    ///   field without an index.
+    /// * Multiple locations may have the same path.  This happens when a single
+    ///   logical declaration is spread out across multiple places.  The most
+    ///   obvious example is the "extend" block again -- there may be multiple
+    ///   extend blocks in the same scope, each of which will have the same path.
+    /// * A location's span is not always a subset of its parent's span.  For
+    ///   example, the "extendee" of an extension declaration appears at the
+    ///   beginning of the "extend" block and is shared by all extensions within
+    ///   the block.
+    /// * Just because a location's span is a subset of some other location's span
+    ///   does not mean that it is a descendant.  For example, a "group" defines
+    ///   both a type and a field in a single declaration.  Thus, the locations
+    ///   corresponding to the type and field and their components will overlap.
+    /// * Code which tries to interpret locations should probably be designed to
+    ///   ignore those that it doesn't understand, as more types of locations could
+    ///   be recorded in the future.
     #[prost(message, repeated, tag = "1")]
     pub location: ::prost::alloc::vec::Vec<source_code_info::Location>,
 }
 /// Nested message and enum types in `SourceCodeInfo`.
 pub mod source_code_info {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Location {
         /// Identifies which part of the FileDescriptorProto was defined at this
         /// location.
@@ -1748,21 +1750,21 @@ pub mod source_code_info {
         /// Each element is a field number or an index.  They form a path from
         /// the root FileDescriptorProto to the place where the definition appears.
         /// For example, this path:
-        ///    \[ 4, 3, 2, 7, 1 \]
+        /// \[ 4, 3, 2, 7, 1 \]
         /// refers to:
-        ///    file.message_type(3)  // 4, 3
-        ///        .field(7)         // 2, 7
-        ///        .name()           // 1
+        /// file.message_type(3)  // 4, 3
+        /// .field(7)         // 2, 7
+        /// .name()           // 1
         /// This is because FileDescriptorProto.message_type has field number 4:
-        ///    repeated DescriptorProto message_type = 4;
+        /// repeated DescriptorProto message_type = 4;
         /// and DescriptorProto.field has field number 2:
-        ///    repeated FieldDescriptorProto field = 2;
+        /// repeated FieldDescriptorProto field = 2;
         /// and FieldDescriptorProto.name has field number 1:
-        ///    optional string name = 1;
+        /// optional string name = 1;
         ///
         /// Thus, the above path gives the location of a field name.  If we removed
         /// the last element:
-        ///    \[ 4, 3, 2, 7 \]
+        /// \[ 4, 3, 2, 7 \]
         /// this path refers to the whole field declaration (from the beginning
         /// of the label to the terminating semicolon).
         #[prost(int32, repeated, tag = "1")]
@@ -1793,34 +1795,34 @@ pub mod source_code_info {
         ///
         /// Examples:
         ///
-        ///    optional int32 foo = 1;  // Comment attached to foo.
-        ///    // Comment attached to bar.
-        ///    optional int32 bar = 2;
+        /// optional int32 foo = 1;  // Comment attached to foo.
+        /// // Comment attached to bar.
+        /// optional int32 bar = 2;
         ///
-        ///    optional string baz = 3;
-        ///    // Comment attached to baz.
-        ///    // Another line attached to baz.
+        /// optional string baz = 3;
+        /// // Comment attached to baz.
+        /// // Another line attached to baz.
         ///
-        ///    // Comment attached to moo.
-        ///    //
-        ///    // Another line attached to moo.
-        ///    optional double moo = 4;
+        /// // Comment attached to moo.
+        /// //
+        /// // Another line attached to moo.
+        /// optional double moo = 4;
         ///
-        ///    // Detached comment for corge. This is not leading or trailing comments
-        ///    // to moo or corge because there are blank lines separating it from
-        ///    // both.
+        /// // Detached comment for corge. This is not leading or trailing comments
+        /// // to moo or corge because there are blank lines separating it from
+        /// // both.
         ///
-        ///    // Detached comment for corge paragraph 2.
+        /// // Detached comment for corge paragraph 2.
         ///
-        ///    optional string corge = 5;
-        ///    /* Block comment attached
-        ///     * to corge.  Leading asterisks
-        ///     * will be removed. */
-        ///    /* Block comment attached to
-        ///     * grault. */
-        ///    optional int32 grault = 6;
+        /// optional string corge = 5;
+        /// /\* Block comment attached
+        /// \* to corge.  Leading asterisks
+        /// \* will be removed. */
+        /// /* Block comment attached to
+        /// \* grault. \*/
+        /// optional int32 grault = 6;
         ///
-        ///    // ignored detached comments.
+        /// // ignored detached comments.
         #[prost(string, optional, tag = "3")]
         pub leading_comments: ::core::option::Option<::prost::alloc::string::String>,
         #[prost(string, optional, tag = "4")]
@@ -1843,7 +1845,7 @@ pub struct GeneratedCodeInfo {
 }
 /// Nested message and enum types in `GeneratedCodeInfo`.
 pub mod generated_code_info {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Annotation {
         /// Identifies the element in the original source .proto file. This field
         /// is formatted the same as SourceCodeInfo.Location.path.
@@ -2029,43 +2031,49 @@ impl SymbolVisibility {
 ///
 /// Example 1: Compute Duration from two Timestamps in pseudo code.
 ///
-///      Timestamp start = ...;
-///      Timestamp end = ...;
-///      Duration duration = ...;
+/// ```text
+/// Timestamp start = ...;
+/// Timestamp end = ...;
+/// Duration duration = ...;
 ///
-///      duration.seconds = end.seconds - start.seconds;
-///      duration.nanos = end.nanos - start.nanos;
+/// duration.seconds = end.seconds - start.seconds;
+/// duration.nanos = end.nanos - start.nanos;
 ///
-///      if (duration.seconds < 0 && duration.nanos > 0) {
-///        duration.seconds += 1;
-///        duration.nanos -= 1000000000;
-///      } else if (duration.seconds > 0 && duration.nanos < 0) {
-///        duration.seconds -= 1;
-///        duration.nanos += 1000000000;
-///      }
+/// if (duration.seconds < 0 && duration.nanos > 0) {
+///    duration.seconds += 1;
+///    duration.nanos -= 1000000000;
+/// } else if (duration.seconds > 0 && duration.nanos < 0) {
+///    duration.seconds -= 1;
+///    duration.nanos += 1000000000;
+/// }
+/// ```
 ///
 /// Example 2: Compute Timestamp from Timestamp + Duration in pseudo code.
 ///
-///      Timestamp start = ...;
-///      Duration duration = ...;
-///      Timestamp end = ...;
+/// ```text
+/// Timestamp start = ...;
+/// Duration duration = ...;
+/// Timestamp end = ...;
 ///
-///      end.seconds = start.seconds + duration.seconds;
-///      end.nanos = start.nanos + duration.nanos;
+/// end.seconds = start.seconds + duration.seconds;
+/// end.nanos = start.nanos + duration.nanos;
 ///
-///      if (end.nanos < 0) {
-///        end.seconds -= 1;
-///        end.nanos += 1000000000;
-///      } else if (end.nanos >= 1000000000) {
-///        end.seconds += 1;
-///        end.nanos -= 1000000000;
-///      }
+/// if (end.nanos < 0) {
+///    end.seconds -= 1;
+///    end.nanos += 1000000000;
+/// } else if (end.nanos >= 1000000000) {
+///    end.seconds += 1;
+///    end.nanos -= 1000000000;
+/// }
+/// ```
 ///
 /// Example 3: Compute Duration from datetime.timedelta in Python.
 ///
-///      td = datetime.timedelta(days=3, minutes=10)
-///      duration = Duration()
-///      duration.FromTimedelta(td)
+/// ```text
+/// td = datetime.timedelta(days=3, minutes=10)
+/// duration = Duration()
+/// duration.FromTimedelta(td)
+/// ```
 ///
 /// # JSON Mapping
 ///
@@ -2076,13 +2084,12 @@ impl SymbolVisibility {
 /// encoded in JSON format as "3s", while 3 seconds and 1 nanosecond should
 /// be expressed in JSON format as "3.000000001s", and 3 seconds and 1
 /// microsecond should be expressed in JSON format as "3.000001s".
-///
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Duration {
     /// Signed seconds of the span of time. Must be from -315,576,000,000
     /// to +315,576,000,000 inclusive. Note: these bounds are computed from:
@@ -2116,50 +2123,62 @@ pub struct Duration {
 ///
 /// Example 1: Compute Timestamp from POSIX `time()`.
 ///
-///      Timestamp timestamp;
-///      timestamp.set_seconds(time(NULL));
-///      timestamp.set_nanos(0);
+/// ```text
+/// Timestamp timestamp;
+/// timestamp.set_seconds(time(NULL));
+/// timestamp.set_nanos(0);
+/// ```
 ///
 /// Example 2: Compute Timestamp from POSIX `gettimeofday()`.
 ///
-///      struct timeval tv;
-///      gettimeofday(&tv, NULL);
+/// ```text
+/// struct timeval tv;
+/// gettimeofday(&tv, NULL);
 ///
-///      Timestamp timestamp;
-///      timestamp.set_seconds(tv.tv_sec);
-///      timestamp.set_nanos(tv.tv_usec * 1000);
+/// Timestamp timestamp;
+/// timestamp.set_seconds(tv.tv_sec);
+/// timestamp.set_nanos(tv.tv_usec * 1000);
+/// ```
 ///
 /// Example 3: Compute Timestamp from Win32 `GetSystemTimeAsFileTime()`.
 ///
-///      FILETIME ft;
-///      GetSystemTimeAsFileTime(&ft);
-///      UINT64 ticks = (((UINT64)ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+/// ```text
+/// FILETIME ft;
+/// GetSystemTimeAsFileTime(&ft);
+/// UINT64 ticks = (((UINT64)ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
 ///
-///      // A Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z
-///      // is 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.
-///      Timestamp timestamp;
-///      timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
-///      timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+/// // A Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z
+/// // is 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.
+/// Timestamp timestamp;
+/// timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
+/// timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+/// ```
 ///
 /// Example 4: Compute Timestamp from Java `System.currentTimeMillis()`.
 ///
-///      long millis = System.currentTimeMillis();
+/// ```text
+/// long millis = System.currentTimeMillis();
 ///
-///      Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
-///          .setNanos((int) ((millis % 1000) * 1000000)).build();
+/// Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
+///      .setNanos((int) ((millis % 1000) * 1000000)).build();
+/// ```
 ///
 /// Example 5: Compute Timestamp from Java `Instant.now()`.
 ///
-///      Instant now = Instant.now();
+/// ```text
+/// Instant now = Instant.now();
 ///
-///      Timestamp timestamp =
-///          Timestamp.newBuilder().setSeconds(now.getEpochSecond())
-///              .setNanos(now.getNano()).build();
+/// Timestamp timestamp =
+///      Timestamp.newBuilder().setSeconds(now.getEpochSecond())
+///          .setNanos(now.getNano()).build();
+/// ```
 ///
 /// Example 6: Compute Timestamp from current time in Python.
 ///
-///      timestamp = Timestamp()
-///      timestamp.GetCurrentTime()
+/// ```text
+/// timestamp = Timestamp()
+/// timestamp.GetCurrentTime()
+/// ```
 ///
 /// # JSON Mapping
 ///
@@ -2184,16 +2203,13 @@ pub struct Duration {
 /// to this format using
 /// [`strftime`](<https://docs.python.org/2/library/time.html#time.strftime>) with
 /// the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
-/// the Joda Time's [`ISODateTimeFormat.dateTime()`](
-/// <http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime(>)
-/// ) to obtain a formatter capable of generating timestamps in this format.
-///
+/// the Joda Time's [`ISODateTimeFormat.dateTime()`](<http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime(>)) to obtain a formatter capable of generating timestamps in this format.
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Timestamp {
     /// Represents seconds of UTC time since Unix epoch
     /// 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
@@ -2299,16 +2315,17 @@ impl NullValue {
 /// empty messages in your APIs. A typical example is to use it as the request
 /// or the response type of an API method. For instance:
 ///
-///      service Foo {
-///        rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
-///      }
-///
+/// ```text
+/// service Foo {
+///    rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+/// }
+/// ```
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Empty {}
 /// Wrapper message for `double`.
 ///
@@ -2340,7 +2357,7 @@ pub struct FloatValue {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Int64Value {
     /// The int64 value.
     #[prost(int64, tag = "1")]
@@ -2357,7 +2374,7 @@ pub struct Int64Value {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UInt64Value {
     /// The uint64 value.
     #[prost(uint64, tag = "1")]
@@ -2369,7 +2386,7 @@ pub struct UInt64Value {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Int32Value {
     /// The int32 value.
     #[prost(int32, tag = "1")]
@@ -2381,7 +2398,7 @@ pub struct Int32Value {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UInt32Value {
     /// The uint32 value.
     #[prost(uint32, tag = "1")]
@@ -2393,7 +2410,7 @@ pub struct UInt32Value {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct BoolValue {
     /// The bool value.
     #[prost(bool, tag = "1")]
@@ -2405,7 +2422,7 @@ pub struct BoolValue {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct StringValue {
     /// The string value.
     #[prost(string, tag = "1")]
@@ -2417,7 +2434,7 @@ pub struct StringValue {
 ///
 /// Not recommended for use in new APIs, but still useful for legacy APIs and
 /// has no plan to be removed.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct BytesValue {
     /// The bytes value.
     #[prost(bytes = "vec", tag = "1")]
@@ -2431,49 +2448,57 @@ pub struct BytesValue {
 ///
 /// Example 1: Pack and unpack a message in C++.
 ///
-///      Foo foo = ...;
-///      Any any;
-///      any.PackFrom(foo);
-///      ...
-///      if (any.UnpackTo(&foo)) {
-///        ...
-///      }
+/// ```text
+/// Foo foo = ...;
+/// Any any;
+/// any.PackFrom(foo);
+/// ...
+/// if (any.UnpackTo(&foo)) {
+///    ...
+/// }
+/// ```
 ///
 /// Example 2: Pack and unpack a message in Java.
 ///
-///      Foo foo = ...;
-///      Any any = Any.pack(foo);
-///      ...
-///      if (any.is(Foo.class)) {
-///        foo = any.unpack(Foo.class);
-///      }
-///      // or ...
-///      if (any.isSameTypeAs(Foo.getDefaultInstance())) {
-///        foo = any.unpack(Foo.getDefaultInstance());
-///      }
+/// ```text
+/// Foo foo = ...;
+/// Any any = Any.pack(foo);
+/// ...
+/// if (any.is(Foo.class)) {
+///    foo = any.unpack(Foo.class);
+/// }
+/// // or ...
+/// if (any.isSameTypeAs(Foo.getDefaultInstance())) {
+///    foo = any.unpack(Foo.getDefaultInstance());
+/// }
+/// ```
 ///
-///   Example 3: Pack and unpack a message in Python.
+/// Example 3: Pack and unpack a message in Python.
 ///
-///      foo = Foo(...)
-///      any = Any()
-///      any.Pack(foo)
-///      ...
-///      if any.Is(Foo.DESCRIPTOR):
-///        any.Unpack(foo)
-///        ...
+/// ```text
+/// foo = Foo(...)
+/// any = Any()
+/// any.Pack(foo)
+/// ...
+/// if any.Is(Foo.DESCRIPTOR):
+///    any.Unpack(foo)
+///    ...
+/// ```
 ///
-///   Example 4: Pack and unpack a message in Go
+/// Example 4: Pack and unpack a message in Go
 ///
-///       foo := &pb.Foo{...}
-///       any, err := anypb.New(foo)
-///       if err != nil {
-///         ...
-///       }
-///       ...
-///       foo := &pb.Foo{}
-///       if err := any.UnmarshalTo(foo); err != nil {
-///         ...
-///       }
+/// ```text
+///   foo := &pb.Foo{...}
+///   any, err := anypb.New(foo)
+///   if err != nil {
+///     ...
+///   }
+///   ...
+///   foo := &pb.Foo{}
+///   if err := any.UnmarshalTo(foo); err != nil {
+///     ...
+///   }
+/// ```
 ///
 /// The pack methods provided by protobuf library will by default use
 /// 'type.googleapis.com/full.type.name' as the type URL and the unpack
@@ -2481,35 +2506,38 @@ pub struct BytesValue {
 /// in the type URL, for example "foo.bar.com/x/y.z" will yield type
 /// name "y.z".
 ///
-/// JSON
-/// ====
+/// # JSON
+///
 /// The JSON representation of an `Any` value uses the regular
 /// representation of the deserialized, embedded message, with an
 /// additional field `@type` which contains the type URL. Example:
 ///
-///      package google.profile;
-///      message Person {
-///        string first_name = 1;
-///        string last_name = 2;
-///      }
+/// ```text
+/// package google.profile;
+/// message Person {
+///    string first_name = 1;
+///    string last_name = 2;
+/// }
 ///
-///      {
-///        "@type": "type.googleapis.com/google.profile.Person",
-///        "firstName": <string>,
-///        "lastName": <string>
-///      }
+/// {
+///    "@type": "type.googleapis.com/google.profile.Person",
+///    "firstName": <string>,
+///    "lastName": <string>
+/// }
+/// ```
 ///
 /// If the embedded message type is well-known and has a custom JSON
 /// representation, that representation will be embedded adding a field
 /// `value` which holds the custom JSON in addition to the `@type`
-/// field. Example (for message [google.protobuf.Duration][]):
+/// field. Example (for message \[google.protobuf.Duration\]\[\]):
 ///
-///      {
-///        "@type": "type.googleapis.com/google.protobuf.Duration",
-///        "value": "1.212s"
-///      }
-///
-#[derive(Clone, PartialEq, ::prost::Message)]
+/// ```text
+/// {
+///    "@type": "type.googleapis.com/google.protobuf.Duration",
+///    "value": "1.212s"
+/// }
+/// ```
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Any {
     /// A URL/resource name that uniquely identifies the type of the serialized
     /// protocol buffer message. This string must contain at least
@@ -2524,13 +2552,13 @@ pub struct Any {
     /// server that maps type URLs to message definitions as follows:
     ///
     /// * If no scheme is provided, `https` is assumed.
-    /// * An HTTP GET on the URL must yield a [google.protobuf.Type][]
-    ///    value in binary format, or produce an error.
+    /// * An HTTP GET on the URL must yield a \[google.protobuf.Type\]\[\]
+    ///   value in binary format, or produce an error.
     /// * Applications are allowed to cache lookup results based on the
-    ///    URL, or have them precompiled into a binary to avoid any
-    ///    lookup. Therefore, binary compatibility needs to be preserved
-    ///    on changes to types. (Use versioned type names to manage
-    ///    breaking changes.)
+    ///   URL, or have them precompiled into a binary to avoid any
+    ///   lookup. Therefore, binary compatibility needs to be preserved
+    ///   on changes to types. (Use versioned type names to manage
+    ///   breaking changes.)
     ///
     /// Note: this functionality is not currently available in the official
     /// protobuf release, and it is not used for type URLs beginning with
@@ -2539,7 +2567,6 @@ pub struct Any {
     ///
     /// Schemes other than `http`, `https` (or the empty scheme) might be
     /// used with implementation specific semantics.
-    ///
     #[prost(string, tag = "1")]
     pub type_url: ::prost::alloc::string::String,
     /// Must be a valid serialized protocol buffer of the above specified type.

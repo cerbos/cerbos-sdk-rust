@@ -103,14 +103,14 @@ pub mod check_resources_request {
         pub resource: ::core::option::Option<super::super::super::engine::v1::Resource>,
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AuxData {
     #[prost(message, optional, tag = "1")]
     pub jwt: ::core::option::Option<aux_data::Jwt>,
 }
 /// Nested message and enum types in `AuxData`.
 pub mod aux_data {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Jwt {
         #[prost(string, tag = "1")]
         pub token: ::prost::alloc::string::String,
@@ -118,7 +118,7 @@ pub mod aux_data {
         pub key_set_id: ::prost::alloc::string::String,
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct File {
     #[prost(string, tag = "1")]
     pub file_name: ::prost::alloc::string::String,
@@ -182,7 +182,7 @@ pub struct AddOrUpdatePolicyRequest {
     #[prost(message, repeated, tag = "1")]
     pub policies: ::prost::alloc::vec::Vec<super::super::policy::v1::Policy>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ListAuditLogEntriesRequest {
     #[prost(enumeration = "list_audit_log_entries_request::Kind", tag = "1")]
     pub kind: i32,
@@ -191,7 +191,7 @@ pub struct ListAuditLogEntriesRequest {
 }
 /// Nested message and enum types in `ListAuditLogEntriesRequest`.
 pub mod list_audit_log_entries_request {
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct TimeRange {
         #[prost(message, optional, tag = "1")]
         pub start: ::core::option::Option<
@@ -241,7 +241,7 @@ pub mod list_audit_log_entries_request {
             }
         }
     }
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
     pub enum Filter {
         #[prost(uint32, tag = "2")]
         Tail(u32),
@@ -253,9 +253,9 @@ pub mod list_audit_log_entries_request {
         Lookup(::prost::alloc::string::String),
     }
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServerInfoRequest {}
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ListPoliciesRequest {
     #[prost(bool, tag = "1")]
     pub include_disabled: bool,
@@ -268,22 +268,22 @@ pub struct ListPoliciesRequest {
     #[prost(string, repeated, tag = "5")]
     pub policy_id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GetPolicyRequest {
     #[prost(string, repeated, tag = "1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DisablePolicyRequest {
     #[prost(string, repeated, tag = "1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EnablePolicyRequest {
     #[prost(string, repeated, tag = "1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct InspectPoliciesRequest {
     #[prost(bool, tag = "1")]
     pub include_disabled: bool,
@@ -301,19 +301,19 @@ pub struct AddOrUpdateSchemaRequest {
     #[prost(message, repeated, tag = "1")]
     pub schemas: ::prost::alloc::vec::Vec<super::super::schema::v1::Schema>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ListSchemasRequest {}
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GetSchemaRequest {
     #[prost(string, repeated, tag = "1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DeleteSchemaRequest {
     #[prost(string, repeated, tag = "1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ReloadStoreRequest {
     #[prost(bool, tag = "1")]
     pub wait: bool,

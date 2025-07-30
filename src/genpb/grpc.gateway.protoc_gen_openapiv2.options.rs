@@ -5,26 +5,25 @@
 ///
 /// Example:
 ///
-///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-///     info: {
-///       title: "Echo API";
-///       version: "1.0";
-///       description: "";
-///       contact: {
-///         name: "gRPC-Gateway project";
-///         url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
-///         email: "none@example.com";
-///       };
-///       license: {
-///         name: "BSD 3-Clause License";
-///         url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";>
-///       };
-///     };
-///     schemes: HTTPS;
-///     consumes: "application/json";
-///     produces: "application/json";
-///   };
-///
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+/// info: {
+/// title: "Echo API";
+/// version: "1.0";
+/// description: "";
+/// contact: {
+/// name: "gRPC-Gateway project";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
+/// email: "none@example.com";
+/// };
+/// license: {
+/// name: "BSD 3-Clause License";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";>
+/// };
+/// };
+/// schemes: HTTPS;
+/// consumes: "application/json";
+/// produces: "application/json";
+/// };
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Swagger {
     /// Specifies the OpenAPI Specification version being used. It can be
@@ -103,25 +102,28 @@ pub struct Swagger {
 ///
 /// Example:
 ///
-///   service EchoService {
-///     rpc Echo(SimpleMessage) returns (SimpleMessage) {
-///       option (google.api.http) = {
-///         get: "/v1/example/echo/{id}"
-///       };
+/// service EchoService {
+/// rpc Echo(SimpleMessage) returns (SimpleMessage) {
+/// option (google.api.http) = {
+/// get: "/v1/example/echo/{id}"
+/// };
 ///
-///       option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-///         summary: "Get a message.";
-///         operation_id: "getMessage";
-///         tags: "echo";
-///         responses: {
-///           key: "200"
-///             value: {
-///             description: "OK";
-///           }
-///         }
-///       };
+/// ```text
+///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+///     summary: "Get a message.";
+///     operation_id: "getMessage";
+///     tags: "echo";
+///     responses: {
+///       key: "200"
+///         value: {
+///         description: "OK";
+///       }
 ///     }
-///   }
+///   };
+/// }
+/// ```
+///
+/// }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Operation {
     /// A list of tags for API documentation control. Tags can be used for logical
@@ -203,7 +205,7 @@ pub struct Parameters {
 }
 /// `HeaderParameter` a HTTP header parameter.
 /// See: <https://swagger.io/specification/v2/#parameter-object>
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct HeaderParameter {
     /// `Name` is the header name.
     #[prost(string, tag = "1")]
@@ -275,8 +277,7 @@ pub mod header_parameter {
 /// `Header` is a representation of OpenAPI v2 specification's Header object.
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#headerObject>
-///
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Header {
     /// `Description` is a short description of the header.
     #[prost(string, tag = "1")]
@@ -299,7 +300,6 @@ pub struct Header {
 /// `Response` is a representation of OpenAPI v2 specification's Response object.
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#responseObject>
-///
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Response {
     /// `Description` is a short description of the response.
@@ -337,24 +337,23 @@ pub struct Response {
 ///
 /// Example:
 ///
-///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-///     info: {
-///       title: "Echo API";
-///       version: "1.0";
-///       description: "";
-///       contact: {
-///         name: "gRPC-Gateway project";
-///         url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
-///         email: "none@example.com";
-///       };
-///       license: {
-///         name: "BSD 3-Clause License";
-///         url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";>
-///       };
-///     };
-///     ...
-///   };
-///
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+/// info: {
+/// title: "Echo API";
+/// version: "1.0";
+/// description: "";
+/// contact: {
+/// name: "gRPC-Gateway project";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
+/// email: "none@example.com";
+/// };
+/// license: {
+/// name: "BSD 3-Clause License";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";>
+/// };
+/// };
+/// ...
+/// };
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Info {
     /// The title of the application.
@@ -392,20 +391,19 @@ pub struct Info {
 ///
 /// Example:
 ///
-///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-///     info: {
-///       ...
-///       contact: {
-///         name: "gRPC-Gateway project";
-///         url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
-///         email: "none@example.com";
-///       };
-///       ...
-///     };
-///     ...
-///   };
-///
-#[derive(Clone, PartialEq, ::prost::Message)]
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+/// info: {
+/// ...
+/// contact: {
+/// name: "gRPC-Gateway project";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
+/// email: "none@example.com";
+/// };
+/// ...
+/// };
+/// ...
+/// };
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Contact {
     /// The identifying name of the contact person/organization.
     #[prost(string, tag = "1")]
@@ -425,19 +423,18 @@ pub struct Contact {
 ///
 /// Example:
 ///
-///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-///     info: {
-///       ...
-///       license: {
-///         name: "BSD 3-Clause License";
-///         url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";>
-///       };
-///       ...
-///     };
-///     ...
-///   };
-///
-#[derive(Clone, PartialEq, ::prost::Message)]
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+/// info: {
+/// ...
+/// license: {
+/// name: "BSD 3-Clause License";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway/blob/main/LICENSE";>
+/// };
+/// ...
+/// };
+/// ...
+/// };
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct License {
     /// The license name used for the API.
     #[prost(string, tag = "1")]
@@ -453,16 +450,15 @@ pub struct License {
 ///
 /// Example:
 ///
-///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-///     ...
-///     external_docs: {
-///       description: "More about gRPC-Gateway";
-///       url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
-///     }
-///     ...
-///   };
-///
-#[derive(Clone, PartialEq, ::prost::Message)]
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+/// ...
+/// external_docs: {
+/// description: "More about gRPC-Gateway";
+/// url: "<https://github.com/grpc-ecosystem/grpc-gateway";>
+/// }
+/// ...
+/// };
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ExternalDocumentation {
     /// A short description of the target documentation. GFM syntax can be used for
     /// rich text representation.
@@ -476,7 +472,6 @@ pub struct ExternalDocumentation {
 /// `Schema` is a representation of OpenAPI v2 specification's Schema object.
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#schemaObject>
-///
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Schema {
     #[prost(message, optional, tag = "1")]
@@ -509,15 +504,14 @@ pub struct Schema {
 ///
 /// Example:
 ///
-///   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_enum) = {
-///     ...
-///     title: "MyEnum";
-///     description:"This is my nice enum";
-///     example: "ZERO";
-///     required: true;
-///     ...
-///   };
-///
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_enum) = {
+/// ...
+/// title: "MyEnum";
+/// description:"This is my nice enum";
+/// example: "ZERO";
+/// required: true;
+/// ...
+/// };
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EnumSchema {
     /// A short description of the schema.
@@ -542,7 +536,7 @@ pub struct EnumSchema {
     /// be imported into the protofile. If no message is identified, the Ref will
     /// be used verbatim in the output.
     /// For example:
-    ///   `ref: ".google.protobuf.Timestamp"`.
+    /// `ref: ".google.protobuf.Timestamp"`.
     #[prost(string, tag = "8")]
     pub r#ref: ::prost::alloc::string::String,
     /// Custom properties that start with "x-" such as "x-foo" used to describe
@@ -566,22 +560,24 @@ pub struct EnumSchema {
 ///
 /// Example:
 ///
-///   message SimpleMessage {
-///     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
-///       json_schema: {
-///         title: "SimpleMessage"
-///         description: "A simple message."
-///         required: \["id"\]
-///       }
-///     };
+/// message SimpleMessage {
+/// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+/// json_schema: {
+/// title: "SimpleMessage"
+/// description: "A simple message."
+/// required: \["id"\]
+/// }
+/// };
 ///
-///     // Id represents the message identifier.
-///     string id = 1; [
-///         (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-///           description: "The unique identifier of the simple message."
-///         }];
-///   }
+/// ```text
+/// // Id represents the message identifier.
+/// string id = 1; [
+///     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+///       description: "The unique identifier of the simple message."
+///     }];
+/// ```
 ///
+/// }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct JsonSchema {
     /// Ref is used to define an external reference to include in the message.
@@ -589,7 +585,7 @@ pub struct JsonSchema {
     /// be imported into the protofile. If no message is identified, the Ref will
     /// be used verbatim in the output.
     /// For example:
-    ///   `ref: ".google.protobuf.Timestamp"`.
+    /// `ref: ".google.protobuf.Timestamp"`.
     #[prost(string, tag = "3")]
     pub r#ref: ::prost::alloc::string::String,
     /// The title of the schema.
@@ -666,7 +662,7 @@ pub struct JsonSchema {
 pub mod json_schema {
     /// 'FieldConfiguration' provides additional field level properties used when generating the OpenAPI v2 file.
     /// These properties are not defined by OpenAPIv2, but they are used to control the generation.
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct FieldConfiguration {
         /// Alternative parameter name when used as path parameter. If set, this will
         /// be used as the complete parameter name when this field is used as a path
@@ -733,7 +729,6 @@ pub mod json_schema {
 /// `Tag` is a representation of OpenAPI v2 specification's Tag object.
 ///
 /// See: <https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/2.0.md#tagObject>
-///
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Tag {
     /// The name of the tag. Use it to allow override of the name of a
@@ -992,7 +987,7 @@ pub mod security_requirement {
     /// If the security scheme is of type "oauth2", then the value is a list of
     /// scope names required for the execution. For other security scheme types,
     /// the array MUST be empty.
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct SecurityRequirementValue {
         #[prost(string, repeated, tag = "1")]
         pub scope: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,

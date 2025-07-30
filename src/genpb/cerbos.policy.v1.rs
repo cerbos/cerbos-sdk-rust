@@ -141,7 +141,7 @@ pub mod role_policy {
         derive(serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
     pub enum PolicyType {
         #[prost(string, tag = "1")]
         Role(::prost::alloc::string::String),
@@ -327,7 +327,7 @@ pub mod r#match {
     }
 }
 #[if_struct_macro::serde_default]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Output {
     #[deprecated]
     #[prost(string, tag = "1")]
@@ -338,7 +338,7 @@ pub struct Output {
 /// Nested message and enum types in `Output`.
 pub mod output {
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct When {
         #[prost(string, tag = "1")]
         pub rule_activated: ::prost::alloc::string::String,
@@ -347,7 +347,7 @@ pub mod output {
     }
 }
 #[if_struct_macro::serde_default]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Schemas {
     #[prost(message, optional, tag = "1")]
     pub principal_schema: ::core::option::Option<schemas::Schema>,
@@ -357,13 +357,13 @@ pub struct Schemas {
 /// Nested message and enum types in `Schemas`.
 pub mod schemas {
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct IgnoreWhen {
         #[prost(string, repeated, tag = "1")]
         pub actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Schema {
         #[prost(string, tag = "1")]
         pub r#ref: ::prost::alloc::string::String,
@@ -372,7 +372,7 @@ pub mod schemas {
     }
 }
 #[if_struct_macro::serde_default]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct TestFixture {}
 /// Nested message and enum types in `TestFixture`.
 pub mod test_fixture {
@@ -421,18 +421,18 @@ pub mod test_fixture {
     }
 }
 #[if_struct_macro::serde_default]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct TestFixtureGroup {}
 /// Nested message and enum types in `TestFixtureGroup`.
 pub mod test_fixture_group {
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Principals {
         #[prost(string, repeated, tag = "1")]
         pub principals: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     }
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Resources {
         #[prost(string, repeated, tag = "1")]
         pub resources: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -517,7 +517,7 @@ pub struct TestTable {
 /// Nested message and enum types in `TestTable`.
 pub mod test_table {
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Input {
         #[prost(string, repeated, tag = "1")]
         pub principals: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -592,7 +592,7 @@ pub struct Test {
 /// Nested message and enum types in `Test`.
 pub mod test {
     #[if_struct_macro::serde_default]
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct TestName {
         #[prost(string, tag = "1")]
         pub test_table_name: ::prost::alloc::string::String,
@@ -622,7 +622,7 @@ pub struct TestResults {
 /// Nested message and enum types in `TestResults`.
 pub mod test_results {
     #[if_struct_macro::serde_default]
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Tally {
         #[prost(enumeration = "Result", tag = "1")]
         pub result: i32,

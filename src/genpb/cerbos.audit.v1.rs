@@ -95,12 +95,12 @@ pub mod decision_log_entry {
         PlanResources(PlanResources),
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MetaValues {
     #[prost(string, repeated, tag = "1")]
     pub values: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Peer {
     #[prost(string, tag = "1")]
     pub address: ::prost::alloc::string::String,
@@ -119,21 +119,21 @@ pub struct AuditTrail {
         super::super::policy::v1::SourceAttributes,
     >,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PolicySource {
     #[prost(oneof = "policy_source::Source", tags = "1, 2, 3, 4, 5, 6")]
     pub source: ::core::option::Option<policy_source::Source>,
 }
 /// Nested message and enum types in `PolicySource`.
 pub mod policy_source {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Blob {
         #[prost(string, tag = "1")]
         pub bucket_url: ::prost::alloc::string::String,
         #[prost(string, tag = "2")]
         pub prefix: ::prost::alloc::string::String,
     }
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Database {
         #[prost(enumeration = "database::Driver", tag = "1")]
         pub driver: i32,
@@ -183,12 +183,12 @@ pub mod policy_source {
             }
         }
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Disk {
         #[prost(string, tag = "1")]
         pub directory: ::prost::alloc::string::String,
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct EmbeddedPdp {
         #[prost(string, tag = "1")]
         pub url: ::prost::alloc::string::String,
@@ -199,7 +199,7 @@ pub mod policy_source {
             super::super::super::super::google::protobuf::Timestamp,
         >,
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Git {
         #[prost(string, tag = "1")]
         pub repository_url: ::prost::alloc::string::String,
@@ -208,19 +208,19 @@ pub mod policy_source {
         #[prost(string, tag = "3")]
         pub subdirectory: ::prost::alloc::string::String,
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Hub {
         #[prost(oneof = "hub::Source", tags = "1, 2, 3, 4")]
         pub source: ::core::option::Option<hub::Source>,
     }
     /// Nested message and enum types in `Hub`.
     pub mod hub {
-        #[derive(Clone, PartialEq, ::prost::Message)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct LocalBundle {
             #[prost(string, tag = "1")]
             pub path: ::prost::alloc::string::String,
         }
-        #[derive(Clone, PartialEq, ::prost::Oneof)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
         pub enum Source {
             #[prost(string, tag = "1")]
             Label(::prost::alloc::string::String),
@@ -232,7 +232,7 @@ pub mod policy_source {
             LocalBundle(LocalBundle),
         }
     }
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
     pub enum Source {
         #[prost(message, tag = "1")]
         Blob(Blob),

@@ -76,7 +76,7 @@ pub mod check_resource_set_response {
     }
     /// Nested message and enum types in `Meta`.
     pub mod meta {
-        #[derive(Clone, PartialEq, ::prost::Message)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct EffectMeta {
             #[prost(string, tag = "1")]
             pub matched_policy: ::prost::alloc::string::String,
@@ -157,7 +157,7 @@ pub mod check_resources_response {
     }
     /// Nested message and enum types in `ResultEntry`.
     pub mod result_entry {
-        #[derive(Clone, PartialEq, ::prost::Message)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct Resource {
             #[prost(string, tag = "1")]
             pub id: ::prost::alloc::string::String,
@@ -182,7 +182,7 @@ pub mod check_resources_response {
         }
         /// Nested message and enum types in `Meta`.
         pub mod meta {
-            #[derive(Clone, PartialEq, ::prost::Message)]
+            #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
             pub struct EffectMeta {
                 #[prost(string, tag = "1")]
                 pub matched_policy: ::prost::alloc::string::String,
@@ -199,7 +199,7 @@ pub struct PlaygroundFailure {
 }
 /// Nested message and enum types in `PlaygroundFailure`.
 pub mod playground_failure {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct ErrorDetails {
         #[prost(uint32, tag = "1")]
         pub line: u32,
@@ -208,7 +208,7 @@ pub mod playground_failure {
         #[prost(string, tag = "3")]
         pub context: ::prost::alloc::string::String,
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Error {
         #[prost(string, tag = "1")]
         pub file: ::prost::alloc::string::String,
@@ -335,7 +335,7 @@ pub mod playground_proxy_response {
         CheckResources(super::CheckResourcesResponse),
     }
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AddOrUpdatePolicyResponse {
     #[prost(message, optional, tag = "1")]
     pub success: ::core::option::Option<super::super::super::google::protobuf::Empty>,
@@ -355,7 +355,7 @@ pub mod list_audit_log_entries_response {
         DecisionLogEntry(super::super::super::audit::v1::DecisionLogEntry),
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServerInfoResponse {
     #[prost(string, tag = "1")]
     pub version: ::prost::alloc::string::String,
@@ -364,7 +364,7 @@ pub struct ServerInfoResponse {
     #[prost(string, tag = "3")]
     pub build_date: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ListPoliciesResponse {
     #[prost(string, repeated, tag = "1")]
     pub policy_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -374,12 +374,12 @@ pub struct GetPolicyResponse {
     #[prost(message, repeated, tag = "1")]
     pub policies: ::prost::alloc::vec::Vec<super::super::policy::v1::Policy>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DisablePolicyResponse {
     #[prost(uint32, tag = "1")]
     pub disabled_policies: u32,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EnablePolicyResponse {
     #[prost(uint32, tag = "1")]
     pub enabled_policies: u32,
@@ -394,7 +394,7 @@ pub struct InspectPoliciesResponse {
 }
 /// Nested message and enum types in `InspectPoliciesResponse`.
 pub mod inspect_policies_response {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Attribute {
         #[prost(enumeration = "attribute::Kind", tag = "1")]
         pub kind: i32,
@@ -443,7 +443,7 @@ pub mod inspect_policies_response {
             }
         }
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct DerivedRole {
         #[prost(string, tag = "1")]
         pub name: ::prost::alloc::string::String,
@@ -563,7 +563,7 @@ pub mod inspect_policies_response {
             }
         }
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Variable {
         #[prost(string, tag = "1")]
         pub name: ::prost::alloc::string::String,
@@ -643,9 +643,9 @@ pub mod inspect_policies_response {
         pub constants: ::prost::alloc::vec::Vec<Constant>,
     }
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AddOrUpdateSchemaResponse {}
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ListSchemasResponse {
     #[prost(string, repeated, tag = "1")]
     pub schema_ids: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -655,10 +655,10 @@ pub struct GetSchemaResponse {
     #[prost(message, repeated, tag = "1")]
     pub schemas: ::prost::alloc::vec::Vec<super::super::schema::v1::Schema>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DeleteSchemaResponse {
     #[prost(uint32, tag = "1")]
     pub deleted_schemas: u32,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ReloadStoreResponse {}
