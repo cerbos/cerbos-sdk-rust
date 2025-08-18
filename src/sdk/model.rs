@@ -353,7 +353,7 @@ pub struct CheckResourcesResponse {
 }
 
 impl CheckResourcesResponse {
-    pub fn find(&self, id: impl AsRef<str>) -> Option<ResourceResult> {
+    pub fn find(&self, id: impl AsRef<str>) -> Option<ResourceResult<'_>> {
         let id_str = id.as_ref();
         let entry = self
             .response
@@ -368,7 +368,7 @@ impl CheckResourcesResponse {
         &self,
         id: impl AsRef<str>,
         predicates: Vec<ResourceMatcher>,
-    ) -> Option<ResourceResult> {
+    ) -> Option<ResourceResult<'_>> {
         let id_str = id.as_ref();
         let entry = self.response.results.iter().find(|r| {
             r.resource.as_ref().is_some_and(|rr| {
@@ -395,7 +395,7 @@ impl CheckResourcesResponse {
         entry.map(ResourceResult::new)
     }
 
-    pub fn iter(&self) -> CheckResourcesResponseIter {
+    pub fn iter(&self) -> CheckResourcesResponseIter<'_> {
         CheckResourcesResponseIter {
             iter: self.response.results.iter(),
         }
