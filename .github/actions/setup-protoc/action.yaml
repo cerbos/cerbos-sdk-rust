@@ -1,0 +1,17 @@
+name: Install Protoc
+
+description: Install Protoc
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install Protoc
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        cd $(mktemp -d)
+        gh release download --repo protocolbuffers/protobuf --pattern "protoc-*-linux-x86_64.zip"
+        unzip protoc-*-linux-x86_64.zip
+        printf "%s/bin/\n" "${PWD}" >> "${GITHUB_PATH}"
