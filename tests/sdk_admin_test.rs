@@ -25,7 +25,9 @@ trait Stoppable {
 impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
     async fn stop(&self) -> anyhow::Result<()> {
         use anyhow::Context;
-        self.stop().await.context("can't stop container")
+        self.stop_with_timeout(None)
+            .await
+            .context("can't stop container")
     }
 }
 fn get_test_data_path(subpath: &[&str]) -> PathBuf {
