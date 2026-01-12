@@ -33,7 +33,7 @@ jobs:
         run: cargo clippy --all-features -- -D warnings
 
       - name: Install Cerbos
-        uses: cerbos/cerbos-setup-action@ee5f1c4104e29f54c106d9abdd47569c138d9f9d # v1
+        uses: cerbos/cerbos-setup-action@feb2173363a24d30544b990965892bc391909213 # v1
         with:
           version: latest
 
