@@ -1,4 +1,3 @@
-# Based on https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
 ---
 on:
   workflow_dispatch:
@@ -9,19 +8,29 @@ on:
 
 name: Pull Request
 
+defaults:
+  run:
+    shell: bash
+
+permissions: {}
+
 jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Check out sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install Protoc
-        uses: ./.github/actions/setup-protoc
+        uses: cerbos/actions/install-tools@68b6dfbf9cc54c29a99f4bb9585af585fe6e12da # main
+        with:
+          tools: protoc
 
       - name: Install stable toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1.16.0
         with:
           override: true
           components: rustfmt, clippy
@@ -33,7 +42,7 @@ jobs:
         run: cargo clippy --all-features -- -D warnings
 
       - name: Install Cerbos
-        uses: cerbos/cerbos-setup-action@53d0a0d03111685bd355b2be6d75a2d0948c22de # v1
+        uses: cerbos/cerbos-setup-action@53d0a0d03111685bd355b2be6d75a2d0948c22de # v1.9.8
         with:
           version: latest
 
