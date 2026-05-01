@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   push:
     tags:
+      - if-struct-macro-v*
       - v*
 
 name: Release
@@ -45,6 +46,21 @@ jobs:
         uses: rust-lang/crates-io-auth-action@bbd81622f20ce9e2dd9622e3218b975523e45bbe # v1.0.4
 
       - name: Publish
-        run: cargo publish
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            if-struct-macro-v*)
+              package="if-struct-macro"
+              ;;
+
+            v*)
+              package="cerbos"
+              ;;
+
+            *)
+              printf "::error::Tag %s does not correspond to a known package\n" "${GITHUB_REF_NAME}"
+              ;;
+          esac
+
+          cargo publish --package "${package}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
