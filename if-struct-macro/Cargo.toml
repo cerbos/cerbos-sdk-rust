@@ -2,6 +2,11 @@
 name = "if-struct-macro"
 version = "0.1.0"
 edition = "2024"
+description = "Macro that conditionally applies `serde(default)` only to structs when the `serde` feature is enabled"
+license = "Apache-2.0"
+authors = ["Cerbos Developers <sdk+rust@cerbos.dev>"]
+repository = "https://github.com/cerbos/cerbos-sdk-rust"
+homepage = "https://cerbos.dev"
 
 [lib]
 proc-macro = true
