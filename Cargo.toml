@@ -1,3 +1,6 @@
+[workspace]
+members = ["if-struct-macro"]
+
 [package]
 name = "cerbos"
 version = "0.5.0"
