@@ -30,7 +30,7 @@ jobs:
           tools: protoc
 
       - name: Install stable toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1.16.0
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
         with:
           override: true
           components: rustfmt, clippy
@@ -42,7 +42,7 @@ jobs:
         run: cargo clippy --all-features -- -D warnings
 
       - name: Install Cerbos
-        uses: cerbos/cerbos-setup-action@53d0a0d03111685bd355b2be6d75a2d0948c22de # v1.9.8
+        uses: cerbos/cerbos-setup-action@6d88cfd96db5af84489633c6a2db42bf2522933b # v1.9.9
         with:
           version: latest
 
