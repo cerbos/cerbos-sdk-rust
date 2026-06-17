@@ -3,7 +3,7 @@ use serde::{
     Deserialize, Deserializer,
 };
 use serde_json::Value as JsonValue;
-use serde_yml::Value as YamlValue;
+use noyalib::Value as YamlValue;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -206,8 +206,8 @@ pub fn from_json_str(json_str: &str) -> Result<Value, serde_json::Error> {
     serde_json::from_str(json_str)
 }
 
-pub fn from_yaml_str(yaml_str: &str) -> Result<Value, serde_yml::Error> {
-    serde_yml::from_str(yaml_str)
+pub fn from_yaml_str(yaml_str: &str) -> Result<Value, noyalib::Error> {
+    noyalib::from_str(yaml_str)
 }
 
 // Convert from serde_json::Value to protobuf Value
@@ -243,7 +243,7 @@ pub fn from_json_value(json_value: JsonValue) -> Value {
     }
 }
 
-// Convert from serde_yml::Value to protobuf Value
+// Convert from noyalib::Value to protobuf Value
 pub fn from_yaml_value(yaml_value: YamlValue) -> Value {
     match yaml_value {
         YamlValue::Null => Value {
@@ -253,7 +253,7 @@ pub fn from_yaml_value(yaml_value: YamlValue) -> Value {
             kind: Some(Kind::BoolValue(b)),
         },
         YamlValue::Number(n) => Value {
-            kind: Some(Kind::NumberValue(n.as_f64().unwrap_or(0.0))),
+            kind: Some(Kind::NumberValue(n.as_f64())),
         },
         YamlValue::String(s) => Value {
             kind: Some(Kind::StringValue(s)),
@@ -267,19 +267,13 @@ pub fn from_yaml_value(yaml_value: YamlValue) -> Value {
         YamlValue::Mapping(map) => {
             let mut fields = HashMap::new();
             for (k, v) in map {
-                let key = match k {
-                    YamlValue::String(s) => s,
-                    YamlValue::Number(n) => n.to_string(),
-                    YamlValue::Bool(b) => b.to_string(),
-                    _ => "unknown".to_string(),
-                };
-                fields.insert(key, from_yaml_value(v));
+                fields.insert(k, from_yaml_value(v));
             }
             Value {
                 kind: Some(Kind::StructValue(Struct { fields })),
             }
         }
-        YamlValue::Tagged(tagged) => from_yaml_value(tagged.value),
+        YamlValue::Tagged(tagged) => from_yaml_value(tagged.value().clone()),
     }
 }
 

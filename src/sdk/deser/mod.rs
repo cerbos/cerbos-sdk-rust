@@ -31,8 +31,8 @@ static JSON_START: &str = "{";
 
 trait PolicyDeser {
     type Value: Clone;
-    fn from_value<T: serde::de::DeserializeOwned>(value: Self::Value) -> anyhow::Result<T>;
-    fn into<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T>;
+    fn from_value<T: serde::de::DeserializeOwned+'static>(value: Self::Value) -> anyhow::Result<T>;
+    fn into<T: serde::de::DeserializeOwned+'static>(self) -> anyhow::Result<T>;
     fn get(&self, name: &str) -> Option<&Self::Value>;
 }
 
@@ -46,7 +46,7 @@ impl JsonPolicyDeser {
 }
 impl PolicyDeser for JsonPolicyDeser {
     type Value = serde_json::Value;
-    fn from_value<T: serde::de::DeserializeOwned>(value: Self::Value) -> anyhow::Result<T> {
+    fn from_value<T: serde::de::DeserializeOwned+'static>(value: Self::Value) -> anyhow::Result<T> {
         serde_json::from_value(value).with_context(|| "fail to deserialize")
     }
 
@@ -54,32 +54,32 @@ impl PolicyDeser for JsonPolicyDeser {
         self.0.get(name)
     }
 
-    fn into<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T> {
+    fn into<T: serde::de::DeserializeOwned+'static>(self) -> anyhow::Result<T> {
         serde_json::from_value(self.0).with_context(|| "fail to deserialize")
     }
 }
 
-struct YamlPolicyDeser(serde_yml::Value);
+struct YamlPolicyDeser(noyalib::Value);
 impl YamlPolicyDeser {
     fn new(buf: Vec<u8>) -> anyhow::Result<Self> {
         Ok(Self(
-            serde_yml::from_slice(&buf).with_context(|| "fail to deser from slice")?,
+            noyalib::from_slice(&buf).with_context(|| "fail to deser from slice")?,
         ))
     }
 }
 impl PolicyDeser for YamlPolicyDeser {
-    type Value = serde_yml::Value;
+    type Value = noyalib::Value;
 
-    fn from_value<T: serde::de::DeserializeOwned>(value: Self::Value) -> anyhow::Result<T> {
-        serde_yml::from_value(value).with_context(|| "fail to deserialize")
+    fn from_value<T: serde::de::DeserializeOwned+'static>(value: Self::Value) -> anyhow::Result<T> {
+        noyalib::from_value(&value).with_context(|| "fail to deserialize")
     }
 
     fn get(&self, name: &str) -> Option<&Self::Value> {
         self.0.get(name)
     }
 
-    fn into<T: serde::de::DeserializeOwned>(self) -> anyhow::Result<T> {
-        serde_yml::from_value(self.0).with_context(|| "fail to deserialize")
+    fn into<T: serde::de::DeserializeOwned+'static>(self) -> anyhow::Result<T> {
+        noyalib::from_value(&self.0).with_context(|| "fail to deserialize")
     }
 }
 enum Decoder {
