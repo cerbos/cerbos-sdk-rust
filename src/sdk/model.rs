@@ -364,15 +364,14 @@ impl<'a> ResourceResult<'a> {
             .borrow()
             .as_ref()?
             .get(key)
-            .map(|o| o.val.as_ref())
-            .flatten()
+            .and_then(|o| o.val.as_ref())
     }
 
     pub fn output_entry(&self, key: &str) -> Option<&'a OutputEntry> {
         if self.output_map.borrow().is_none() {
             self.build_output_map();
         }
-        self.output_map.borrow().as_ref()?.get(key).map(|v| *v)
+        self.output_map.borrow().as_ref()?.get(key).copied()
     }
 
     fn build_output_map(&self) {
