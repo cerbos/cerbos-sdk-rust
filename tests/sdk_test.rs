@@ -85,6 +85,22 @@ async fn check_resources_plaintext_with_output() -> Result<()> {
     do_check_resources_with_output(client).await
 }
 
+#[cfg(feature = "testcontainers")]
+#[tokio::test]
+async fn check_resources_tls_with_auxdata() -> Result<()> {
+    let temp_dir = tempfile::TempDir::new()?;
+    let (client, contiainer) = async_tls_client(&temp_dir).await?;
+    do_check_resources_with_auxdata(client).await?;
+    contiainer.stop().await
+}
+
+#[cfg(not(feature = "testcontainers"))]
+#[tokio::test]
+async fn check_resources_plaintext_with_auxdata() -> Result<()> {
+    let client = async_plaintext_client().await?;
+    do_check_resources_with_auxdata(client).await
+}
+
 fn string_value(s: impl Into<String>) -> Value {
     Value {
         kind: Some(value::Kind::StringValue(s.into())),
@@ -217,6 +233,47 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     let allowed = resp
         .find("XX125")
         .map(|x| x.is_allowed("view:public"))
+        .unwrap();
+    assert!(allowed);
+
+    Ok(())
+}
+
+async fn do_check_resources_with_auxdata(mut client: CerbosAsyncClient) -> Result<()> {
+    let principal = Principal::new("alice", ["employee"])
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("geography", "GB"),
+            attr("team", "design"),
+        ]);
+
+    let resource = Resource::new("XX125", "leave_request")
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("geography", "GB"),
+            attr("team", "design"),
+            attr("owner", "alice"),
+            attr("id", "XX125"),
+        ]);
+
+    let token_str = "eyJhbGciOiJFUzM4NCIsImtpZCI6IjE5TGZaYXRFZGc4M1lOYzVyMjNndU1KcXJuND0iLCJ0eXAiOiJKV1QifQ.eyJhdWQiOlsiY2VyYm9zLWp3dC10ZXN0cyJdLCJjdXN0b21BcnJheSI6WyJBIiwiQiIsIkMiXSwiY3VzdG9tSW50Ijo0MiwiY3VzdG9tTWFwIjp7IkEiOiJBQSIsIkIiOiJCQiIsIkMiOiJDQyJ9LCJjdXN0b21TdHJpbmciOiJmb29iYXIiLCJleHAiOjE5NTAyNzc5MjYsImlzcyI6ImNlcmJvcy10ZXN0LXN1aXRlIn0._nCHIsuFI3wczeuUv_xjSwaVnIQUdYA9sGf_jVsrsDWloLs3iPWDaA1bXpuIUJVsi8-G6qqdrPI0cOBxEocg1NCm8fyD9T_3hsZV0fYWon_Je6Kl93a3JIW3S6kbvjsL";
+
+    let resp = client
+        .check_resources(
+            principal,
+            ResourceList::new_from([ResourceAction(resource, ["frobnicate"])]),
+            Some(AuxData::new().with_jwts([
+                ("token_a", token_str, None::<String>),
+                ("token_b", token_str, None::<String>),
+            ])),
+        )
+        .await?;
+
+    let allowed = resp
+        .find("XX125")
+        .map(|x| x.is_allowed("frobnicate"))
         .unwrap();
     assert!(allowed);
 
