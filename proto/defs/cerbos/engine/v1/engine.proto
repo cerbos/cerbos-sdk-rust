@@ -1,4 +1,4 @@
-// Copyright 2021-2025 Zenauth Ltd.
+// Copyright 2021-2026 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
@@ -42,11 +42,11 @@ message PlanResourcesInput {
     ];
 
     string scope = 4 [
-      (buf.validate.field).string = {pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"},
+      (buf.validate.field).string = {pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"},
       (google.api.field_behavior) = OPTIONAL,
       (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
         description: "A dot-separated scope that describes the hierarchy this resource belongs to. This is used for determining policy inheritance."
-        pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"
+        pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"
       }
     ];
   }
@@ -124,6 +124,7 @@ message PlanResourcesOutput {
   repeated cerbos.schema.v1.ValidationError validation_errors = 8;
   repeated string actions = 9;
   map<string, string> matched_scopes = 10;
+  repeated EvaluationError evaluation_errors = 11;
 }
 
 message CheckInput {
@@ -161,6 +162,17 @@ message CheckOutput {
   repeated string effective_derived_roles = 4;
   repeated cerbos.schema.v1.ValidationError validation_errors = 5;
   repeated OutputEntry outputs = 6;
+  repeated EvaluationError evaluation_errors = 7;
+}
+
+message EvaluationError {
+  message CELError {
+    string expression = 1;
+    string message = 2;
+  }
+  oneof error {
+    CELError cel_error = 1;
+  }
 }
 
 message OutputEntry {
@@ -171,6 +183,14 @@ message OutputEntry {
   google.protobuf.Value val = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
     description: "Dynamic output, determined by user defined rule output."
     example: "\"some_string\""
+  }];
+  string action = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Action that was being evaluated when this output was produced."
+    example: "\"view\""
+  }];
+  string error = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Error encountered when evaluating the output expression (if any). `val` will not be set if an error was encountered."
+    example: "\"division by zero\""
   }];
 }
 
@@ -206,18 +226,17 @@ message Resource {
     (buf.validate.field).map.keys = {
       string: {min_len: 1}
     },
-    (buf.validate.field).map.values.required = true,
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "Kay-value pairs of contextual data about this resource that should be used during policy evaluation."
       example: "{\"owner\": \"bugs_bunny\"}"
     }
   ];
   string scope = 5 [
-    (buf.validate.field).string = {pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"},
+    (buf.validate.field).string = {pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"},
     (google.api.field_behavior) = OPTIONAL,
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "A dot-separated scope that describes the hierarchy this resource belongs to. This is used for determining policy inheritance."
-      pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"
+      pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"
       example: "\"acme.corp\""
     }
   ];
@@ -266,18 +285,17 @@ message Principal {
     (buf.validate.field).map.keys = {
       string: {min_len: 1}
     },
-    (buf.validate.field).map.values.required = true,
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "Key-value pairs of contextual data about this principal that should be used during policy evaluation."
       example: "{\"beta_tester\": true}"
     }
   ];
   string scope = 5 [
-    (buf.validate.field).string = {pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"},
+    (buf.validate.field).string = {pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"},
     (google.api.field_behavior) = OPTIONAL,
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "A dot-separated scope that describes the hierarchy this principal belongs to. This is used for determining policy inheritance."
-      pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"
+      pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"
       example: "\"acme.corp\""
     }
   ];
@@ -287,8 +305,20 @@ message AuxData {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {description: "Structured auxiliary data"}
   };
+  option (buf.validate.message).cel = {
+    id: "AuxData.only_one_jwt_field"
+    message: "Only one of the jwt or jwts fields must be set"
+    expression: "!(has(this.jwt) && has(this.jwts))"
+  };
+
+  message JWT {
+    map<string, google.protobuf.Value> claims = 1;
+  }
 
   map<string, google.protobuf.Value> jwt = 1;
+  map<string, JWT> jwts = 2 [(buf.validate.field).map.keys = {
+    string: {min_len: 1}
+  }];
 }
 
 message Trace {
@@ -351,6 +381,16 @@ message Trace {
 
   repeated Component components = 1;
   Event event = 2;
+}
+
+message TraceEntry {
+  repeated uint32 component_indices = 1;
+  Trace.Event event = 2;
+}
+
+message TraceBatch {
+  repeated Trace.Component definitions = 1;
+  repeated TraceEntry entries = 2;
 }
 
 // Data from the request, provided to expressions as the top-level `request` variable.

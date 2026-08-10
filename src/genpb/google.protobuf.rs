@@ -1634,6 +1634,7 @@ pub mod feature_set {
         Unknown = 0,
         Style2024 = 1,
         StyleLegacy = 2,
+        Style2026 = 3,
     }
     impl EnforceNamingStyle {
         /// String value of the enum field names used in the ProtoBuf definition.
@@ -1645,6 +1646,7 @@ pub mod feature_set {
                 Self::Unknown => "ENFORCE_NAMING_STYLE_UNKNOWN",
                 Self::Style2024 => "STYLE2024",
                 Self::StyleLegacy => "STYLE_LEGACY",
+                Self::Style2026 => "STYLE2026",
             }
         }
         /// Creates an enum from field names used in the ProtoBuf definition.
@@ -1653,6 +1655,7 @@ pub mod feature_set {
                 "ENFORCE_NAMING_STYLE_UNKNOWN" => Some(Self::Unknown),
                 "STYLE2024" => Some(Self::Style2024),
                 "STYLE_LEGACY" => Some(Self::StyleLegacy),
+                "STYLE2026" => Some(Self::Style2026),
                 _ => None,
             }
         }
@@ -1940,6 +1943,7 @@ pub enum Edition {
     /// comparison.
     Edition2023 = 1000,
     Edition2024 = 1001,
+    Edition2026 = 1002,
     /// A placeholder edition for developing and testing unscheduled features.
     Unstable = 9999,
     /// Placeholder editions for testing feature resolution.  These should not be
@@ -1967,6 +1971,7 @@ impl Edition {
             Self::Proto3 => "EDITION_PROTO3",
             Self::Edition2023 => "EDITION_2023",
             Self::Edition2024 => "EDITION_2024",
+            Self::Edition2026 => "EDITION_2026",
             Self::Unstable => "EDITION_UNSTABLE",
             Self::Edition1TestOnly => "EDITION_1_TEST_ONLY",
             Self::Edition2TestOnly => "EDITION_2_TEST_ONLY",
@@ -1985,6 +1990,7 @@ impl Edition {
             "EDITION_PROTO3" => Some(Self::Proto3),
             "EDITION_2023" => Some(Self::Edition2023),
             "EDITION_2024" => Some(Self::Edition2024),
+            "EDITION_2026" => Some(Self::Edition2026),
             "EDITION_UNSTABLE" => Some(Self::Unstable),
             "EDITION_1_TEST_ONLY" => Some(Self::Edition1TestOnly),
             "EDITION_2_TEST_ONLY" => Some(Self::Edition2TestOnly),
@@ -2234,26 +2240,31 @@ pub struct Timestamp {
     #[prost(int32, tag = "2")]
     pub nanos: i32,
 }
-/// `Struct` represents a structured data value, consisting of fields
-/// which map to dynamically typed values. In some languages, `Struct`
-/// might be supported by a native representation. For example, in
-/// scripting languages like JS a struct is represented as an
-/// object. The details of that representation are described together
-/// with the proto support for the language.
+/// Represents a JSON object.
 ///
-/// The JSON representation for `Struct` is JSON object.
+/// An unordered key-value map, intending to perfectly capture the semantics of a
+/// JSON object. This enables parsing any arbitrary JSON payload as a message
+/// field in ProtoJSON format.
+///
+/// This follows RFC 8259 guidelines for interoperable JSON: notably this type
+/// cannot represent large Int64 values or `NaN`/`Infinity` numbers,
+/// since the JSON format generally does not support those values in its number
+/// type.
+///
+/// If you do not intend to parse arbitrary JSON into your message, a custom
+/// typed message should be preferred instead of using this type.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Struct {
     /// Unordered map of dynamically typed values.
     #[prost(map = "string, message", tag = "1")]
     pub fields: ::std::collections::HashMap<::prost::alloc::string::String, Value>,
 }
+/// Represents a JSON value.
+///
 /// `Value` represents a dynamically typed value which can be either
 /// null, a number, a string, a boolean, a recursive struct value, or a
 /// list of values. A producer of value is expected to set one of these
-/// variants. Absence of any variant indicates an error.
-///
-/// The JSON representation for `Value` is JSON value.
+/// variants. Absence of any variant is an invalid state.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Value {
     /// The kind of value.
@@ -2265,39 +2276,45 @@ pub mod value {
     /// The kind of value.
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Kind {
-        /// Represents a null value.
+        /// Represents a JSON `null`.
         #[prost(enumeration = "super::NullValue", tag = "1")]
         NullValue(i32),
-        /// Represents a double value.
+        /// Represents a JSON number. Must not be `NaN`, `Infinity` or
+        /// `-Infinity`, since those are not supported in JSON. This also cannot
+        /// represent large Int64 values, since JSON format generally does not
+        /// support them in its number type.
         #[prost(double, tag = "2")]
         NumberValue(f64),
-        /// Represents a string value.
+        /// Represents a JSON string.
         #[prost(string, tag = "3")]
         StringValue(::prost::alloc::string::String),
-        /// Represents a boolean value.
+        /// Represents a JSON boolean (`true` or `false` literal in JSON).
         #[prost(bool, tag = "4")]
         BoolValue(bool),
-        /// Represents a structured value.
+        /// Represents a JSON object.
         #[prost(message, tag = "5")]
         StructValue(super::Struct),
-        /// Represents a repeated `Value`.
+        /// Represents a JSON array.
         #[prost(message, tag = "6")]
         ListValue(super::ListValue),
     }
 }
-/// `ListValue` is a wrapper around a repeated field of values.
-///
-/// The JSON representation for `ListValue` is JSON array.
+/// Represents a JSON array.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListValue {
     /// Repeated field of dynamically typed values.
     #[prost(message, repeated, tag = "1")]
     pub values: ::prost::alloc::vec::Vec<Value>,
 }
-/// `NullValue` is a singleton enumeration to represent the null value for the
-/// `Value` type union.
+/// Represents a JSON `null`.
 ///
-/// The JSON representation for `NullValue` is JSON `null`.
+/// `NullValue` is a sentinel, using an enum with only one value to represent
+/// the null value for the `Value` type union.
+///
+/// A field of type `NullValue` with any value other than `0` is considered
+/// invalid. Most ProtoJSON serializers will emit a Value with a `null_value` set
+/// as a JSON `null` regardless of the integer value, and so will round trip to
+/// a `0` value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum NullValue {
@@ -2454,133 +2471,67 @@ pub struct BytesValue {
 /// `Any` contains an arbitrary serialized protocol buffer message along with a
 /// URL that describes the type of the serialized message.
 ///
-/// Protobuf library provides support to pack/unpack Any values in the form
-/// of utility functions or additional generated methods of the Any type.
+/// In its binary encoding, an `Any` is an ordinary message; but in other wire
+/// forms like JSON, it has a special encoding. The format of the type URL is
+/// described on the `type_url` field.
 ///
-/// Example 1: Pack and unpack a message in C++.
+/// Protobuf APIs provide utilities to interact with `Any` values:
 ///
-/// ```text
-/// Foo foo = ...;
-/// Any any;
-/// any.PackFrom(foo);
-/// ...
-/// if (any.UnpackTo(&foo)) {
-///    ...
-/// }
-/// ```
+/// * A 'pack' operation accepts a message and constructs a generic `Any` wrapper
+///   around it.
+/// * An 'unpack' operation reads the content of an `Any` message, either into an
+///   existing message or a new one. Unpack operations must check the type of the
+///   value they unpack against the declared `type_url`.
+/// * An 'is' operation decides whether an `Any` contains a message of the given
+///   type, i.e. whether it can 'unpack' that type.
 ///
-/// Example 2: Pack and unpack a message in Java.
+/// The JSON format representation of an `Any` follows one of these cases:
 ///
-/// ```text
-/// Foo foo = ...;
-/// Any any = Any.pack(foo);
-/// ...
-/// if (any.is(Foo.class)) {
-///    foo = any.unpack(Foo.class);
-/// }
-/// // or ...
-/// if (any.isSameTypeAs(Foo.getDefaultInstance())) {
-///    foo = any.unpack(Foo.getDefaultInstance());
-/// }
-/// ```
+/// * For types without special-cased JSON encodings, the JSON format
+///   representation of the `Any` is the same as that of the message, with an
+///   additional `@type` field which contains the type URL.
+/// * For types with special-cased JSON encodings (typically called 'well-known'
+///   types, listed in <https://protobuf.dev/programming-guides/json/#any>), the
+///   JSON format representation has a key `@type` which contains the type URL
+///   and a key `value` which contains the JSON-serialized value.
 ///
-/// Example 3: Pack and unpack a message in Python.
-///
-/// ```text
-/// foo = Foo(...)
-/// any = Any()
-/// any.Pack(foo)
-/// ...
-/// if any.Is(Foo.DESCRIPTOR):
-///    any.Unpack(foo)
-///    ...
-/// ```
-///
-/// Example 4: Pack and unpack a message in Go
-///
-/// ```text
-///   foo := &pb.Foo{...}
-///   any, err := anypb.New(foo)
-///   if err != nil {
-///     ...
-///   }
-///   ...
-///   foo := &pb.Foo{}
-///   if err := any.UnmarshalTo(foo); err != nil {
-///     ...
-///   }
-/// ```
-///
-/// The pack methods provided by protobuf library will by default use
-/// 'type.googleapis.com/full.type.name' as the type URL and the unpack
-/// methods only use the fully qualified type name after the last '/'
-/// in the type URL, for example "foo.bar.com/x/y.z" will yield type
-/// name "y.z".
-///
-/// # JSON
-///
-/// The JSON representation of an `Any` value uses the regular
-/// representation of the deserialized, embedded message, with an
-/// additional field `@type` which contains the type URL. Example:
-///
-/// ```text
-/// package google.profile;
-/// message Person {
-///    string first_name = 1;
-///    string last_name = 2;
-/// }
-///
-/// {
-///    "@type": "type.googleapis.com/google.profile.Person",
-///    "firstName": <string>,
-///    "lastName": <string>
-/// }
-/// ```
-///
-/// If the embedded message type is well-known and has a custom JSON
-/// representation, that representation will be embedded adding a field
-/// `value` which holds the custom JSON in addition to the `@type`
-/// field. Example (for message \[google.protobuf.Duration\]\[\]):
-///
-/// ```text
-/// {
-///    "@type": "type.googleapis.com/google.protobuf.Duration",
-///    "value": "1.212s"
-/// }
-/// ```
+/// The text format representation of an `Any` is like a message with one field
+/// whose name is the type URL in brackets. For example, an `Any` containing a
+/// `foo.Bar` message may be written `\[type.googleapis.com/foo.Bar\] { a: 2 }`.
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Any {
-    /// A URL/resource name that uniquely identifies the type of the serialized
-    /// protocol buffer message. This string must contain at least
-    /// one "/" character. The last segment of the URL's path must represent
-    /// the fully qualified name of the type (as in
-    /// `path/google.protobuf.Duration`). The name should be in a canonical form
-    /// (e.g., leading "." is not accepted).
+    /// Identifies the type of the serialized Protobuf message with a URI reference
+    /// consisting of a prefix ending in a slash and the fully-qualified type name.
     ///
-    /// In practice, teams usually precompile into the binary all types that they
-    /// expect it to use in the context of Any. However, for URLs which use the
-    /// scheme `http`, `https`, or no scheme, one can optionally set up a type
-    /// server that maps type URLs to message definitions as follows:
+    /// Example: type.googleapis.com/google.protobuf.StringValue
     ///
-    /// * If no scheme is provided, `https` is assumed.
-    /// * An HTTP GET on the URL must yield a \[google.protobuf.Type\]\[\]
-    ///   value in binary format, or produce an error.
-    /// * Applications are allowed to cache lookup results based on the
-    ///   URL, or have them precompiled into a binary to avoid any
-    ///   lookup. Therefore, binary compatibility needs to be preserved
-    ///   on changes to types. (Use versioned type names to manage
-    ///   breaking changes.)
+    /// This string must contain at least one `/` character, and the content after
+    /// the last `/` must be the fully-qualified name of the type in canonical
+    /// form, without a leading dot. Do not write a scheme on these URI references
+    /// so that clients do not attempt to contact them.
     ///
-    /// Note: this functionality is not currently available in the official
-    /// protobuf release, and it is not used for type URLs beginning with
-    /// type.googleapis.com. As of May 2023, there are no widely used type server
-    /// implementations and no plans to implement one.
+    /// The prefix is arbitrary and Protobuf implementations are expected to
+    /// simply strip off everything up to and including the last `/` to identify
+    /// the type. `type.googleapis.com/` is a common default prefix that some
+    /// legacy implementations require. This prefix does not indicate the origin of
+    /// the type, and URIs containing it are not expected to respond to any
+    /// requests.
     ///
-    /// Schemes other than `http`, `https` (or the empty scheme) might be
-    /// used with implementation specific semantics.
+    /// All type URL strings must be legal URI references with the additional
+    /// restriction (for the text format) that the content of the reference
+    /// must consist only of alphanumeric characters, percent-encoded escapes, and
+    /// characters in the following set (not including the outer backticks):
+    /// `/-.~_!$&()*+,;=`. Despite our allowing percent encodings, implementations
+    /// should not unescape them to prevent confusion with existing parsers. For
+    /// example, `type.googleapis.com%2FFoo` should be rejected.
+    ///
+    /// In the original design of `Any`, the possibility of launching a type
+    /// resolution service at these type URLs was considered but Protobuf never
+    /// implemented one and considers contacting these URLs to be problematic and
+    /// a potential security issue. Do not attempt to contact type URLs.
     #[prost(string, tag = "1")]
     pub type_url: ::prost::alloc::string::String,
-    /// Must be a valid serialized protocol buffer of the above specified type.
+    /// Holds a Protobuf serialization of the type described by type_url.
     #[prost(bytes = "vec", tag = "2")]
     pub value: ::prost::alloc::vec::Vec<u8>,
 }

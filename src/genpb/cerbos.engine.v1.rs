@@ -283,6 +283,8 @@ pub struct PlanResourcesOutput {
         ::prost::alloc::string::String,
         ::prost::alloc::string::String,
     >,
+    #[prost(message, repeated, tag = "11")]
+    pub evaluation_errors: ::prost::alloc::vec::Vec<EvaluationError>,
 }
 #[cfg_attr(
     feature = "serde",
@@ -328,6 +330,8 @@ pub struct CheckOutput {
     >,
     #[prost(message, repeated, tag = "6")]
     pub outputs: ::prost::alloc::vec::Vec<OutputEntry>,
+    #[prost(message, repeated, tag = "7")]
+    pub evaluation_errors: ::prost::alloc::vec::Vec<EvaluationError>,
 }
 /// Nested message and enum types in `CheckOutput`.
 pub mod check_output {
@@ -351,12 +355,51 @@ pub mod check_output {
     derive(serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct EvaluationError {
+    #[prost(oneof = "evaluation_error::Error", tags = "1")]
+    pub error: ::core::option::Option<evaluation_error::Error>,
+}
+/// Nested message and enum types in `EvaluationError`.
+pub mod evaluation_error {
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+    pub struct CelError {
+        #[prost(string, tag = "1")]
+        pub expression: ::prost::alloc::string::String,
+        #[prost(string, tag = "2")]
+        pub message: ::prost::alloc::string::String,
+    }
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    pub enum Error {
+        #[prost(message, tag = "1")]
+        CelError(CelError),
+    }
+}
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct OutputEntry {
     #[prost(string, tag = "1")]
     pub src: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub val: ::core::option::Option<super::super::super::google::protobuf::Value>,
+    #[prost(string, tag = "3")]
+    pub action: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub error: ::prost::alloc::string::String,
 }
 #[cfg_attr(
     feature = "serde",
@@ -412,6 +455,24 @@ pub struct AuxData {
         ::prost::alloc::string::String,
         super::super::super::google::protobuf::Value,
     >,
+    #[prost(map = "string, message", tag = "2")]
+    pub jwts: ::std::collections::HashMap<::prost::alloc::string::String, aux_data::Jwt>,
+}
+/// Nested message and enum types in `AuxData`.
+pub mod aux_data {
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Jwt {
+        #[prost(map = "string, message", tag = "1")]
+        pub claims: ::std::collections::HashMap<
+            ::prost::alloc::string::String,
+            super::super::super::super::google::protobuf::Value,
+        >,
+    }
 }
 #[cfg_attr(
     feature = "serde",
@@ -642,6 +703,30 @@ pub mod trace {
             }
         }
     }
+}
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TraceEntry {
+    #[prost(uint32, repeated, tag = "1")]
+    pub component_indices: ::prost::alloc::vec::Vec<u32>,
+    #[prost(message, optional, tag = "2")]
+    pub event: ::core::option::Option<trace::Event>,
+}
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TraceBatch {
+    #[prost(message, repeated, tag = "1")]
+    pub definitions: ::prost::alloc::vec::Vec<trace::Component>,
+    #[prost(message, repeated, tag = "2")]
+    pub entries: ::prost::alloc::vec::Vec<TraceEntry>,
 }
 /// Data from the request, provided to expressions as the top-level `request` variable.
 #[cfg_attr(

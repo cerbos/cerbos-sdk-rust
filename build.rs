@@ -26,6 +26,7 @@ fn main() -> Result<(), std::io::Error> {
         &[
             "proto/defs/cerbos/policy/v1/policy.proto",
             "proto/defs/cerbos/svc/v1/svc.proto",
+            "proto/defs/cerbos/cloud/auth/v1/auth.proto",
             "proto/defs/cerbos/cloud/store/v1/store.proto",
             "proto/defs/cerbos/cloud/apikey/v1/apikey.proto",
             "proto/defs/google/rpc/status.proto",

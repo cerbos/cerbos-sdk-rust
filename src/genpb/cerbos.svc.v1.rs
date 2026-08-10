@@ -441,6 +441,34 @@ pub mod cerbos_admin_service_client {
                 );
             self.inner.unary(req, path, codec).await
         }
+        pub async fn delete_policy(
+            &mut self,
+            request: impl tonic::IntoRequest<
+                super::super::super::request::v1::DeletePolicyRequest,
+            >,
+        ) -> std::result::Result<
+            tonic::Response<super::super::super::response::v1::DeletePolicyResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.svc.v1.CerbosAdminService/DeletePolicy",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "DeletePolicy"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn disable_policy(
             &mut self,
             request: impl tonic::IntoRequest<
@@ -674,6 +702,39 @@ pub mod cerbos_admin_service_client {
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new("cerbos.svc.v1.CerbosAdminService", "ReloadStore"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn purge_store_revisions(
+            &mut self,
+            request: impl tonic::IntoRequest<
+                super::super::super::request::v1::PurgeStoreRevisionsRequest,
+            >,
+        ) -> std::result::Result<
+            tonic::Response<
+                super::super::super::response::v1::PurgeStoreRevisionsResponse,
+            >,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.svc.v1.CerbosAdminService/PurgeStoreRevisions",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.svc.v1.CerbosAdminService",
+                        "PurgeStoreRevisions",
+                    ),
                 );
             self.inner.unary(req, path, codec).await
         }

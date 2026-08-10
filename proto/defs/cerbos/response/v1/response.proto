@@ -1,4 +1,4 @@
-// Copyright 2021-2025 Zenauth Ltd.
+// Copyright 2021-2026 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
@@ -73,10 +73,11 @@ message CheckResourceSetResponse {
 
   message ActionEffectMap {
     map<string, cerbos.effect.v1.Effect> actions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Mapping of each action to an effect."}];
-    repeated cerbos.schema.v1.ValidationError validation_errors = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description:
+    repeated cerbos.schema.v1.ValidationError validation_errors = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description:
         "List of validation errors (if schema validation is "
         "enabled)"
-}];
+    }];
   }
 
   message Meta {
@@ -164,10 +165,11 @@ message CheckResourceBatchResponse {
       description: "Mapping of each action to an effect."
       example: "{\"view\":\"EFFECT_ALLOW\"}"
     }];
-    repeated cerbos.schema.v1.ValidationError validation_errors = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description:
+    repeated cerbos.schema.v1.ValidationError validation_errors = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description:
         "List of validation errors (if schema validation is "
         "enabled)"
-}];
+    }];
   }
 
   string request_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
@@ -210,7 +212,7 @@ message CheckResourcesResponse {
           "A dot-separated scope that describes the hierarchy "
           "this resource belongs to. This is used for "
           "determining policy inheritance."
-        pattern: "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"
+        pattern: "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"
         example: "\"acme.corp\""
       }];
     }
@@ -256,10 +258,11 @@ message CheckResourcesResponse {
       description: "Mapping of each action to an effect."
       example: "{\"view\":\"EFFECT_ALLOW\"}"
     }];
-    repeated cerbos.schema.v1.ValidationError validation_errors = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description:
+    repeated cerbos.schema.v1.ValidationError validation_errors = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description:
         "List of validation errors (if schema validation is "
         "enabled)"
-}];
+    }];
     Meta meta = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description: "Metadata about policy evaluation"
       example:
@@ -427,11 +430,41 @@ message GetPolicyResponse {
   repeated cerbos.policy.v1.Policy policies = 1;
 }
 
+message DeletePolicyResponse {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {description: "Delete policy response"}
+  };
+
+  uint32 deleted_policies = 1;
+}
+
+message DeletePolicyErrorDetails {
+  map<string, IntegrityErrors> errors = 1;
+}
+
 message DisablePolicyResponse {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {description: "Disable policy response"}
   };
+
   uint32 disabled_policies = 1;
+}
+
+message DisablePolicyErrorDetails {
+  map<string, IntegrityErrors> errors = 1;
+}
+
+message IntegrityErrors {
+  message BreaksScopeChain {
+    repeated string descendants = 1;
+  }
+
+  message RequiredByOtherPolicies {
+    repeated string dependents = 1;
+  }
+
+  BreaksScopeChain breaks_scope_chain = 1;
+  RequiredByOtherPolicies required_by_other_policies = 2;
 }
 
 message EnablePolicyResponse {
@@ -550,4 +583,12 @@ message ReloadStoreResponse {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
     json_schema: {description: "Reload store response"}
   };
+}
+
+message PurgeStoreRevisionsResponse {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {description: "Purge store revisions response"}
+  };
+
+  uint32 affected_rows = 1;
 }

@@ -61,6 +61,18 @@ pub struct GetFilesResponse {
     #[prost(message, repeated, tag = "2")]
     pub files: ::prost::alloc::vec::Vec<File>,
 }
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetCurrentVersionRequest {
+    #[prost(string, tag = "1")]
+    pub store_id: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetCurrentVersionResponse {
+    #[prost(int64, tag = "1")]
+    pub store_version: i64,
+    #[prost(message, optional, tag = "2")]
+    pub change_details: ::core::option::Option<ChangeDetails>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChangeDetails {
     #[prost(string, tag = "1")]
@@ -402,6 +414,35 @@ pub mod cerbos_store_service_client {
                     GrpcMethod::new(
                         "cerbos.cloud.store.v1.CerbosStoreService",
                         "ListFiles",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn get_current_version(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetCurrentVersionRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GetCurrentVersionResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.cloud.store.v1.CerbosStoreService/GetCurrentVersion",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.store.v1.CerbosStoreService",
+                        "GetCurrentVersion",
                     ),
                 );
             self.inner.unary(req, path, codec).await

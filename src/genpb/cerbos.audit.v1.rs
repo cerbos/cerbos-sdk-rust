@@ -22,6 +22,8 @@ pub struct AccessLogEntry {
     pub oversized: bool,
     #[prost(message, optional, tag = "8")]
     pub policy_source: ::core::option::Option<PolicySource>,
+    #[prost(message, optional, tag = "9")]
+    pub request_context: ::core::option::Option<RequestContext>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DecisionLogEntry {
@@ -56,6 +58,8 @@ pub struct DecisionLogEntry {
     pub oversized: bool,
     #[prost(message, optional, tag = "18")]
     pub policy_source: ::core::option::Option<PolicySource>,
+    #[prost(message, optional, tag = "19")]
+    pub request_context: ::core::option::Option<RequestContext>,
     #[prost(oneof = "decision_log_entry::Method", tags = "7, 8")]
     pub method: ::core::option::Option<decision_log_entry::Method>,
 }
@@ -207,29 +211,55 @@ pub mod policy_source {
         pub branch: ::prost::alloc::string::String,
         #[prost(string, tag = "3")]
         pub subdirectory: ::prost::alloc::string::String,
+        #[prost(string, tag = "4")]
+        pub hash: ::prost::alloc::string::String,
     }
     #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Hub {
-        #[prost(oneof = "hub::Source", tags = "1, 2, 3, 4")]
+        #[prost(oneof = "hub::Source", tags = "1, 2, 3, 4, 5, 6")]
         pub source: ::core::option::Option<hub::Source>,
     }
     /// Nested message and enum types in `Hub`.
     pub mod hub {
         #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+        pub struct EmbeddedBundle {
+            #[prost(string, tag = "1")]
+            pub rule_id: ::prost::alloc::string::String,
+            #[prost(string, repeated, tag = "2")]
+            pub scopes: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+            #[prost(string, tag = "3")]
+            pub bundle_id: ::prost::alloc::string::String,
+        }
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct LocalBundle {
             #[prost(string, tag = "1")]
             pub path: ::prost::alloc::string::String,
+            #[prost(string, tag = "2")]
+            pub bundle_id: ::prost::alloc::string::String,
+        }
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+        pub struct RemoteBundle {
+            #[prost(string, tag = "1")]
+            pub deployment_id: ::prost::alloc::string::String,
+            #[prost(string, tag = "2")]
+            pub bundle_id: ::prost::alloc::string::String,
         }
         #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
         pub enum Source {
+            #[deprecated]
             #[prost(string, tag = "1")]
             Label(::prost::alloc::string::String),
+            #[deprecated]
             #[prost(string, tag = "2")]
             DeploymentId(::prost::alloc::string::String),
             #[prost(string, tag = "3")]
             PlaygroundId(::prost::alloc::string::String),
             #[prost(message, tag = "4")]
             LocalBundle(LocalBundle),
+            #[prost(message, tag = "5")]
+            EmbeddedBundle(EmbeddedBundle),
+            #[prost(message, tag = "6")]
+            RemoteBundle(RemoteBundle),
         }
     }
     #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
@@ -244,7 +274,16 @@ pub mod policy_source {
         Git(Git),
         #[prost(message, tag = "5")]
         Hub(Hub),
+        #[deprecated]
         #[prost(message, tag = "6")]
         EmbeddedPdp(EmbeddedPdp),
     }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RequestContext {
+    #[prost(map = "string, message", tag = "1")]
+    pub annotations: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        super::super::super::google::protobuf::Value,
+    >,
 }

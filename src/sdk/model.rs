@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 use super::attr::{AttrVal, Attribute};
 use crate::genpb::cerbos::effect::v1::Effect;
+use crate::genpb::cerbos::engine::v1::OutputEntry;
 use crate::genpb::cerbos::engine::v1::{
     plan_resources_filter::expression::Operand, plan_resources_filter::Kind,
     plan_resources_input::Resource as ResourceKindPB, Principal as PrincipalPB,
@@ -228,6 +229,32 @@ impl AuxData {
             .for_each(|ks| jwt.key_set_id = ks.to_string());
 
         self.aux_data.jwt = Some(jwt);
+        self.aux_data.jwts.clear();
+        self
+    }
+
+    pub fn with_jwts<K, T, S>(mut self, jwts: impl IntoIterator<Item = (K, T, Option<S>)>) -> Self
+    where
+        K: Into<String>,
+        T: Into<String>,
+        S: Into<String>,
+    {
+        self.aux_data.jwt = None;
+        self.aux_data.jwts = jwts
+            .into_iter()
+            .map(|(name, token, key_set_id)| {
+                let mut jwt = Jwt {
+                    token: token.into(),
+                    ..Default::default()
+                };
+
+                if let Some(ks) = key_set_id {
+                    jwt.key_set_id = ks.into();
+                }
+
+                (name.into(), jwt)
+            })
+            .collect();
         self
     }
 }
@@ -311,7 +338,7 @@ pub enum ResourceMatcher {
 #[derive(Debug)]
 pub struct ResourceResult<'a> {
     pub(crate) result: &'a ResultEntry,
-    output_map: RefCell<Option<HashMap<String, &'a Value>>>,
+    output_map: RefCell<Option<HashMap<String, &'a OutputEntry>>>,
 }
 
 impl<'a> ResourceResult<'a> {
@@ -333,15 +360,25 @@ impl<'a> ResourceResult<'a> {
         if self.output_map.borrow().is_none() {
             self.build_output_map();
         }
-        self.output_map.borrow().as_ref()?.get(key).copied()
+        self.output_map
+            .borrow()
+            .as_ref()?
+            .get(key)
+            .map(|o| o.val.as_ref())
+            .flatten()
+    }
+
+    pub fn output_entry(&self, key: &str) -> Option<&'a OutputEntry> {
+        if self.output_map.borrow().is_none() {
+            self.build_output_map();
+        }
+        self.output_map.borrow().as_ref()?.get(key).map(|v| *v)
     }
 
     fn build_output_map(&self) {
         let mut map = HashMap::new();
         for output in &self.result.outputs {
-            if let Some(val) = output.val.as_ref() {
-                map.insert(output.src.clone(), val);
-            }
+            map.insert(output.src.clone(), output);
         }
         *self.output_map.borrow_mut() = Some(map);
     }

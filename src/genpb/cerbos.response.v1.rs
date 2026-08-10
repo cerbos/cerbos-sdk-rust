@@ -375,9 +375,52 @@ pub struct GetPolicyResponse {
     pub policies: ::prost::alloc::vec::Vec<super::super::policy::v1::Policy>,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DeletePolicyResponse {
+    #[prost(uint32, tag = "1")]
+    pub deleted_policies: u32,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeletePolicyErrorDetails {
+    #[prost(map = "string, message", tag = "1")]
+    pub errors: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        IntegrityErrors,
+    >,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DisablePolicyResponse {
     #[prost(uint32, tag = "1")]
     pub disabled_policies: u32,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DisablePolicyErrorDetails {
+    #[prost(map = "string, message", tag = "1")]
+    pub errors: ::std::collections::HashMap<
+        ::prost::alloc::string::String,
+        IntegrityErrors,
+    >,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct IntegrityErrors {
+    #[prost(message, optional, tag = "1")]
+    pub breaks_scope_chain: ::core::option::Option<integrity_errors::BreaksScopeChain>,
+    #[prost(message, optional, tag = "2")]
+    pub required_by_other_policies: ::core::option::Option<
+        integrity_errors::RequiredByOtherPolicies,
+    >,
+}
+/// Nested message and enum types in `IntegrityErrors`.
+pub mod integrity_errors {
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+    pub struct BreaksScopeChain {
+        #[prost(string, repeated, tag = "1")]
+        pub descendants: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+    pub struct RequiredByOtherPolicies {
+        #[prost(string, repeated, tag = "1")]
+        pub dependents: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    }
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EnablePolicyResponse {
@@ -662,3 +705,8 @@ pub struct DeleteSchemaResponse {
 }
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ReloadStoreResponse {}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PurgeStoreRevisionsResponse {
+    #[prost(uint32, tag = "1")]
+    pub affected_rows: u32,
+}
