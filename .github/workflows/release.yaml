@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Protoc
-        uses: cerbos/actions/install-tools@7df6503218a73e5022cc801e99574380474c97dd # main
+        uses: cerbos/actions/install-tools@120749e918c919283f71ea19b06a2f0637132e06 # main
         with:
           tools: protoc
 
