@@ -185,11 +185,22 @@ async fn do_check_resources(mut client: CerbosAsyncClient) -> Result<()> {
 }
 
 async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result<()> {
-    let principal = Principal::new("donald_duck", ["employee"]).with_policy_version("20210210");
+    let principal = Principal::new("donald_duck", ["employee"])
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("team", "design"),
+            attr("geography", "GB"),
+        ]);
 
     let resource = Resource::new("XX125", "leave_request")
         .with_policy_version("20210210")
-        .with_attributes([attr("id", "XX125")]);
+        .with_attributes([
+            attr("id", "XX125"),
+            attr("department", "marketing"),
+            attr("team", "design"),
+            attr("geography", "GB"),
+        ]);
 
     let resp = client
         .check_resources(
@@ -203,6 +214,7 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     assert!(xx125_or_none.is_some());
 
     let xx125 = xx125_or_none.unwrap();
+    assert!(xx125.is_allowed("view:public"));
 
     let resource_output = Some(Value {
         kind: Some(value::Kind::StructValue(Struct {
