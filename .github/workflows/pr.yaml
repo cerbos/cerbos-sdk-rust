@@ -48,7 +48,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cerbos run --set=storage.disk.directory=resources/store -- cargo test --test sdk_test
+          cerbos run --set=storage.disk.directory=tests/testdata/policies -- cargo test --test sdk_test
         env:
           CERBOS_NO_TELEMETRY: "1"
 

@@ -63,5 +63,5 @@ async fn main() -> Result<()> {
 Running tests
 
 ```sh
-cerbos run --set=storage.disk.directory=resources/store -- cargo test
+cerbos run --set=storage.disk.directory=tests/testdata/policies -- cargo test
 ```
