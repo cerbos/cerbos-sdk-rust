@@ -54,7 +54,6 @@ async fn async_tls_client(
     let hostname = "localhost";
     let tls_config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
     let container = CerbosContainer::default()
-        .with_image_tag("latest")
         .with_config_path(&config_path)
         .with_sqlite_in_memory_storage()
         .with_tls_config(&tls_config)

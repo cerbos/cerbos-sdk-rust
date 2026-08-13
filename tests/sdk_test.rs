@@ -1,6 +1,8 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
+use std::path::PathBuf;
+
 use cerbos::{
     genpb::google::protobuf::{value, ListValue, Struct, Value},
     sdk::{attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result},
@@ -27,6 +29,15 @@ impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
             .context("can't stop container")
     }
 }
+
+fn get_test_data_path(subpath: &[&str]) -> PathBuf {
+    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("tests");
+    path.push("testdata");
+    subpath.iter().for_each(|p| path.push(p));
+    path
+}
+
 #[cfg(feature = "testcontainers")]
 async fn async_tls_client(
     temp_dir: &tempfile::TempDir,
@@ -43,9 +54,8 @@ async fn async_tls_client(
     let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
     let config_path = get_test_data_path(&["configs", "tcp_with_tls.yaml"]);
     let container = CerbosContainer::default()
-        .with_image_tag("latest")
-        .with_config_path(&config_path)
         .with_extra_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
+        .with_config_path(&config_path)
         .with_tls_config(&config)
         .start()
         .await?;
