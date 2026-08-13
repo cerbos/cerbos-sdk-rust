@@ -35,8 +35,9 @@ async fn async_tls_client(
     use testcontainers::runners::AsyncRunner;
 
     let mut store_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    store_dir.push("resources");
-    store_dir.push("store");
+    store_dir.push("tests");
+    store_dir.push("testdata");
+    store_dir.push("policies");
 
     let hostname = "localhost";
     let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
