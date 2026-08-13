@@ -30,6 +30,7 @@ impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
     }
 }
 
+#[cfg(feature = "testcontainers")]
 fn get_test_data_path(subpath: &[&str]) -> PathBuf {
     let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     path.push("tests");
