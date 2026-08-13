@@ -41,8 +41,10 @@ async fn async_tls_client(
 
     let hostname = "localhost";
     let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
+    let config_path = get_test_data_path(&["configs", "tcp_with_tls.yaml"]);
     let container = CerbosContainer::default()
         .with_image_tag("latest")
+        .with_config_path(&config_path)
         .with_extra_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
         .with_tls_config(&config)
         .start()
