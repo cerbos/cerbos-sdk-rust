@@ -8,7 +8,7 @@ use crate::genpb::cerbos::engine::v1::{
     plan_resources_input::Resource as ResourceKindPB, Principal as PrincipalPB,
     Resource as ResourcePB,
 };
-use crate::genpb::cerbos::request::v1::aux_data::Jwt;
+use crate::genpb::cerbos::request::v1::aux_data::Jwt as JwtPB;
 use crate::genpb::cerbos::request::v1::check_resources_request::ResourceEntry;
 use crate::genpb::cerbos::request::v1::AuxData as AuxDataPB;
 use crate::genpb::cerbos::response::v1::check_resources_response::ResultEntry;
@@ -199,6 +199,23 @@ impl From<Resource> for ResourceKind {
     }
 }
 
+pub enum Jwt {
+    Value(String),
+    ValueWithKeySetID(String, String),
+}
+
+impl ProtobufWrapper<JwtPB> for Jwt {
+    fn to_pb(self) -> JwtPB {
+        match self {
+            Jwt::Value(token) => JwtPB {
+                token,
+                ..Default::default()
+            },
+            Jwt::ValueWithKeySetID(token, key_set_id) => JwtPB { token, key_set_id },
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct AuxData {
     pub(crate) aux_data: AuxDataPB,
@@ -218,7 +235,7 @@ impl AuxData {
     }
 
     pub fn with_jwt<T: Into<String>>(mut self, token: T, key_set_id: Option<T>) -> Self {
-        let mut jwt = Jwt {
+        let mut jwt = JwtPB {
             token: token.into(),
             ..Default::default()
         };
@@ -233,27 +250,14 @@ impl AuxData {
         self
     }
 
-    pub fn with_jwts<K, T, S>(mut self, jwts: impl IntoIterator<Item = (K, T, Option<S>)>) -> Self
+    pub fn with_jwts<S>(mut self, jwts: impl IntoIterator<Item = (S, Jwt)>) -> Self
     where
-        K: Into<String>,
-        T: Into<String>,
         S: Into<String>,
     {
         self.aux_data.jwt = None;
         self.aux_data.jwts = jwts
             .into_iter()
-            .map(|(name, token, key_set_id)| {
-                let mut jwt = Jwt {
-                    token: token.into(),
-                    ..Default::default()
-                };
-
-                if let Some(ks) = key_set_id {
-                    jwt.key_set_id = ks.into();
-                }
-
-                (name.into(), jwt)
-            })
+            .map(|(name, jwt)| (name.into(), jwt.to_pb()))
             .collect();
         self
     }

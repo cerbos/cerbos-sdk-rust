@@ -292,8 +292,8 @@ async fn do_check_resources_with_auxdata(mut client: CerbosAsyncClient) -> Resul
             principal,
             ResourceList::new_from([ResourceAction(resource, ["frobnicate"])]),
             Some(AuxData::new().with_jwts([
-                ("token_a", token_str, None::<String>),
-                ("token_b", token_str, None::<String>),
+                ("token_a", Jwt::Value(token_str.to_string())),
+                ("token_b", Jwt::Value(token_str.to_string())),
             ])),
         )
         .await?;
