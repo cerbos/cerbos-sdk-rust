@@ -103,6 +103,11 @@ pub mod genpb {
         #[path = ""]
         pub mod cloud {
             #[path = ""]
+            pub mod auth {
+                #[path = "cerbos.cloud.auth.v1.rs"]
+                pub mod v1;
+            }
+            #[path = ""]
             pub mod store {
                 #[path = "cerbos.cloud.store.v1.rs"]
                 pub mod v1;

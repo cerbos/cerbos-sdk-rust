@@ -7,7 +7,6 @@ Rust client library for [Cerbos](https://cerbos.dev): the open core, language-ag
 * [Cerbos GitHub repository](https://github.com/cerbos/cerbos)
 * [Cerbos Slack community](http://go.cerbos.io/slack)
 
-
 ## Usage
 
 ```
@@ -16,7 +15,6 @@ cargo add cerbos
 
 The client can be used either asynchronously or synchronously by instantiating `CerbosAsyncClient`
 or `CerbosSyncClient` respectively.
-
 
 ```rust
 use cerbos::sdk::attr::attr;
@@ -62,6 +60,6 @@ async fn main() -> Result<()> {
 
 Running tests
 
-```sh
-cerbos run --set=storage.disk.directory=resources/store -- cargo test
+```console
+just tests
 ```

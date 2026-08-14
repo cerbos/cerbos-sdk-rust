@@ -1,6 +1,9 @@
 // Copyright 2021-2025 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "testcontainers")]
+use std::path::PathBuf;
+
 use cerbos::{
     genpb::google::protobuf::{value, ListValue, Struct, Value},
     sdk::{attr::attr, model::*, CerbosAsyncClient, CerbosClientOptions, CerbosEndpoint, Result},
@@ -27,6 +30,16 @@ impl<T: testcontainers::Image> Stoppable for testcontainers::ContainerAsync<T> {
             .context("can't stop container")
     }
 }
+
+#[cfg(feature = "testcontainers")]
+fn get_test_data_path(subpath: &[&str]) -> PathBuf {
+    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("tests");
+    path.push("testdata");
+    subpath.iter().for_each(|p| path.push(p));
+    path
+}
+
 #[cfg(feature = "testcontainers")]
 async fn async_tls_client(
     temp_dir: &tempfile::TempDir,
@@ -35,14 +48,16 @@ async fn async_tls_client(
     use testcontainers::runners::AsyncRunner;
 
     let mut store_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    store_dir.push("resources");
-    store_dir.push("store");
+    store_dir.push("tests");
+    store_dir.push("testdata");
+    store_dir.push("policies");
 
     let hostname = "localhost";
     let config = CerbosTestTlsConfig::new(hostname, temp_dir)?;
+    let config_path = get_test_data_path(&["configs", "tcp_with_tls.yaml"]);
     let container = CerbosContainer::default()
-        .with_image_tag("0.44.0")
         .with_extra_volume_mounts(vec![(store_dir.to_str().unwrap(), "/policies")])
+        .with_config_path(&config_path)
         .with_tls_config(&config)
         .start()
         .await?;
@@ -83,6 +98,22 @@ async fn check_resources_tls_with_output() -> Result<()> {
 async fn check_resources_plaintext_with_output() -> Result<()> {
     let client = async_plaintext_client().await?;
     do_check_resources_with_output(client).await
+}
+
+#[cfg(feature = "testcontainers")]
+#[tokio::test]
+async fn check_resources_tls_with_auxdata() -> Result<()> {
+    let temp_dir = tempfile::TempDir::new()?;
+    let (client, contiainer) = async_tls_client(&temp_dir).await?;
+    do_check_resources_with_auxdata(client).await?;
+    contiainer.stop().await
+}
+
+#[cfg(not(feature = "testcontainers"))]
+#[tokio::test]
+async fn check_resources_plaintext_with_auxdata() -> Result<()> {
+    let client = async_plaintext_client().await?;
+    do_check_resources_with_auxdata(client).await
 }
 
 fn string_value(s: impl Into<String>) -> Value {
@@ -154,11 +185,22 @@ async fn do_check_resources(mut client: CerbosAsyncClient) -> Result<()> {
 }
 
 async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result<()> {
-    let principal = Principal::new("donald_duck", ["employee"]).with_policy_version("20210210");
+    let principal = Principal::new("donald_duck", ["employee"])
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("team", "design"),
+            attr("geography", "GB"),
+        ]);
 
     let resource = Resource::new("XX125", "leave_request")
         .with_policy_version("20210210")
-        .with_attributes([attr("id", "XX125")]);
+        .with_attributes([
+            attr("id", "XX125"),
+            attr("department", "marketing"),
+            attr("team", "design"),
+            attr("geography", "GB"),
+        ]);
 
     let resp = client
         .check_resources(
@@ -172,6 +214,7 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     assert!(xx125_or_none.is_some());
 
     let xx125 = xx125_or_none.unwrap();
+    assert!(xx125.is_allowed("view:public"));
 
     let resource_output = Some(Value {
         kind: Some(value::Kind::StructValue(Struct {
@@ -217,6 +260,47 @@ async fn do_check_resources_with_output(mut client: CerbosAsyncClient) -> Result
     let allowed = resp
         .find("XX125")
         .map(|x| x.is_allowed("view:public"))
+        .unwrap();
+    assert!(allowed);
+
+    Ok(())
+}
+
+async fn do_check_resources_with_auxdata(mut client: CerbosAsyncClient) -> Result<()> {
+    let principal = Principal::new("alice", ["employee"])
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("geography", "GB"),
+            attr("team", "design"),
+        ]);
+
+    let resource = Resource::new("XX125", "leave_request")
+        .with_policy_version("20210210")
+        .with_attributes([
+            attr("department", "marketing"),
+            attr("geography", "GB"),
+            attr("team", "design"),
+            attr("owner", "alice"),
+            attr("id", "XX125"),
+        ]);
+
+    let token_str = "eyJhbGciOiJFUzM4NCIsImtpZCI6IjE5TGZaYXRFZGc4M1lOYzVyMjNndU1KcXJuND0iLCJ0eXAiOiJKV1QifQ.eyJhdWQiOlsiY2VyYm9zLWp3dC10ZXN0cyJdLCJjdXN0b21BcnJheSI6WyJBIiwiQiIsIkMiXSwiY3VzdG9tSW50Ijo0MiwiY3VzdG9tTWFwIjp7IkEiOiJBQSIsIkIiOiJCQiIsIkMiOiJDQyJ9LCJjdXN0b21TdHJpbmciOiJmb29iYXIiLCJleHAiOjE5NTAyNzc5MjYsImlzcyI6ImNlcmJvcy10ZXN0LXN1aXRlIn0._nCHIsuFI3wczeuUv_xjSwaVnIQUdYA9sGf_jVsrsDWloLs3iPWDaA1bXpuIUJVsi8-G6qqdrPI0cOBxEocg1NCm8fyD9T_3hsZV0fYWon_Je6Kl93a3JIW3S6kbvjsL";
+
+    let resp = client
+        .check_resources(
+            principal,
+            ResourceList::new_from([ResourceAction(resource, ["frobnicate"])]),
+            Some(AuxData::new().with_jwts([
+                ("token_a", Jwt::Value(token_str.to_string())),
+                ("token_b", Jwt::Value(token_str.to_string())),
+            ])),
+        )
+        .await?;
+
+    let allowed = resp
+        .find("XX125")
+        .map(|x| x.is_allowed("frobnicate"))
         .unwrap();
     assert!(allowed);
 

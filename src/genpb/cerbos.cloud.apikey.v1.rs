@@ -15,6 +15,33 @@ pub struct IssueAccessTokenResponse {
         super::super::super::super::google::protobuf::Duration,
     >,
 }
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RegisterDeviceRequest {}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RegisterDeviceResponse {
+    #[prost(oneof = "register_device_response::Message", tags = "1, 2")]
+    pub message: ::core::option::Option<register_device_response::Message>,
+}
+/// Nested message and enum types in `RegisterDeviceResponse`.
+pub mod register_device_response {
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    pub enum Message {
+        #[prost(string, tag = "1")]
+        VerificationUrl(::prost::alloc::string::String),
+        #[prost(message, tag = "2")]
+        DeviceToken(super::super::super::auth::v1::DeviceToken),
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RefreshDeviceTokenRequest {
+    #[prost(message, optional, tag = "1")]
+    pub device_token: ::core::option::Option<super::super::auth::v1::DeviceToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RefreshDeviceTokenResponse {
+    #[prost(message, optional, tag = "1")]
+    pub device_token: ::core::option::Option<super::super::auth::v1::DeviceToken>,
+}
 /// Generated client implementations.
 pub mod api_key_service_client {
     #![allow(
@@ -131,6 +158,64 @@ pub mod api_key_service_client {
                     GrpcMethod::new(
                         "cerbos.cloud.apikey.v1.ApiKeyService",
                         "IssueAccessToken",
+                    ),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn register_device(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RegisterDeviceRequest>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::RegisterDeviceResponse>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.cloud.apikey.v1.ApiKeyService/RegisterDevice",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.apikey.v1.ApiKeyService",
+                        "RegisterDevice",
+                    ),
+                );
+            self.inner.server_streaming(req, path, codec).await
+        }
+        pub async fn refresh_device_token(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RefreshDeviceTokenRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RefreshDeviceTokenResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic_prost::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/cerbos.cloud.apikey.v1.ApiKeyService/RefreshDeviceToken",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "cerbos.cloud.apikey.v1.ApiKeyService",
+                        "RefreshDeviceToken",
                     ),
                 );
             self.inner.unary(req, path, codec).await

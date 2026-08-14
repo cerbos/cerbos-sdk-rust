@@ -6,7 +6,7 @@ use std::{borrow::Cow, path::Path};
 
 use certs::CerbosTestTlsConfig;
 use testcontainers::{
-    core::{ContainerPort, Mount, WaitFor},
+    core::{wait::LogWaitStrategy, ContainerPort, Mount, WaitFor},
     Image,
 };
 
@@ -154,7 +154,9 @@ impl Image for CerbosContainer {
     }
 
     fn ready_conditions(&self) -> Vec<testcontainers::core::WaitFor> {
-        vec![WaitFor::message_on_stdout("Starting HTTP server")]
+        vec![WaitFor::Log(LogWaitStrategy::stdout_or_stderr(
+            "Starting HTTP server",
+        ))]
     }
     fn cmd(&self) -> impl IntoIterator<Item = impl Into<Cow<'_, str>>> {
         self.cmd.iter()

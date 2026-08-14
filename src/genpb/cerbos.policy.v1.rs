@@ -120,6 +120,8 @@ pub struct ResourceRule {
 #[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RolePolicy {
+    #[prost(string, tag = "6")]
+    pub version: ::prost::alloc::string::String,
     #[prost(string, repeated, tag = "5")]
     pub parent_roles: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, tag = "2")]
@@ -130,6 +132,10 @@ pub struct RolePolicy {
     #[deprecated]
     #[prost(enumeration = "ScopePermissions", tag = "4")]
     pub scope_permissions: i32,
+    #[prost(message, optional, tag = "7")]
+    pub variables: ::core::option::Option<Variables>,
+    #[prost(message, optional, tag = "8")]
+    pub constants: ::core::option::Option<Constants>,
     #[prost(oneof = "role_policy::PolicyType", tags = "1")]
     pub policy_type: ::core::option::Option<role_policy::PolicyType>,
 }
@@ -156,6 +162,10 @@ pub struct RoleRule {
     pub allow_actions: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub condition: ::core::option::Option<Condition>,
+    #[prost(string, tag = "4")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "5")]
+    pub output: ::core::option::Option<Output>,
 }
 #[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -452,6 +462,10 @@ pub struct TestOptions {
     >,
     #[prost(string, tag = "4")]
     pub default_policy_version: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub default_scope: ::prost::alloc::string::String,
+    #[prost(bool, tag = "6")]
+    pub strict_evaluation: bool,
 }
 #[if_struct_macro::serde_default]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -697,9 +711,14 @@ pub mod test_results {
     pub struct Details {
         #[prost(enumeration = "Result", tag = "1")]
         pub result: i32,
+        #[deprecated]
         #[prost(message, repeated, tag = "4")]
         pub engine_trace: ::prost::alloc::vec::Vec<
             super::super::super::engine::v1::Trace,
+        >,
+        #[prost(message, optional, tag = "7")]
+        pub engine_trace_batch: ::core::option::Option<
+            super::super::super::engine::v1::TraceBatch,
         >,
         #[prost(oneof = "details::Outcome", tags = "2, 3, 5, 6")]
         pub outcome: ::core::option::Option<details::Outcome>,
@@ -729,7 +748,7 @@ pub mod test_results {
     pub struct OutputFailure {
         #[prost(string, tag = "1")]
         pub src: ::prost::alloc::string::String,
-        #[prost(oneof = "output_failure::Outcome", tags = "2, 3")]
+        #[prost(oneof = "output_failure::Outcome", tags = "2, 3, 4")]
         pub outcome: ::core::option::Option<output_failure::Outcome>,
     }
     /// Nested message and enum types in `OutputFailure`.
@@ -755,6 +774,16 @@ pub mod test_results {
             >,
         }
         #[if_struct_macro::serde_default]
+        #[derive(Clone, PartialEq, ::prost::Message)]
+        pub struct EvaluationError {
+            #[prost(message, optional, tag = "1")]
+            pub expected: ::core::option::Option<
+                super::super::super::super::super::google::protobuf::Value,
+            >,
+            #[prost(string, tag = "2")]
+            pub error: ::prost::alloc::string::String,
+        }
+        #[if_struct_macro::serde_default]
         #[cfg_attr(
             feature = "serde",
             derive(serde::Deserialize),
@@ -766,6 +795,8 @@ pub mod test_results {
             Mismatched(MismatchedValue),
             #[prost(message, tag = "3")]
             Missing(MissingValue),
+            #[prost(message, tag = "4")]
+            Errored(EvaluationError),
         }
     }
     #[if_struct_macro::serde_default]

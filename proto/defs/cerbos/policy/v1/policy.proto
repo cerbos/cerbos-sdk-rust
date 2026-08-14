@@ -1,4 +1,4 @@
-// Copyright 2021-2025 Zenauth Ltd.
+// Copyright 2021-2026 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
@@ -82,7 +82,7 @@ message ResourcePolicy {
     }
   }];
   repeated ResourceRule rules = 4;
-  string scope = 5 [(buf.validate.field).string.pattern = "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"];
+  string scope = 5 [(buf.validate.field).string.pattern = "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"];
   Schemas schemas = 6;
   Variables variables = 7;
   ScopePermissions scope_permissions = 8;
@@ -131,13 +131,14 @@ message RolePolicy {
     option (buf.validate.oneof).required = true;
     string role = 1 [(buf.validate.field).string = {pattern: "^[^!*?\\[\\]{}]+$"}];
   }
+  string version = 6 [(buf.validate.field).string = {pattern: "^[\\w]*$"}];
   repeated string parent_roles = 5 [(buf.validate.field).repeated = {
     unique: true
     items: {
       string: {min_len: 1}
     }
   }];
-  string scope = 2 [(buf.validate.field).string.pattern = "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"];
+  string scope = 2 [(buf.validate.field).string.pattern = "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"];
   repeated RoleRule rules = 3;
   // Deprecated: no-op.
   ScopePermissions scope_permissions = 4 [
@@ -149,6 +150,8 @@ message RolePolicy {
     },
     deprecated = true
   ];
+  Variables variables = 7;
+  Constants constants = 8;
 }
 
 message RoleRule {
@@ -167,6 +170,8 @@ message RoleRule {
     (buf.validate.field).required = true
   ];
   Condition condition = 3;
+  string name = 4 [(buf.validate.field).string.pattern = "^([a-zA-Z][\\w\\@\\.\\-]*)*$"];
+  Output output = 5;
 }
 
 message PrincipalPolicy {
@@ -179,7 +184,7 @@ message PrincipalPolicy {
     (buf.validate.field).string.pattern = "^[\\w]+$"
   ];
   repeated PrincipalRule rules = 3;
-  string scope = 4 [(buf.validate.field).string.pattern = "^([0-9a-zA-Z][\\w\\-]*(\\.[\\w\\-]*)*)*$"];
+  string scope = 4 [(buf.validate.field).string.pattern = "^(^$|\\.|[0-9a-zA-Z][\\w\\-]*(\\.\\w[\\w\\-]*)*)$"];
   Variables variables = 5;
   ScopePermissions scope_permissions = 6;
   Constants constants = 7;
@@ -404,6 +409,8 @@ message TestOptions {
   bool lenient_scope_search = 2;
   map<string, google.protobuf.Value> globals = 3;
   string default_policy_version = 4;
+  string default_scope = 5;
+  bool strict_evaluation = 6;
 }
 
 message TestSuite {
@@ -680,7 +687,8 @@ message TestResults {
       Success success = 5;
       string skip_reason = 6;
     }
-    repeated cerbos.engine.v1.Trace engine_trace = 4;
+    repeated cerbos.engine.v1.Trace engine_trace = 4 [deprecated = true];
+    cerbos.engine.v1.TraceBatch engine_trace_batch = 7;
   }
 
   message OutputFailure {
@@ -693,10 +701,16 @@ message TestResults {
       google.protobuf.Value expected = 1;
     }
 
+    message EvaluationError {
+      google.protobuf.Value expected = 1;
+      string error = 2;
+    }
+
     string src = 1;
     oneof outcome {
       MismatchedValue mismatched = 2;
       MissingValue missing = 3;
+      EvaluationError errored = 4;
     }
   }
 

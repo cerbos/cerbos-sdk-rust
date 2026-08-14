@@ -11,6 +11,10 @@ server:
     cert: /certs/tls.crt
     key: /certs/tls.key
 
+auxData:
+  jwt:
+    disableVerification: true
+
 storage:
   driver: "disk"
   disk:

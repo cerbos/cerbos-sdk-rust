@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 use super::attr::{AttrVal, Attribute};
 use crate::genpb::cerbos::effect::v1::Effect;
+use crate::genpb::cerbos::engine::v1::OutputEntry;
 use crate::genpb::cerbos::engine::v1::{
     plan_resources_filter::expression::Operand, plan_resources_filter::Kind,
     plan_resources_input::Resource as ResourceKindPB, Principal as PrincipalPB,
     Resource as ResourcePB,
 };
-use crate::genpb::cerbos::request::v1::aux_data::Jwt;
+use crate::genpb::cerbos::request::v1::aux_data::Jwt as JwtPB;
 use crate::genpb::cerbos::request::v1::check_resources_request::ResourceEntry;
 use crate::genpb::cerbos::request::v1::AuxData as AuxDataPB;
 use crate::genpb::cerbos::response::v1::check_resources_response::ResultEntry;
@@ -198,6 +199,23 @@ impl From<Resource> for ResourceKind {
     }
 }
 
+pub enum Jwt {
+    Value(String),
+    ValueWithKeySetID(String, String),
+}
+
+impl ProtobufWrapper<JwtPB> for Jwt {
+    fn to_pb(self) -> JwtPB {
+        match self {
+            Jwt::Value(token) => JwtPB {
+                token,
+                ..Default::default()
+            },
+            Jwt::ValueWithKeySetID(token, key_set_id) => JwtPB { token, key_set_id },
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct AuxData {
     pub(crate) aux_data: AuxDataPB,
@@ -217,7 +235,7 @@ impl AuxData {
     }
 
     pub fn with_jwt<T: Into<String>>(mut self, token: T, key_set_id: Option<T>) -> Self {
-        let mut jwt = Jwt {
+        let mut jwt = JwtPB {
             token: token.into(),
             ..Default::default()
         };
@@ -228,6 +246,19 @@ impl AuxData {
             .for_each(|ks| jwt.key_set_id = ks.to_string());
 
         self.aux_data.jwt = Some(jwt);
+        self.aux_data.jwts.clear();
+        self
+    }
+
+    pub fn with_jwts<S>(mut self, jwts: impl IntoIterator<Item = (S, Jwt)>) -> Self
+    where
+        S: Into<String>,
+    {
+        self.aux_data.jwt = None;
+        self.aux_data.jwts = jwts
+            .into_iter()
+            .map(|(name, jwt)| (name.into(), jwt.to_pb()))
+            .collect();
         self
     }
 }
@@ -311,7 +342,7 @@ pub enum ResourceMatcher {
 #[derive(Debug)]
 pub struct ResourceResult<'a> {
     pub(crate) result: &'a ResultEntry,
-    output_map: RefCell<Option<HashMap<String, &'a Value>>>,
+    output_map: RefCell<Option<HashMap<String, &'a OutputEntry>>>,
 }
 
 impl<'a> ResourceResult<'a> {
@@ -333,15 +364,24 @@ impl<'a> ResourceResult<'a> {
         if self.output_map.borrow().is_none() {
             self.build_output_map();
         }
+        self.output_map
+            .borrow()
+            .as_ref()?
+            .get(key)
+            .and_then(|o| o.val.as_ref())
+    }
+
+    pub fn output_entry(&self, key: &str) -> Option<&'a OutputEntry> {
+        if self.output_map.borrow().is_none() {
+            self.build_output_map();
+        }
         self.output_map.borrow().as_ref()?.get(key).copied()
     }
 
     fn build_output_map(&self) {
         let mut map = HashMap::new();
         for output in &self.result.outputs {
-            if let Some(val) = output.val.as_ref() {
-                map.insert(output.src.clone(), val);
-            }
+            map.insert(output.src.clone(), output);
         }
         *self.output_map.borrow_mut() = Some(map);
     }

@@ -1,13 +1,16 @@
-// Copyright 2021-2025 Zenauth Ltd.
+// Copyright 2021-2026 Zenauth Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
 
 package cerbos.audit.v1;
 
+import "buf/validate/validate.proto";
 import "cerbos/engine/v1/engine.proto";
 import "cerbos/policy/v1/policy.proto";
+import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option csharp_namespace = "Cerbos.Api.V1.Audit";
 option go_package = "github.com/cerbos/cerbos/api/genpb/cerbos/audit/v1;auditv1";
@@ -22,6 +25,7 @@ message AccessLogEntry {
   uint32 status_code = 6;
   bool oversized = 7;
   PolicySource policy_source = 8;
+  optional RequestContext request_context = 9;
 }
 
 message DecisionLogEntry {
@@ -54,6 +58,7 @@ message DecisionLogEntry {
   AuditTrail audit_trail = 16;
   bool oversized = 17;
   PolicySource policy_source = 18;
+  optional RequestContext request_context = 19;
 }
 
 message MetaValues {
@@ -102,18 +107,33 @@ message PolicySource {
     string repository_url = 1;
     string branch = 2;
     string subdirectory = 3;
+    string hash = 4;
   }
 
   message Hub {
+    message EmbeddedBundle {
+      string rule_id = 1;
+      repeated string scopes = 2;
+      string bundle_id = 3;
+    }
+
     message LocalBundle {
       string path = 1;
+      string bundle_id = 2;
+    }
+
+    message RemoteBundle {
+      string deployment_id = 1;
+      string bundle_id = 2;
     }
 
     oneof source {
-      string label = 1;
-      string deployment_id = 2;
+      string label = 1 [deprecated = true];
+      string deployment_id = 2 [deprecated = true];
       string playground_id = 3;
       LocalBundle local_bundle = 4;
+      EmbeddedBundle embedded_bundle = 5;
+      RemoteBundle remote_bundle = 6;
     }
   }
 
@@ -123,6 +143,22 @@ message PolicySource {
     Disk disk = 3;
     Git git = 4;
     Hub hub = 5;
-    EmbeddedPDP embedded_pdp = 6;
+    EmbeddedPDP embedded_pdp = 6 [deprecated = true];
   }
+}
+
+message RequestContext {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {description: "Optional metadata to attach to the request. This information will be captured in the audit logs if audit logging is enabled."}
+  };
+  map<string, google.protobuf.Value> annotations = 1 [
+    (buf.validate.field).map.keys = {
+      string: {min_len: 1}
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Key-value pairs of annotations."
+      min_properties: 1
+      example: "{\"app-name\": \"awesome-app\", \"app-version\": \"1.2.3\"}"
+    }
+  ];
 }

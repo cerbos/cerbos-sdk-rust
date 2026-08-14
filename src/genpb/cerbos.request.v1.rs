@@ -18,6 +18,8 @@ pub struct PlanResourcesRequest {
     pub aux_data: ::core::option::Option<AuxData>,
     #[prost(bool, tag = "6")]
     pub include_meta: bool,
+    #[prost(message, optional, tag = "8")]
+    pub request_context: ::core::option::Option<super::super::audit::v1::RequestContext>,
 }
 /// Deprecated. See CheckResourcesRequest.
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -92,6 +94,8 @@ pub struct CheckResourcesRequest {
     pub resources: ::prost::alloc::vec::Vec<check_resources_request::ResourceEntry>,
     #[prost(message, optional, tag = "5")]
     pub aux_data: ::core::option::Option<AuxData>,
+    #[prost(message, optional, tag = "6")]
+    pub request_context: ::core::option::Option<super::super::audit::v1::RequestContext>,
 }
 /// Nested message and enum types in `CheckResourcesRequest`.
 pub mod check_resources_request {
@@ -103,10 +107,12 @@ pub mod check_resources_request {
         pub resource: ::core::option::Option<super::super::super::engine::v1::Resource>,
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AuxData {
     #[prost(message, optional, tag = "1")]
     pub jwt: ::core::option::Option<aux_data::Jwt>,
+    #[prost(map = "string, message", tag = "2")]
+    pub jwts: ::std::collections::HashMap<::prost::alloc::string::String, aux_data::Jwt>,
 }
 /// Nested message and enum types in `AuxData`.
 pub mod aux_data {
@@ -274,6 +280,11 @@ pub struct GetPolicyRequest {
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DeletePolicyRequest {
+    #[prost(string, repeated, tag = "1")]
+    pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DisablePolicyRequest {
     #[prost(string, repeated, tag = "1")]
     pub id: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -317,4 +328,9 @@ pub struct DeleteSchemaRequest {
 pub struct ReloadStoreRequest {
     #[prost(bool, tag = "1")]
     pub wait: bool,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PurgeStoreRevisionsRequest {
+    #[prost(uint32, tag = "1")]
+    pub keep_last: u32,
 }
